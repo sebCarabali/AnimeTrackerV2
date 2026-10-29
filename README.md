@@ -145,7 +145,7 @@ docs: actualiza instrucciones de arranque en README
 
 ```bash
 cd tools/repo-checks
-npm test
+pnpm test
 ```
 
 ---

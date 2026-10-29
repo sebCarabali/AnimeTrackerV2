@@ -244,6 +244,12 @@ riesgos:
 historial:
   - fecha: 2026-10-29
     cambio: >-
+      HU-00.01 (0-1-estructura-del-monorepo) regresada a in-progress tras code review.
+      5 hallazgos MEDIA: CA4 sin prueba automatizada en Vitest, readme test con múltiples
+      expects en un it(), orden CA3b/CA3a invertido, README usa npm test en vez de pnpm,
+      __dirname en contexto mixto CJS/ESM. T7 agregada a tareas de la historia.
+  - fecha: 2026-10-29
+    cambio: >-
       HU-00.01 (0-1-estructura-del-monorepo) promovida a ready-for-dev.
       Gaps resueltos: CA3 dividida en CA3a (.editorconfig) y CA3b (.gitignore);
       nueva tarea T4b y prueba de estructura para .editorconfig añadidas.

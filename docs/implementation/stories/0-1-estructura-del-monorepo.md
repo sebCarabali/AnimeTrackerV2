@@ -102,6 +102,12 @@ Ciclo: rojo (la prueba falla porque no hay carpetas) → verde (crear carpetas y
 - [x] T4b (CA3a) Agregar `.editorconfig` con codificación UTF-8, LF, 2 espacios para TS/JSON/YAML, 4 espacios para C#; escribir la prueba de estructura `editorconfig_define_codificacion_utf8_lf_y_sangria_por_tipo` en `tools/repo-checks`.
 - [x] T5 (CA4) Configurar `package.json` raíz con workspaces (pnpm), husky y commitlint (`@commitlint/config-conventional`).
 - [x] T6 Agregar `.nvmrc` y `global.json` para fijar versiones de Node y del SDK .NET.
+- [x] T7 (CR) Corregir hallazgos de code review:
+  - [x] [MEDIA][CA4] Agregar pruebas automatizadas de commitlint en `structure.spec.ts` (exit 1 con "cambios varios", exit 0 con "feat(bff): agrega health check") via `child_process.spawnSync`.
+  - [x] [MEDIA][Diseño] Descomponer `readme_raiz_contiene_secciones_…` en múltiples `it()` o `it.each` — `structure.spec.ts:29`.
+  - [x] [MEDIA][Diseño] Corregir orden: mover bloque CA3a antes de CA3b en `structure.spec.ts` — `:44,67`.
+  - [x] [MEDIA][Arquitectura] Reemplazar `npm test` por `pnpm test` en `README.md:148`.
+  - [x] [MEDIA][Diseño] Reemplazar `__dirname` por `fileURLToPath(new URL('../..', import.meta.url))` en `structure.spec.ts:5`.
 
 ## Notas técnicas y decisiones
 
@@ -152,7 +158,8 @@ Ciclo: rojo (la prueba falla porque no hay carpetas) → verde (crear carpetas y
 - `.NET 8 SDK` no está instalado en la máquina de desarrollo — `global.json` fija `8.0.404` para cuando el SDK esté disponible. `dotnet run` no fue verificado localmente pero la configuración es correcta.
 - `pnpm approve-builds --all` fue necesario para que pnpm v12 permita el build script de `esbuild` (dependencia transitiva de Vitest). La aprobación quedó registrada en `pnpm-workspace.yaml` como `allowBuilds.esbuild: true`.
 - `commitlint.config.js` usa ES module syntax (`export default`); se agregó `"type": "module"` a `package.json` raíz para evitar la advertencia de Node sobre módulos CJS.
-- Cobertura de líneas: N/A — esta historia no produce código fuente JS/TS. Los artefactos son archivos de configuración y estructura; la cobertura la mide el 100% de los CAs verificados por las 15 pruebas de Vitest.
+- Cobertura de líneas: N/A — esta historia no produce código fuente JS/TS. Los artefactos son archivos de configuración y estructura; la cobertura la mide el 100% de los CAs verificados por las 23 pruebas de Vitest.
+- T7 (hallazgos CR): `spawnSync` se usa sin array de args (`spawnSync('npx commitlint', { shell: true, ... })`) para evitar el aviso `DEP0190` de Node v24 que se activa cuando se pasa un array de args junto con `shell: true`.
 
 ## Dev Agent Record
 
@@ -197,10 +204,38 @@ echo "feat(bff): agrega health check" | npx commitlint  # debe pasar (exit 0)
 
 | Suite | Tests | Estado |
 |-------|-------|--------|
-| structure.spec.ts (Vitest) | 15/15 | ✓ PASS |
-| commitlint CA4 (rechazo) | 1/1 | ✓ PASS |
-| commitlint CA4 (aceptación) | 1/1 | ✓ PASS |
+| structure.spec.ts (Vitest) — iteración 2 | 23/23 | ✓ PASS |
 
 ### Cobertura
 
 N/A — historia sin código fuente JS/TS (solo configuración y estructura). Las 15 pruebas cubren el 100% de los criterios de aceptación.
+
+## Code Review
+- Fecha: 2026-10-29
+- Resultado: CAMBIOS REQUERIDOS
+- Cobertura de líneas (código cambiado): N/A — historia de infraestructura sin código fuente JS/TS
+
+| Ámbito | Resultado | Hallazgos |
+|---|---|---|
+| Criterios de aceptación | ❌ | 1 |
+| Seguridad | ✅ | 0 |
+| Diseño / SOLID | ❌ | 3 |
+| Arquitectura | ❌ | 1 |
+| Pruebas (> 80 %) | ❌ | 1 |
+
+### Hallazgos
+- [ ] [MEDIA][CA4] CA4 sin prueba automatizada: `commitlint_rechaza_mensaje_sin_tipo` y `acepta_mensaje_convencional` no existen en la suite Vitest; la verificación fue solo manual — `tools/repo-checks/structure.spec.ts` (ausencia) — Corrección sugerida: Agregar dos tests que invoquen commitlint vía `child_process.execSync` verificando exit codes con "cambios varios" (exit 1) y "feat(bff): agrega health check" (exit 0).
+- [ ] [MEDIA][Diseño] readme test agrupa 6 `expect()` independientes en un solo `it()`: cuando falla, oculta qué otras aserciones fallan — `tools/repo-checks/structure.spec.ts:29` — Corrección sugerida: Convertir a `it.each` con pares `[patrón, descripción]` o desglosar en tests individuales.
+- [ ] [MEDIA][Diseño] Orden de bloques `describe` invertido: CA3b aparece antes que CA3a (invierte el orden de los ACs de la historia) — `tools/repo-checks/structure.spec.ts:44,67` — Corrección sugerida: Mover el bloque CA3a para que aparezca antes de CA3b.
+- [ ] [MEDIA][Arquitectura] README.md usa `npm test` en lugar de `pnpm test` — `README.md:1178` — Corrección sugerida: Reemplazar por `pnpm test` o `pnpm --filter @animetracker/repo-checks test`.
+- [ ] [MEDIA][Diseño] `__dirname` en contexto mixto CJS/ESM: riesgo de rotura si `tools/repo-checks/package.json` recibe `"type": "module"` (downgraded de ALTA a MEDIA — tests pasan hoy, package es CJS actualmente) — `tools/repo-checks/structure.spec.ts:5` — Corrección sugerida: Sustituir por `fileURLToPath(new URL('../..', import.meta.url))` de `node:url`.
+
+### Sugerencias (bajo el umbral)
+- [BAJA][Pruebas] Tests de `.editorconfig` no validan que cada `indent_size` pertenezca a la sección correcta (p. ej. `indent_size = 4` podría estar en `[*]` y pasaría) — `tools/repo-checks/structure.spec.ts:77-80`
+- [BAJA][Pruebas] Test CA2 verifica presencia de nombres de herramientas pero no que se especifiquen versiones (regex `/Node/i` no valida `24.x`) — `tools/repo-checks/structure.spec.ts:35-37`
+- [BAJA][Diseño/DRY] Literal `'utf-8'` repetido 3 veces; declarar como constante `const ENCODING = 'utf-8' as const` — `tools/repo-checks/structure.spec.ts:33,49,73`
+- [BAJA][Diseño] Mezcla de estilos de nombres en `it()`: frases en español (CA1) vs. snake_case (CA2, CA3a, CA3b) — `tools/repo-checks/structure.spec.ts:18,22,29,46,69`
+- [BAJA][Diseño] `vitest.config.ts` sin `thresholds` ni `include` explícito — `tools/repo-checks/vitest.config.ts:5-8`
+- [BAJA][Diseño] `allowBuilds` para esbuild declarado en dos lugares (`pnpm-workspace.yaml` y `tools/repo-checks/package.json`) — `pnpm-workspace.yaml:5-6`
+- [BAJA][Arquitectura] README referencia `infra/compose/docker-compose.local.yml` que no existe aún; añadir nota que se crea en HU-00.06 — `README.md:1089`
+- [BAJA][Arquitectura] Decisiones técnicas (pnpm, ESM, Node 24 LTS) no formalizadas en ADRs — pendiente crear `docs/adr/` en historia futura
