@@ -34,11 +34,22 @@ Entrada: `$ARGUMENTS` = número de historia (ej. `3`, `1.3`, `1-3`).
 
 3. **Inventariar contexto.** Lista (sin leer completos) los archivos de `docs/planning/` y las demás historias. Identifica los relevantes (PRD, arquitectura, épica de la historia, UX, estándares). Estas rutas se pasan a los revisores.
 
-4. **Lanzar las dos revisiones en paralelo.** En UN SOLO mensaje, haz dos llamadas a la herramienta Agent (subagent_type `general-purpose`), una por ámbito:
-   - Técnico: prompt = contenido de `reviewers/technical.md` (en el directorio de esta skill)
-   - Negocio: prompt = contenido de `reviewers/business.md`
+4. **Lanzar las dos revisiones en paralelo.** En UN SOLO mensaje, haz dos llamadas a la herramienta Agent, una por ámbito:
 
-   Sustituye `{story_path}`, `{planning_paths}`, `{stories_dir}` y `{sprint_status_path}`. Los revisores son de solo lectura.
+   | Revisor | subagent_type |
+   |---|---|
+   | Técnico | `story-reviewer-readiness-technical` |
+   | Negocio | `story-reviewer-readiness-business` |
+
+   Prompt para cada agente:
+   ```
+   Historia: {story_path}
+   Planeación: {planning_paths}
+   Otras historias: {stories_dir}
+   Estado del sprint: {sprint_status_path}
+   ```
+
+   Los revisores son de solo lectura.
 
 5. **Consolidar.**
    - Extrae `RESULTADO` de cada respuesta.

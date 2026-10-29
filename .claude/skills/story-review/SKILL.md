@@ -44,17 +44,27 @@ Orden: `CRITICA` > `ALTA` > `MEDIA` > `BAJA`.
 
 3. **Ejecutar pruebas y cobertura una vez** (para que los revisores no compitan por el build): ejecuta la suite y genera el reporte de cobertura (JaCoCo para Maven/Gradle, `dotnet test --collect:"XPlat Code Coverage"` + coverlet para .NET, o lo que use el repo). Guarda la salida y la ruta del reporte.
 
-4. **Lanzar cinco revisores en paralelo.** En UN SOLO mensaje, cinco llamadas a la herramienta Agent (subagent_type `general-purpose`), cada una con el contenido del archivo correspondiente en `reviewers/` de esta skill:
+4. **Lanzar cinco revisores en paralelo.** En UN SOLO mensaje, cinco llamadas a la herramienta Agent, cada una con el agente especializado correspondiente:
 
-   | Revisor | Archivo |
+   | Revisor | subagent_type |
    |---|---|
-   | Criterios de aceptación y requisitos | `reviewers/acceptance.md` |
-   | Seguridad | `reviewers/security.md` |
-   | Patrones de diseño y SOLID | `reviewers/design.md` |
-   | Alineación a la arquitectura | `reviewers/architecture.md` |
-   | Pruebas y cobertura > 80 % | `reviewers/tests.md` |
+   | Criterios de aceptación y requisitos | `story-reviewer-acceptance` |
+   | Seguridad | `story-reviewer-security` |
+   | Patrones de diseño y SOLID | `story-reviewer-design` |
+   | Alineación a la arquitectura | `story-reviewer-architecture` |
+   | Pruebas y cobertura > 80 % | `story-reviewer-tests` |
 
-   Sustituye `{story_path}`, `{planning_paths}`, `{changed_files}`, `{diff_path}`, `{test_output_path}` y `{coverage_report_path}`. Los revisores son de solo lectura.
+   Prompt para cada agente (omite los campos que no apliquen al revisor):
+   ```
+   Historia: {story_path}
+   Planeación: {planning_paths}
+   Archivos cambiados: {changed_files}
+   Diff: {diff_path}
+   Salida de pruebas: {test_output_path}
+   Reporte de cobertura: {coverage_report_path}
+   ```
+
+   Los revisores son de solo lectura.
 
 5. **Consolidar.**
    - Une los hallazgos y elimina duplicados (mismo archivo/línea y misma causa → conserva la severidad mayor).
