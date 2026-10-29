@@ -1,0 +1,27 @@
+root = true
+
+# ─── Todos los archivos ──────────────────────────────────────────
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# ─── TypeScript, JavaScript, JSON, YAML, HTML, CSS ───────────────
+[*.{ts,tsx,js,jsx,json,yml,yaml,html,css,scss,sass,md}]
+indent_style = space
+indent_size = 2
+
+# ─── C# (.NET) ───────────────────────────────────────────────────
+[*.cs]
+indent_style = space
+indent_size = 4
+
+# ─── C# project / solution files ────────────────────────────────
+[*.{csproj,sln,props,targets}]
+indent_style = space
+indent_size = 2
+
+# ─── Makefiles (requieren tabs) ──────────────────────────────────
+[Makefile]
+indent_style = tab
