@@ -24,7 +24,15 @@ public sealed class ResultOfTTests
         result.IsFailure.ShouldBeTrue();
         result.IsSuccess.ShouldBeFalse();
         result.Error.ShouldBe("something went wrong");
-        result.Value.ShouldBe(default);
+    }
+
+    [Fact]
+    public void Failure_accessing_Value_throws_InvalidOperationException()
+    {
+        var result = Result<int>.Failure("error");
+
+        Should.Throw<InvalidOperationException>(() => _ = result.Value)
+            .Message.ShouldBe("Cannot access Value of a failed result.");
     }
 }
 

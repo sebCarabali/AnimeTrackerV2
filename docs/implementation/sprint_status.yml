@@ -244,6 +244,17 @@ riesgos:
 historial:
   - fecha: 2026-10-29
     cambio: >-
+      HU-00.02 (0-2-solucion-net-monolito-modular) promovida a review tras corrección T9.
+      Result<T>.Value ahora lanza InvalidOperationException cuando IsFailure=true. 44/44 pruebas
+      pasan. Cobertura SharedKernel 100 %.
+  - fecha: 2026-10-29
+    cambio: >-
+      HU-00.02 (0-2-solucion-net-monolito-modular) regresada a in-progress tras segunda iteración
+      de code review. 1 hallazgo MEDIA: Result<T>.Value accesible sin guard cuando IsFailure=true
+      (silently returns default(T)). T9 agregada con 1 ítem de corrección. 11 sugerencias BAJA
+      registradas en la historia.
+  - fecha: 2026-10-29
+    cambio: >-
       HU-00.02 (0-2-solucion-net-monolito-modular) regresada a in-progress tras code review.
       9 hallazgos ≥ MEDIA: 4 ALTA (Api.csproj→Infrastructure ×3, sin test Api_no_depende_de_Infrastructure,
       Entity<TId> sin Equals/GetHashCode, cobertura <80%), 5 MEDIA (eventos en Entity vs AggregateRoot,
