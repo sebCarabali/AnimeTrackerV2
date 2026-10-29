@@ -244,6 +244,13 @@ riesgos:
 historial:
   - fecha: 2026-10-29
     cambio: >-
+      HU-00.02 (0-2-solucion-net-monolito-modular) regresada a in-progress tras code review.
+      9 hallazgos ≥ MEDIA: 4 ALTA (Api.csproj→Infrastructure ×3, sin test Api_no_depende_de_Infrastructure,
+      Entity<TId> sin Equals/GetHashCode, cobertura <80%), 5 MEDIA (eventos en Entity vs AggregateRoot,
+      TId notnull, /health sin auth, 5 Placeholder tests, DoD CI pendiente HU-00.09).
+      T8 agregada con 8 ítems de corrección.
+  - fecha: 2026-10-29
+    cambio: >-
       Re-evaluación readiness HU-00.02: resultado 2 (require-review). Técnico: 2,
       Negocio: 1. Acción pendiente: resolver Q6 (umbral 80% cobertura) antes del
       2026-11-02. Historia permanece en ready-for-dev; puede iniciar T1–T4 y T6–T7.

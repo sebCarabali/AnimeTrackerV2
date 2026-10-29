@@ -1,14 +1,11 @@
 namespace AnimeTracker.SharedKernel;
 
-public abstract class Entity<TId>
+public abstract class Entity<TId> where TId : notnull
 {
     public TId Id { get; protected set; } = default!;
 
-    private readonly List<IDomainEvent> _domainEvents = [];
+    public override bool Equals(object? obj) =>
+        obj is Entity<TId> other && EqualityComparer<TId>.Default.Equals(Id, other.Id);
 
-    public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
-
-    protected void RaiseDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
-
-    public void ClearDomainEvents() => _domainEvents.Clear();
+    public override int GetHashCode() => EqualityComparer<TId>.Default.GetHashCode(Id);
 }

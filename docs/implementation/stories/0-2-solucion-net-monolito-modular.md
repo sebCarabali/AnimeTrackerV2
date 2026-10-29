@@ -124,6 +124,15 @@ Verificación negativa obligatoria: en una rama temporal, agregar una referencia
 - [x] T5 (CA4) Definir `GetAnimeSummaryQuery` en Catalog.Contracts con handler stub en Catalog.Application; prueba de integración desde Tracking.
 - [x] T6 (CA5) `Host`: método de extensión `AddXxxModule()` / `MapXxxModule()` por módulo; health checks.
 - [x] T7 Crear proyectos de prueba por módulo: `AnimeTracker.{Modulo}.UnitTests` e `IntegrationTests`.
+- [x] T8 Corregir hallazgos de code review:
+  - [x] Eliminar `<ProjectReference>` a Infrastructure de los tres `*.Api.csproj` (Catalog, Tracking, Calendar).
+  - [x] Agregar test `Api_no_depende_de_Infrastructure(string module)` en `ModuleBoundaryTests`.
+  - [x] Agregar `Equals`/`GetHashCode` por Id en `Entity<TId>`.
+  - [x] Agregar pruebas unitarias para `Entity<TId>` (raise/clear events) y `Result<T>` (Ok/Failure).
+  - [x] Mover lógica de eventos de dominio a `AggregateRoot<TId>`; limpiar `Entity<TId>`.
+  - [x] Agregar `where TId : notnull` en `Entity<TId>`.
+  - [x] Proteger `/health` con autenticación o restricción de red antes de staging.
+  - [x] Reemplazar las 5 pruebas Placeholder por pruebas de arranque real o marcar con TODO+ticket.
 
 ## Notas técnicas y decisiones
 
@@ -193,19 +202,82 @@ dotnet test AnimeTracker.sln
 
 | Suite | Resultado | Pruebas |
 |---|---|---|
-| ArchitectureTests | ✅ Pass | 15/15 |
+| ArchitectureTests | ✅ Pass | 18/18 |
 | Host.IntegrationTests | ✅ Pass | 1/1 |
 | Tracking.IntegrationTests | ✅ Pass | 2/2 |
+| SharedKernel.UnitTests | ✅ Pass | 17/17 |
 | Catalog.UnitTests | ✅ Pass | 1/1 |
 | Tracking.UnitTests | ✅ Pass | 1/1 |
 | Calendar.UnitTests | ✅ Pass | 1/1 |
 | Catalog.IntegrationTests | ✅ Pass | 1/1 |
 | Calendar.IntegrationTests | ✅ Pass | 1/1 |
-| **Total** | **✅ 23/23** | |
+| **Total** | **✅ 43/43** | |
+
+### Archivos adicionales (iteración T8)
+
+| Archivo | Tipo |
+|---|---|
+| `services/core/tests/SharedKernel/AnimeTracker.SharedKernel.UnitTests/AnimeTracker.SharedKernel.UnitTests.csproj` | Nuevo |
+| `services/core/tests/SharedKernel/AnimeTracker.SharedKernel.UnitTests/EntityTests.cs` | Nuevo |
+| `services/core/tests/SharedKernel/AnimeTracker.SharedKernel.UnitTests/ResultTests.cs` | Nuevo |
+| `services/core/tests/SharedKernel/AnimeTracker.SharedKernel.UnitTests/ValueObjectTests.cs` | Nuevo |
+| `services/core/src/SharedKernel/AnimeTracker.SharedKernel/Entity.cs` | Modificado (notnull, Equals, GetHashCode, sin eventos) |
+| `services/core/src/SharedKernel/AnimeTracker.SharedKernel/AggregateRoot.cs` | Modificado (eventos movidos desde Entity) |
+| `services/core/src/Host/AnimeTracker.Host/Program.cs` | Modificado (loopback guard en /health) |
+| `services/core/tests/AnimeTracker.ArchitectureTests/ModuleBoundaryTests.cs` | Modificado (Api_no_depende_de_Infrastructure) |
+| `services/core/src/Modules/{Catalog,Tracking,Calendar}/AnimeTracker.*.Api/*.csproj` | Modificado (removida ref. a Infrastructure) |
+| `services/core/tests/Catalog/AnimeTracker.Catalog.UnitTests/CatalogPlaceholderTests.cs` | Modificado (reemplazado placeholder) |
+| `services/core/tests/Tracking/AnimeTracker.Tracking.UnitTests/TrackingPlaceholderTests.cs` | Modificado (reemplazado placeholder) |
+| `services/core/tests/Calendar/AnimeTracker.Calendar.UnitTests/CalendarPlaceholderTests.cs` | Modificado (reemplazado placeholder) |
+| `services/core/tests/Catalog/AnimeTracker.Catalog.IntegrationTests/CatalogPlaceholderIntegrationTests.cs` | Modificado (reemplazado placeholder) |
+| `services/core/tests/Calendar/AnimeTracker.Calendar.IntegrationTests/CalendarPlaceholderIntegrationTests.cs` | Modificado (reemplazado placeholder) |
+| `services/core/AnimeTracker.sln` | Modificado (proyecto SharedKernel.UnitTests agregado) |
 
 ### Cobertura
 
-La cobertura no se midió en esta historia porque el código producido es mayoritariamente infraestructura de bootstrapping (extensions, health checks, stubs) sin lógica de dominio condicional. Q6 (umbral 80%) está pendiente de resolución antes de sprint-1 (2026-11-02). Cuando HU-00.09 configure el pipeline CI con coverlet, se añadirá la medición automática.
+| Proyecto | Cobertura de líneas |
+|---|---|
+| AnimeTracker.SharedKernel | 100 % (Entity, AggregateRoot, Result, ValueObject) |
+
+## Code Review
+
+- Fecha: 2026-10-29
+- Resultado: CAMBIOS REQUERIDOS
+- Cobertura de líneas (código cambiado): < 15 % (SharedKernel: 0 %; bootstrapping general: ~14 %)
+
+| Ámbito | Resultado | Hallazgos |
+|---|---|---|
+| Criterios de aceptación | ✅ | 1 (MEDIA) |
+| Seguridad | ⚠️ | 1 (MEDIA) |
+| Diseño / SOLID | ❌ | 1 (ALTA), 2 (MEDIA) |
+| Arquitectura | ❌ | 2 (ALTA) |
+| Pruebas (> 80 %) | ❌ | 1 (ALTA), 1 (MEDIA) |
+
+### Hallazgos
+
+- [ ] [ALTA][Arquitectura] Los tres `*.Api.csproj` referencian el proyecto Infrastructure de su módulo, violando la regla declarada "Api → Application → Domain" (§Tareas T2). Cualquier desarrollador puede importar tipos de Infrastructure desde Api sin barrera de compilación ni test. — `services/core/src/Modules/Catalog/AnimeTracker.Catalog.Api/AnimeTracker.Catalog.Api.csproj:5`, `Tracking.Api.csproj:5`, `Calendar.Api.csproj:5` — Corrección: eliminar `<ProjectReference>` a Infrastructure de los tres Api.csproj; si el módulo necesita registrar servicios de Infrastructure, hacerlo desde un método `AddXxxInfrastructure()` invocado en el Host.
+- [ ] [ALTA][Arquitectura] No existe test de arquitectura `Api_no_depende_de_Infrastructure`. Sin este guardia, la violación anterior puede reintroducirse sin detección. — `services/core/tests/AnimeTracker.ArchitectureTests/ModuleBoundaryTests.cs` — Corrección: agregar `Api_no_depende_de_Infrastructure(string module)` como Theory de los 3 módulos, análogo a `Application_no_depende_de_Infrastructure_ni_Api`.
+- [ ] [ALTA][Diseño] `Entity<TId>` no sobreescribe `Equals` ni `GetHashCode`. La igualdad cae sobre referencia de objeto, causando bugs silenciosos en `Contains`, `Distinct`, `HashSet` y aserciones de pruebas. — `services/core/src/SharedKernel/AnimeTracker.SharedKernel/Entity.cs:3` — Corrección: agregar `override bool Equals(object? obj)` comparando por `Id` y `override int GetHashCode()` retornando `Id!.GetHashCode()`.
+- [ ] [ALTA][Pruebas] Cobertura del código cambiado ≤ 80 % (SharedKernel con lógica real en 0 %, bootstrapping general < 15 %). Siempre bloquea según DoD del proyecto. — `services/core/src/SharedKernel/AnimeTracker.SharedKernel/` — Corrección: agregar pruebas unitarias para `Entity<T>` (raise/clear events) y `Result<T>` (Ok/Failure) dentro del sprint; justificación de código bootstrapping no aplica a SharedKernel.
+- [ ] [MEDIA][Diseño] Lógica de eventos de dominio (`_domainEvents`, `RaiseDomainEvent`, `ClearDomainEvents`) está en `Entity<TId>` en lugar de `AggregateRoot<TId>`, permitiendo que entidades internas publiquen eventos y rompiendo la frontera del agregado. — `services/core/src/SharedKernel/AnimeTracker.SharedKernel/Entity.cs:7-13` — Corrección: mover los miembros de eventos a `AggregateRoot<TId>`; `Entity<TId>` queda sin lógica de eventos.
+- [ ] [MEDIA][Diseño] `Entity<TId>` carece de la restricción `where TId : notnull`. El `= default!` suprime la advertencia pero permite instanciar `Entity<string>` con `Id` nulo en runtime. — `services/core/src/SharedKernel/AnimeTracker.SharedKernel/Entity.cs:5` — Corrección: agregar `where TId : notnull` o requerir `TId id` en constructor protegido.
+- [ ] [MEDIA][Seguridad] Endpoint `/health` expuesto sin autenticación ni restricción de red; expone nombres internos de módulos y estado operativo a cualquier cliente externo (OWASP A05/A01). — `services/core/src/Host/AnimeTracker.Host/Program.cs:22` — Corrección: encadenar `.RequireAuthorization()` con una policy de monitoring/internal, o limitar a loopback antes de que el servicio salga a staging.
+- [ ] [MEDIA][Pruebas] 5 pruebas Placeholder contienen únicamente `Assert.True(true)` (22 % del total de pruebas); pasan siempre y no ofrecen regresión detectable. — `services/core/tests/Catalog/AnimeTracker.Catalog.UnitTests/CatalogPlaceholderTests.cs:9`, `Tracking.UnitTests/TrackingPlaceholderTests.cs:9`, `Calendar.UnitTests/CalendarPlaceholderTests.cs:9`, `Catalog.IntegrationTests/CatalogPlaceholderIntegrationTests.cs:8`, `Calendar.IntegrationTests/CalendarPlaceholderIntegrationTests.cs:8` — Corrección: reemplazar por pruebas de arranque real (ej. `new ServiceCollection().AddCatalogApplication().BuildServiceProvider()`) o marcar explícitamente como TODO con ticket.
+- [ ] [MEDIA][CA/DoD] DoD item "Pruebas de arquitectura ejecutándose en CI" sin marcar; depende de HU-00.09. Documentado en §Dev Notes como dependencia blanda. — `docs/implementation/stories/0-2-solucion-net-monolito-modular.md:153` — Acción: coordinar con quien lleve HU-00.09; marcar al cierre del sprint una vez el pipeline exista.
+
+### Sugerencias (bajo el umbral)
+
+- [BAJA][Seguridad] El campo `description` del health check se serializa incondicionalmente; puede exponer detalles de excepción si los checks evolucionan — `Program.cs:34`
+- [BAJA][Seguridad] Ausencia de `app.UseHttpsRedirection()` en el pipeline; sienta un precedente peligroso para historias posteriores — `Program.cs`
+- [BAJA][Diseño] `IServiceProvider` construido en `MediatorCrossModuleTests` nunca se libera (`Dispose`); puede causar fugas cuando los servicios sean `IDisposable` — `MediatorCrossModuleTests.cs:21`
+- [BAJA][Diseño] `Result` y `Result<T>` duplican toda la estructura; cualquier cambio en el modelo de error requiere modificar ambas clases — `Result.cs:1`
+- [BAJA][Diseño] Lambda de serialización JSON en línea en `Program.cs` (10 líneas) mezcla composición del Host con formatación de datos — `Program.cs:22`
+- [BAJA][Pruebas] `Types.InNamespace($"AnimeTracker.{origin}")` en `Modulo_solo_ve_Contracts_de_otro` puede dar falsos negativos si se cargan ensamblados de terceros con ese prefijo — `ModuleBoundaryTests.cs:49`
+- [BAJA][Pruebas] `Tracking_no_necesita_importar_internals_de_Catalog` duplica la aserción de comportamiento de `Tracking_obtiene_resumen_de_anime_via_mediator` — `MediatorCrossModuleTests.cs:39`
+- [BAJA][Pruebas] Sin test de arquitectura que verifique que `SharedKernel` no depende de ningún módulo — `ModuleBoundaryTests.cs`
+- [BAJA][CA] Título H1 y campo `titulo` en sprint_status.yml dicen ".NET 8" pero la implementación usa .NET 10 — `0-2-solucion-net-monolito-modular.md:1`
+- [BAJA][Paquetes] `MediatR.Extensions.Microsoft.DependencyInjection` v11.1.0 declarado en `Directory.Packages.props` pero ningún proyecto lo referencia; es incompatible con MediatR v12 — `services/core/Directory.Packages.props:21`
+- [BAJA][DoD] "DoD común cumplida" no enlaza el documento fuente — `0-2-solucion-net-monolito-modular.md:152`
 
 ## Readiness Review
 

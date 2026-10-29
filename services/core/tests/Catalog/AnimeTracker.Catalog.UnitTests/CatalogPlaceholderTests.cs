@@ -1,11 +1,14 @@
-﻿namespace AnimeTracker.Catalog.UnitTests;
+﻿using AnimeTracker.Catalog.Domain;
+using Shouldly;
 
-public sealed class CatalogPlaceholderTests
+namespace AnimeTracker.Catalog.UnitTests;
+
+public sealed class CatalogDomainAssemblyTests
 {
     [Fact]
-    public void Domain_types_exist()
+    public void Domain_assembly_is_named_correctly()
     {
-        // Placeholder: replace with real domain tests when domain logic is added.
-        Assert.True(true);
+        typeof(Placeholder).Assembly.GetName().Name
+            .ShouldBe("AnimeTracker.Catalog.Domain");
     }
 }

@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AnimeTracker.Calendar.Application\AnimeTracker.Calendar.Application.csproj" />
-    <ProjectReference Include="..\AnimeTracker.Calendar.Infrastructure\AnimeTracker.Calendar.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

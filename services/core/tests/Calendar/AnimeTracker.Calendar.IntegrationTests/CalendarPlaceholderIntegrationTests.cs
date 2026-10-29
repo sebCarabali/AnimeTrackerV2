@@ -1,11 +1,18 @@
-﻿namespace AnimeTracker.Calendar.IntegrationTests;
+﻿using AnimeTracker.Calendar.Application;
+using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 
-public sealed class CalendarPlaceholderIntegrationTests
+namespace AnimeTracker.Calendar.IntegrationTests;
+
+public sealed class CalendarApplicationStartupTests
 {
     [Fact]
     public void Application_services_register_without_error()
     {
-        // Placeholder: replace with real integration tests when infrastructure is added.
-        Assert.True(true);
+        var provider = new ServiceCollection()
+            .AddCalendarApplication()
+            .BuildServiceProvider();
+
+        provider.ShouldNotBeNull();
     }
 }

@@ -24,6 +24,18 @@ public class ModuleBoundaryTests
     }
 
     [Theory, MemberData(nameof(Modules))]
+    public void Api_no_depende_de_Infrastructure(string module)
+    {
+        var result = Types.InAssembly(AssemblyHelper.Of(module, "Api"))
+            .ShouldNot()
+            .HaveDependencyOnAny($"AnimeTracker.{module}.Infrastructure")
+            .GetResult();
+
+        result.IsSuccessful.ShouldBeTrue(
+            $"Tipos con dependencias prohibidas: {string.Join(", ", result.FailingTypeNames ?? [])}");
+    }
+
+    [Theory, MemberData(nameof(Modules))]
     public void Application_no_depende_de_Infrastructure_ni_Api(string module)
     {
         var result = Types.InAssembly(AssemblyHelper.Of(module, "Application"))

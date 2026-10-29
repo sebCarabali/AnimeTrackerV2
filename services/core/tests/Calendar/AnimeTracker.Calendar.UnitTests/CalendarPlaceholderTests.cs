@@ -1,11 +1,14 @@
-﻿namespace AnimeTracker.Calendar.UnitTests;
+﻿using AnimeTracker.Calendar.Domain;
+using Shouldly;
 
-public sealed class CalendarPlaceholderTests
+namespace AnimeTracker.Calendar.UnitTests;
+
+public sealed class CalendarDomainAssemblyTests
 {
     [Fact]
-    public void Domain_types_exist()
+    public void Domain_assembly_is_named_correctly()
     {
-        // Placeholder: replace with real domain tests when domain logic is added.
-        Assert.True(true);
+        typeof(Placeholder).Assembly.GetName().Name
+            .ShouldBe("AnimeTracker.Calendar.Domain");
     }
 }

@@ -1,11 +1,18 @@
-﻿namespace AnimeTracker.Catalog.IntegrationTests;
+﻿using AnimeTracker.Catalog.Application;
+using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 
-public sealed class CatalogPlaceholderIntegrationTests
+namespace AnimeTracker.Catalog.IntegrationTests;
+
+public sealed class CatalogApplicationStartupTests
 {
     [Fact]
     public void Application_services_register_without_error()
     {
-        // Placeholder: replace with real integration tests when infrastructure is added.
-        Assert.True(true);
+        var provider = new ServiceCollection()
+            .AddCatalogApplication()
+            .BuildServiceProvider();
+
+        provider.ShouldNotBeNull();
     }
 }

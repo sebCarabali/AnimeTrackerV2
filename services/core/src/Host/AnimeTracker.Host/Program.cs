@@ -3,6 +3,7 @@ using AnimeTracker.Catalog.Api;
 using AnimeTracker.Tracking.Api;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Net;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,21 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
     app.MapOpenApi();
+
+// Restrict /health to loopback until auth is in place (OWASP A05/A01).
+// null RemoteIpAddress = in-process transport (tests, local proxy); allow through.
+app.UseWhen(
+    ctx => ctx.Request.Path.StartsWithSegments("/health"),
+    branch => branch.Use(async (ctx, next) =>
+    {
+        var ip = ctx.Connection.RemoteIpAddress;
+        if (ip is not null && !IPAddress.IsLoopback(ip))
+        {
+            ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return;
+        }
+        await next(ctx);
+    }));
 
 app.MapHealthChecks("/health", new HealthCheckOptions
 {

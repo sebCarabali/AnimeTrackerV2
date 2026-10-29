@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AnimeTracker.Catalog.Application\AnimeTracker.Catalog.Application.csproj" />
-    <ProjectReference Include="..\AnimeTracker.Catalog.Infrastructure\AnimeTracker.Catalog.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
