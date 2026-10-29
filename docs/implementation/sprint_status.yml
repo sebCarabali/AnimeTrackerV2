@@ -116,7 +116,7 @@ epicas:
     puntos: 45
     historias:
       0-1-estructura-del-monorepo:
-        { id: HU-00.01, titulo: Estructura del monorepo, prioridad: Must, puntos: 3, estado: review, sprint: sprint-1, depende_de: [], archivo: stories/0-1-estructura-del-monorepo.md }
+        { id: HU-00.01, titulo: Estructura del monorepo, prioridad: Must, puntos: 3, estado: pull-request, sprint: sprint-1, depende_de: [], archivo: stories/0-1-estructura-del-monorepo.md }
       0-2-solucion-net-monolito-modular:
         { id: HU-00.02, titulo: Solución .NET 8 como monolito modular, prioridad: Must, puntos: 5, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-2-solucion-net-monolito-modular.md }
       0-3-bff-nestjs-inicial:
@@ -242,6 +242,12 @@ riesgos:
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
 
 historial:
+  - fecha: 2026-10-29
+    cambio: >-
+      HU-00.01 (0-1-estructura-del-monorepo) promovida a pull-request tras segunda
+      iteración de code review. 5 revisores: 0 hallazgos ≥ MEDIA. 14 sugerencias BAJA
+      registradas en la historia. MEDIA de arquitectura (ADRs) reclasificado a BAJA
+      por ausencia de convención preexistente (docs/adr/ no existe).
   - fecha: 2026-10-29
     cambio: >-
       HU-00.01 (0-1-estructura-del-monorepo) regresada a in-progress tras code review.

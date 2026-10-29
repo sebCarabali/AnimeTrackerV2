@@ -212,30 +212,33 @@ N/A — historia sin código fuente JS/TS (solo configuración y estructura). La
 
 ## Code Review
 - Fecha: 2026-10-29
-- Resultado: CAMBIOS REQUERIDOS
-- Cobertura de líneas (código cambiado): N/A — historia de infraestructura sin código fuente JS/TS
+- Resultado: APROBADA
+- Iteración: 2 (correcciones de T7 verificadas)
+- Cobertura de líneas (código cambiado): N/A — historia de infraestructura sin código fuente JS/TS; 23/23 tests en verde cubren el 100 % de los CAs
 
 | Ámbito | Resultado | Hallazgos |
 |---|---|---|
-| Criterios de aceptación | ❌ | 1 |
+| Criterios de aceptación | ✅ | 0 |
 | Seguridad | ✅ | 0 |
-| Diseño / SOLID | ❌ | 3 |
-| Arquitectura | ❌ | 1 |
-| Pruebas (> 80 %) | ❌ | 1 |
+| Diseño / SOLID | ✅ | 0 |
+| Arquitectura | ✅ | 0 |
+| Pruebas (> 80 %) | ✅ | 0 |
 
 ### Hallazgos
-- [ ] [MEDIA][CA4] CA4 sin prueba automatizada: `commitlint_rechaza_mensaje_sin_tipo` y `acepta_mensaje_convencional` no existen en la suite Vitest; la verificación fue solo manual — `tools/repo-checks/structure.spec.ts` (ausencia) — Corrección sugerida: Agregar dos tests que invoquen commitlint vía `child_process.execSync` verificando exit codes con "cambios varios" (exit 1) y "feat(bff): agrega health check" (exit 0).
-- [ ] [MEDIA][Diseño] readme test agrupa 6 `expect()` independientes en un solo `it()`: cuando falla, oculta qué otras aserciones fallan — `tools/repo-checks/structure.spec.ts:29` — Corrección sugerida: Convertir a `it.each` con pares `[patrón, descripción]` o desglosar en tests individuales.
-- [ ] [MEDIA][Diseño] Orden de bloques `describe` invertido: CA3b aparece antes que CA3a (invierte el orden de los ACs de la historia) — `tools/repo-checks/structure.spec.ts:44,67` — Corrección sugerida: Mover el bloque CA3a para que aparezca antes de CA3b.
-- [ ] [MEDIA][Arquitectura] README.md usa `npm test` en lugar de `pnpm test` — `README.md:1178` — Corrección sugerida: Reemplazar por `pnpm test` o `pnpm --filter @animetracker/repo-checks test`.
-- [ ] [MEDIA][Diseño] `__dirname` en contexto mixto CJS/ESM: riesgo de rotura si `tools/repo-checks/package.json` recibe `"type": "module"` (downgraded de ALTA a MEDIA — tests pasan hoy, package es CJS actualmente) — `tools/repo-checks/structure.spec.ts:5` — Corrección sugerida: Sustituir por `fileURLToPath(new URL('../..', import.meta.url))` de `node:url`.
+*(ninguno — todos los hallazgos están por debajo del umbral MEDIA)*
 
 ### Sugerencias (bajo el umbral)
-- [BAJA][Pruebas] Tests de `.editorconfig` no validan que cada `indent_size` pertenezca a la sección correcta (p. ej. `indent_size = 4` podría estar en `[*]` y pasaría) — `tools/repo-checks/structure.spec.ts:77-80`
-- [BAJA][Pruebas] Test CA2 verifica presencia de nombres de herramientas pero no que se especifiquen versiones (regex `/Node/i` no valida `24.x`) — `tools/repo-checks/structure.spec.ts:35-37`
-- [BAJA][Diseño/DRY] Literal `'utf-8'` repetido 3 veces; declarar como constante `const ENCODING = 'utf-8' as const` — `tools/repo-checks/structure.spec.ts:33,49,73`
-- [BAJA][Diseño] Mezcla de estilos de nombres en `it()`: frases en español (CA1) vs. snake_case (CA2, CA3a, CA3b) — `tools/repo-checks/structure.spec.ts:18,22,29,46,69`
-- [BAJA][Diseño] `vitest.config.ts` sin `thresholds` ni `include` explícito — `tools/repo-checks/vitest.config.ts:5-8`
-- [BAJA][Diseño] `allowBuilds` para esbuild declarado en dos lugares (`pnpm-workspace.yaml` y `tools/repo-checks/package.json`) — `pnpm-workspace.yaml:5-6`
-- [BAJA][Arquitectura] README referencia `infra/compose/docker-compose.local.yml` que no existe aún; añadir nota que se crea en HU-00.06 — `README.md:1089`
-- [BAJA][Arquitectura] Decisiones técnicas (pnpm, ESM, Node 24 LTS) no formalizadas en ADRs — pendiente crear `docs/adr/` en historia futura
+- [BAJA][Diseño/DRY] Literal `'utf-8'` repetido 3 veces sin constante; usar `const ENCODING = 'utf-8' as const` — `tools/repo-checks/structure.spec.ts:31,68,85`
+- [BAJA][Diseño] Mezcla de estilos en `it()`: frases en español (CA1/CA2) vs. snake_case (CA3a, CA3b, CA4) — `tools/repo-checks/structure.spec.ts:20,24,64,81,103`
+- [BAJA][Diseño] CA3a y CA3b agrupan múltiples `expect()` en un solo `it()`; mismo patrón corregido en CA2 en la iteración anterior — `tools/repo-checks/structure.spec.ts:64-76,81-98`
+- [BAJA][Pruebas] CA3a no valida que `indent_size` pertenezca a la sección correcta (un `.editorconfig` malformado podría superar el test) — `tools/repo-checks/structure.spec.ts:72-75`
+- [BAJA][Diseño] `readContent()` se invoca hasta 6 veces; mejor usar `beforeAll` para leer el archivo una sola vez — `tools/repo-checks/structure.spec.ts:31,37-57`
+- [BAJA][Pruebas] Tests CA4 no verifican `result.error` antes de `result.status`; si `npx` no estuviera disponible el fallo sería confuso — `tools/repo-checks/structure.spec.ts:103-121`
+- [BAJA][Diseño] `vitest.config.ts` sin `thresholds` ni `include` explícito — `tools/repo-checks/vitest.config.ts:4-9`
+- [BAJA][Seguridad] `shell: true` en `spawnSync` con literales estáticos (sin riesgo actual; refactorizar si los args se vuelven dinámicos) — `tools/repo-checks/structure.spec.ts:104,113`
+- [BAJA][Seguridad] Dependencias de desarrollo con rango `^` en lugar de versiones exactas; complementar con `pnpm audit` en CI — `package.json:13-15`
+- [BAJA][Seguridad] `allowBuilds: esbuild: true`; mitigar con `pnpm install --frozen-lockfile` en CI — `pnpm-workspace.yaml:5-6`
+- [BAJA][Seguridad] `rollForward: "latestPatch"` en global.json puede avanzar el SDK automáticamente — `global.json:4`
+- [BAJA][Arquitectura] Sin ámbito `tools` en commitlint; los cambios en `tools/` se clasifican hoy como `ci` — `commitlint.config.js:6-9`
+- [BAJA][Arquitectura] README referencia `infra/compose/docker-compose.local.yml` que no existe aún (se crea en HU-00.06) — `README.md`
+- [BAJA][Arquitectura] Decisiones clave (pnpm, Vitest, ESM, Node 24) sin ADR formal; `docs/adr/` no existe — reclasificado de MEDIA a BAJA porque no existe convención previa de ADRs en el repositorio; crear en historia de mantenimiento futura
