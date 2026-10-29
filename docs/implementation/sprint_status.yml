@@ -1,0 +1,249 @@
+# =====================================================================
+# sprint_status.yml — AnimeTracker
+# Seguimiento de la ejecución del proyecto: releases, sprints, épicas
+# e historias. Actualizar en cada cambio de estado (daily, review,
+# planning) y registrar el cambio en "historial".
+# Backlog fuente: "AnimeTracker — Épicas e Historias de Usuario"
+# =====================================================================
+
+proyecto:
+  nombre: AnimeTracker
+  backlog_url: https://claude.ai/artifact/VytB8NBVN1o9ffZBicHB51
+  documentos: [PRD.md, ARD.md]
+  carpeta_historias: stories/
+  zona_horaria: America/Bogota
+  generado: 2026-10-28
+  actualizado: 2026-10-28
+  cadencia_sprint: 2 semanas (10 días hábiles)
+  velocidad_supuesta_pts: 24   # recalibrar tras el sprint-2 con la velocidad real
+
+leyenda_estados:
+  release: [planned, in-progress, done]
+  sprint: [planned, active, closed]
+  epica: [backlog, planned, in-progress, review, push-request, done]
+  historia:
+    backlog: En el backlog, sin archivo de historia detallado.
+    ready-for-dev: Archivo de historia con criterios y plan TDD listo; puede entrar a un sprint.
+    in-progress: En desarrollo (primera prueba en rojo escrita).
+    review: PR abierto, CI en verde, en revisión.
+    done: Mergeado a main, DoD cumplida y desplegado en staging.
+    blocked: Bloqueada; indicar motivo en "bloqueo".
+
+metricas:
+  historias_total: 51
+  puntos_total: 195
+  historias_done: 0
+  puntos_done: 0
+  historias_ready_for_dev: 12
+  avance_pct: 0
+
+releases:
+  - id: R0
+    nombre: Fundaciones
+    hito: Todo corre en CI
+    estado: planned
+    alcance: [EP-00, HU-07.02]
+    sprints: [sprint-1, sprint-2]
+  - id: R1
+    nombre: MVP manual
+    hito: Uso manual total
+    estado: planned
+    alcance: [EP-01, EP-02, EP-03, EP-04, HU-07.03]
+  - id: R2
+    nombre: Calendario
+    hito: Plan semanal en hora local
+    estado: planned
+    alcance: [EP-05]
+  - id: R3
+    nombre: Auto-tracking
+    hito: p95 de POST /api/v1/track menor a 200 ms
+    estado: planned
+    alcance: [EP-06, HU-07.01, HU-07.04]
+  - id: post-mvp
+    nombre: Después del MVP (Could)
+    estado: planned
+    alcance: [HU-01.05, HU-03.08, HU-05.06, HU-06.07]
+
+sprints:
+  - id: sprint-1
+    release: R0
+    inicio: 2026-11-02
+    fin: 2026-11-13
+    estado: planned
+    objetivo: >-
+      Monorepo, CI por proyectos afectados, solución .NET modular con
+      pruebas de arquitectura, contratos OpenAPI y persistencia por esquema.
+    capacidad_pts: 24
+    comprometido_pts: 23
+    completado_pts: 0
+    historias:
+      - 0-1-estructura-del-monorepo
+      - 0-12-configuracion-y-secretos
+      - 0-9-pipeline-integracion-continua
+      - 0-2-solucion-net-monolito-modular
+      - 0-7-contratos-openapi-primero
+      - 0-8-persistencia-migraciones-por-modulo
+    review: null
+    retro: null
+
+  - id: sprint-2
+    release: R0
+    inicio: 2026-11-16
+    fin: 2026-11-27
+    estado: planned
+    objetivo: >-
+      BFF, SPA y extensión inicializados; entorno local con un comando;
+      despliegue continuo a staging y observabilidad de punta a punta.
+    capacidad_pts: 24
+    comprometido_pts: 24
+    completado_pts: 0
+    historias:
+      - 0-3-bff-nestjs-inicial
+      - 0-4-spa-angular-inicial
+      - 0-5-esqueleto-extension-navegador
+      - 0-6-entorno-local-docker-compose
+      - 0-10-despliegue-continuo-staging
+      - 0-11-observabilidad-base
+      - 7-2-fechas-utc-en-contratos
+    review: null
+    retro: null
+
+epicas:
+  EP-00:
+    titulo: Configuración e inicialización del proyecto
+    release: R0
+    estado: planned
+    puntos: 45
+    historias:
+      0-1-estructura-del-monorepo:
+        { id: HU-00.01, titulo: Estructura del monorepo, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-1, depende_de: [], archivo: stories/0-1-estructura-del-monorepo.md }
+      0-2-solucion-net-monolito-modular:
+        { id: HU-00.02, titulo: Solución .NET 8 como monolito modular, prioridad: Must, puntos: 5, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-2-solucion-net-monolito-modular.md }
+      0-3-bff-nestjs-inicial:
+        { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12], archivo: stories/0-3-bff-nestjs-inicial.md }
+      0-4-spa-angular-inicial:
+        { id: HU-00.04, titulo: SPA Angular inicial, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.09], archivo: stories/0-4-spa-angular-inicial.md }
+      0-5-esqueleto-extension-navegador:
+        { id: HU-00.05, titulo: Esqueleto de la extensión de navegador, prioridad: Should, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-5-esqueleto-extension-navegador.md }
+      0-6-entorno-local-docker-compose:
+        { id: HU-00.06, titulo: Entorno local con Docker Compose, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.08, HU-00.12], archivo: stories/0-6-entorno-local-docker-compose.md }
+      0-7-contratos-openapi-primero:
+        { id: HU-00.07, titulo: Contratos OpenAPI primero, prioridad: Must, puntos: 5, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-7-contratos-openapi-primero.md }
+      0-8-persistencia-migraciones-por-modulo:
+        { id: HU-00.08, titulo: Persistencia y migraciones por módulo, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.02], archivo: stories/0-8-persistencia-migraciones-por-modulo.md }
+      0-9-pipeline-integracion-continua:
+        { id: HU-00.09, titulo: Pipeline de integración continua, prioridad: Must, puntos: 5, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-9-pipeline-integracion-continua.md }
+      0-10-despliegue-continuo-staging:
+        { id: HU-00.10, titulo: Despliegue continuo a staging, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.06, HU-00.09, HU-00.12], archivo: stories/0-10-despliegue-continuo-staging.md }
+      0-11-observabilidad-base:
+        { id: HU-00.11, titulo: Observabilidad base, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.04], archivo: stories/0-11-observabilidad-base.md }
+      0-12-configuracion-y-secretos:
+        { id: HU-00.12, titulo: Configuración y secretos, prioridad: Must, puntos: 2, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-12-configuracion-y-secretos.md }
+
+  EP-01:
+    titulo: Identidad y autenticación
+    release: R1
+    estado: backlog
+    puntos: 18
+    historias:
+      1-1-registro-de-cuenta: { id: HU-01.01, titulo: Registro de cuenta, prioridad: Must, puntos: 3, estado: backlog, sprint: null }
+      1-2-inicio-y-cierre-de-sesion: { id: HU-01.02, titulo: Inicio y cierre de sesión, prioridad: Must, puntos: 5, estado: backlog, sprint: null }
+      1-3-vincular-extension: { id: HU-01.03, titulo: Vincular la extensión con mi cuenta, prioridad: Must, puntos: 5, estado: backlog, sprint: null }
+      1-4-preferencias-zona-horaria: { id: HU-01.04, titulo: Preferencias de perfil y zona horaria, prioridad: Should, puntos: 2, estado: backlog, sprint: null }
+      1-5-recuperar-contrasena: { id: HU-01.05, titulo: Recuperar contraseña, prioridad: Could, puntos: 3, estado: backlog, sprint: null, release: post-mvp }
+
+  EP-02:
+    titulo: Catálogo y sincronización externa
+    release: R1
+    estado: backlog
+    puntos: 24
+    historias:
+      2-1-buscar-anime-por-titulo: { id: HU-02.01, titulo: Buscar anime por título, prioridad: Must, puntos: 5, estado: backlog, sprint: null }
+      2-2-filtrar-por-genero: { id: HU-02.02, titulo: Filtrar por género, prioridad: Must, puntos: 3, estado: backlog, sprint: null }
+      2-3-ficha-de-detalle: { id: HU-02.03, titulo: Ver ficha de detalle, prioridad: Must, puntos: 3, estado: backlog, sprint: null }
+      2-4-capa-anticorrupcion: { id: HU-02.04, titulo: Capa anticorrupción para la API externa, prioridad: Must, puntos: 5, estado: backlog, sprint: null }
+      2-5-hidratacion-y-cache-catalogo: { id: HU-02.05, titulo: Hidratación y caché del catálogo, prioridad: Must, puntos: 5, estado: backlog, sprint: null }
+      2-6-resiliencia-api-externa: { id: HU-02.06, titulo: Resiliencia ante caídas de la API externa, prioridad: Should, puntos: 3, estado: backlog, sprint: null }
+
+  EP-03:
+    titulo: Biblioteca personal y seguimiento de progreso
+    release: R1
+    estado: backlog
+    puntos: 23
+    historias:
+      3-1-agregar-anime-a-biblioteca: { id: HU-03.01, titulo: Agregar un anime a mi biblioteca, prioridad: Must, puntos: 3, estado: backlog, sprint: null, depende_de: [HU-02.04, HU-02.05] }
+      3-2-cambiar-estado: { id: HU-03.02, titulo: Cambiar el estado de un anime, prioridad: Must, puntos: 3, estado: backlog, sprint: null }
+      3-3-marcar-episodio-visto: { id: HU-03.03, titulo: Marcar un episodio como visto, prioridad: Must, puntos: 3, estado: backlog, sprint: null }
+      3-4-corregir-progreso: { id: HU-03.04, titulo: Corregir el progreso, prioridad: Should, puntos: 2, estado: backlog, sprint: null }
+      3-5-biblioteca-por-estado: { id: HU-03.05, titulo: Ver mi biblioteca por estado, prioridad: Must, puntos: 3, estado: backlog, sprint: null }
+      3-6-quitar-anime: { id: HU-03.06, titulo: Quitar un anime de mi biblioteca, prioridad: Should, puntos: 1, estado: backlog, sprint: null }
+      3-7-proyeccion-catalogo-tracking: { id: HU-03.07, titulo: Proyección de catálogo en el Tracking Module, prioridad: Must, puntos: 5, estado: backlog, sprint: null }
+      3-8-historial-episodios: { id: HU-03.08, titulo: Historial de episodios vistos, prioridad: Could, puntos: 3, estado: backlog, sprint: null, release: post-mvp }
+
+  EP-04:
+    titulo: Favoritos y dashboard
+    release: R1
+    estado: backlog
+    puntos: 10
+    historias:
+      4-1-marcar-favorito: { id: HU-04.01, titulo: Marcar un anime como favorito, prioridad: Must, puntos: 2, estado: backlog, sprint: null }
+      4-2-dashboard-principal: { id: HU-04.02, titulo: Dashboard principal, prioridad: Must, puntos: 5, estado: backlog, sprint: null }
+      4-3-endpoint-agregador-dashboard: { id: HU-04.03, titulo: Endpoint agregador del dashboard, prioridad: Must, puntos: 3, estado: backlog, sprint: null, depende_de: [HU-03.07] }
+
+  EP-05:
+    titulo: Calendario de emisiones
+    release: R2
+    estado: backlog
+    puntos: 24
+    historias:
+      5-1-cronograma-semanal: { id: HU-05.01, titulo: Ver el cronograma semanal de simulcasts, prioridad: Must, puntos: 5, estado: backlog, sprint: null }
+      5-2-filtrar-animes-que-sigo: { id: HU-05.02, titulo: Filtrar por los animes que sigo, prioridad: Must, puntos: 3, estado: backlog, sprint: null }
+      5-3-horarios-zona-horaria: { id: HU-05.03, titulo: Horarios ajustados a mi zona horaria, prioridad: Must, puntos: 3, estado: backlog, sprint: null }
+      5-4-cuenta-regresiva: { id: HU-05.04, titulo: Próximo episodio con cuenta regresiva, prioridad: Should, puntos: 3, estado: backlog, sprint: null }
+      5-5-calculo-y-cache-cronograma: { id: HU-05.05, titulo: Cálculo y caché del cronograma, prioridad: Must, puntos: 5, estado: backlog, sprint: null, depende_de: [HU-02.04, HU-02.05] }
+      5-6-notificacion-nuevo-episodio: { id: HU-05.06, titulo: Notificación de nuevo episodio, prioridad: Could, puntos: 5, estado: backlog, sprint: null, release: post-mvp }
+
+  EP-06:
+    titulo: Extensión de navegador auto-tracker
+    release: R3
+    estado: backlog
+    puntos: 34
+    historias:
+      6-1-instalar-y-vincular-extension: { id: HU-06.01, titulo: Instalar y vincular la extensión, prioridad: Must, puntos: 3, estado: backlog, sprint: null, depende_de: [HU-01.03] }
+      6-2-detectar-final-episodio: { id: HU-06.02, titulo: Detectar el final de un episodio, prioridad: Must, puntos: 8, estado: backlog, sprint: null, depende_de: [HU-06.06], nota: Candidata a dividir por plataforma }
+      6-3-identificar-anime-y-episodio: { id: HU-06.03, titulo: Identificar el anime y el episodio, prioridad: Must, puntos: 8, estado: backlog, sprint: null, depende_de: [HU-06.06] }
+      6-4-confirmacion-con-deshacer: { id: HU-06.04, titulo: Confirmación no intrusiva con deshacer, prioridad: Should, puntos: 3, estado: backlog, sprint: null }
+      6-5-cola-sin-conexion: { id: HU-06.05, titulo: Cola sin conexión y reintentos, prioridad: Should, puntos: 5, estado: backlog, sprint: null }
+      6-6-endpoint-ruta-rapida: { id: HU-06.06, titulo: Endpoint de ruta rápida para tracking, prioridad: Must, puntos: 5, estado: backlog, sprint: null, depende_de: [HU-01.03] }
+      6-7-pausar-seguimiento-por-sitio: { id: HU-06.07, titulo: Pausar el seguimiento por sitio, prioridad: Could, puntos: 2, estado: backlog, sprint: null, release: post-mvp }
+
+  EP-07:
+    titulo: Atributos de calidad transversales
+    release: transversal
+    estado: backlog
+    puntos: 17
+    historias:
+      7-1-prueba-de-carga-tracking: { id: HU-07.01, titulo: Prueba de carga del endpoint de tracking, prioridad: Should, puntos: 5, estado: backlog, sprint: null, release: R3 }
+      7-2-fechas-utc-en-contratos: { id: HU-07.02, titulo: Fechas en UTC en todos los contratos, prioridad: Must, puntos: 2, estado: backlog, sprint: sprint-2, release: R0, depende_de: [HU-00.07, HU-00.08], nota: Falta archivo de historia detallado antes del sprint-2 }
+      7-3-seguridad-perimetro: { id: HU-07.03, titulo: Seguridad básica del perímetro, prioridad: Must, puntos: 5, estado: backlog, sprint: null, release: R1 }
+      7-4-pruebas-e2e-flujos-clave: { id: HU-07.04, titulo: Pruebas extremo a extremo de flujos clave, prioridad: Should, puntos: 5, estado: backlog, sprint: null, release: R3 }
+
+preguntas_abiertas:
+  - { id: Q1, pregunta: "¿Qué plataformas de streaming soportará la extensión en R3?", afecta: [HU-06.02, HU-06.03], estado: abierta }
+  - { id: Q2, pregunta: "¿Cuál es la concurrencia objetivo para la prueba de carga?", afecta: [HU-07.01], estado: abierta }
+  - { id: Q3, pregunta: "¿Jikan, AniList o ambas como fuente de catálogo y horarios?", afecta: [HU-02.04, HU-05.05], estado: abierta }
+  - { id: Q4, pregunta: "¿Login con proveedores externos (Google, Discord) además de email?", afecta: [EP-01], estado: abierta }
+  - { id: Q5, pregunta: "¿Plataforma de staging (contenedores gestionados, Kubernetes, VM)?", afecta: [HU-00.10], estado: abierta, resolver_antes_de: sprint-2 }
+  - { id: Q6, pregunta: "¿Se confirma 80 % de cobertura en código nuevo como umbral?", afecta: [HU-00.09], estado: abierta, resolver_antes_de: sprint-1 }
+  - { id: Q7, pregunta: "¿Licencia de MediatR v13+ o alternativa (Mediator con generador de código)?", afecta: [HU-00.02], estado: abierta, resolver_antes_de: sprint-1 }
+
+riesgos:
+  - { id: R-01, descripcion: "Plataforma de staging no definida puede retrasar HU-00.10", probabilidad: media, impacto: medio, mitigacion: "Decidir Q5 en el refinamiento previo al sprint-2" }
+  - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
+
+historial:
+  - fecha: 2026-10-28
+    cambio: >-
+      Creación del archivo. 12 historias de EP-00 detalladas (ready-for-dev).
+      Plan de sprint-1 y sprint-2 para R0. Módulo Identity y proyectos
+      Contracts agregados al alcance de HU-00.02.
