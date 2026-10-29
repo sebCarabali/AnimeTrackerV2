@@ -227,6 +227,12 @@ N/A — historia sin código fuente JS/TS (solo configuración y estructura). La
 ### Hallazgos
 *(ninguno — todos los hallazgos están por debajo del umbral MEDIA)*
 
+## Pull Request
+
+- URL: https://github.com/sebCarabali/AnimeTrackerV2/pull/1
+- Fecha: 2026-10-29
+- Base: `dev`
+
 ### Sugerencias (bajo el umbral)
 - [BAJA][Diseño/DRY] Literal `'utf-8'` repetido 3 veces sin constante; usar `const ENCODING = 'utf-8' as const` — `tools/repo-checks/structure.spec.ts:31,68,85`
 - [BAJA][Diseño] Mezcla de estilos en `it()`: frases en español (CA1/CA2) vs. snake_case (CA3a, CA3b, CA4) — `tools/repo-checks/structure.spec.ts:20,24,64,81,103`
