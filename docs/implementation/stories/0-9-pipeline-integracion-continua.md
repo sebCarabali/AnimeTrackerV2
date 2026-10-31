@@ -135,6 +135,12 @@ it.each([
   - PR #6 (CA5 — cobertura insuficiente): https://github.com/sebCarabali/AnimeTrackerV2/pull/6 → `ci-ok` **fail** ✅
 - [x] Sección "CI" en el README raíz con cómo reproducir cada job localmente.
 
+## Pull Request
+
+- URL: https://github.com/sebCarabali/AnimeTrackerV2/pull/7
+- Fecha: 2026-10-31
+- Rama: `feature/story-0-9-pipeline-integracion-continua` → `main`
+
 ## Readiness Review
 
 - Fecha: 2026-10-31
