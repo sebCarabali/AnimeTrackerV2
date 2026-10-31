@@ -67,6 +67,16 @@ describe('edge cases', () => {
   });
 });
 
+// ─── CA4 verification: intentional failure ───────────────────────────────────
+// This test intentionally fails to verify CA4: "CI fails if a test is red → merge is blocked".
+// EXISTS ONLY IN verify/ca4-failing-test — delete before merge.
+describe('CA4 verification', () => {
+  it('intentional failure — verifies that ci-ok blocks merge when a test is red', () => {
+    expect(true, 'CA4 intentional failure — this test exists only to trip CI').toBe(false);
+  });
+});
+// ─────────────────────────────────────────────────────────────────────────────
+
 // computeMatrix — matrix serialization with fallback
 describe('computeMatrix', () => {
   it('wraps job list into matrix object JSON', () => {
