@@ -92,6 +92,12 @@ it.each([
 - [x] T5 (CA5) Publicar cobertura y aplicar umbral del 80 % — step `Check .NET coverage threshold (80 %)` en job `core`; `thresholds` en `vitest.config.ts` para TypeScript.
 - [x] T6 (CA4) Configurar protección de rama `main`: checks requeridos, 1 aprobación, rama actualizada. *(Documentada en §Notas técnicas; se aplica en GitHub manualmente al crear el PR.)*
 - [x] T7 Job agregador `ci-ok` que es el único check requerido (evita mantener la lista de checks en la protección de rama cuando la matriz cambia).
+- [ ] T9 Corregir hallazgos de code review (iteración 2):
+  - [ ] H1: cambiar `node-version: '22'` → `'24'` en jobs `detect` y `run-job` de `ci.yml`.
+  - [ ] H2: iterar todos los XMLs de cobertura (no solo el primero) en el step `Check .NET coverage threshold`.
+  - [ ] H3: desmarcar T4 o añadir sub-ítem T4b indicando que caché Angular se añade en HU-00.04.
+  - [ ] H4: extraer lógica de fallback de `compute-matrix.ts` a función pura en `affected.ts` + test; añadir guard `GITHUB_OUTPUT` antes de `appendFileSync`.
+  - [ ] H5: desplegar workflow, ejecutar PRs de verificación CA4/CA5 y enlazar URLs en §Definición de Hecho.
 - [x] T8 Corregir hallazgos de code review (iteración 1):
   - [x] H1: `compute-matrix.ts` ejecutado con `node --experimental-strip-types` en job `detect`; se elimina el heredoc con `affected.js`.
   - [x] H2: `pnpm --filter @animetracker/ci test:coverage` añadido al step `repo-checks`.
@@ -198,6 +204,39 @@ cd services/core && dotnet test AnimeTracker.sln
 | `tools/ci/affected.ts` | 100 % |
 
 ## Code Review
+
+### Iteración 2 — 2026-10-31
+
+- Fecha: 2026-10-31
+- Iteración: 2
+- Resultado: CAMBIOS REQUERIDOS
+- Cobertura de líneas (código cambiado): 81.57 % (@animetracker/ci global); affected.ts 100 %; compute-matrix.ts 0 %
+
+| Ámbito | Resultado | Hallazgos |
+|---|---|---|
+| Criterios de aceptación | ❌ | 1 (ALTA) + 2 (MEDIA) |
+| Seguridad | ✅ | 0 |
+| Diseño / SOLID | ❌ | 2 (MEDIA) |
+| Arquitectura | ❌ | 1 (MEDIA, DoD) |
+| Pruebas (> 80 %) | ❌ | 1 (ALTA) + 1 (MEDIA) |
+
+#### Hallazgos
+
+- [ ] [ALTA][DoD+Pruebas] DoD no completada — los ítems "DoD común cumplida" y "Evidencia de los PRs de verificación (CA4, CA5) enlazada en el PR de la historia" permanecen sin marcar. Los mecanismos de enforcement están codificados (ci-ok, thresholds, script Python), pero no existe prueba observacional de que realmente bloquean el merge. — `docs/implementation/stories/0-9-pipeline-integracion-continua.md:121-125` — Corrección: tras desplegar el workflow, abrir un PR con prueba fallida intencional (CA4) y otro con código sin cobertura suficiente (CA5); enlazar ambas URLs en §Definición de Hecho y marcar los ítems antes del merge.
+- [ ] [MEDIA][Diseño] Node.js version mismatch — el workflow usa `node-version: '22'` en jobs `detect` y `run-job` mientras `README.md` especifica Node.js 24.x LTS como versión mínima. La divergencia puede enmascarar diferencias de comportamiento de `--experimental-strip-types` entre versiones. — `.github/workflows/ci.yml:35,85` — Corrección: cambiar `node-version: '22'` → `'24'` en ambos jobs para alinear con el prerequisito declarado.
+- [ ] [MEDIA][Diseño] Coverage check evalúa solo el primer XML — `find TestResults -name "coverage.cobertura.xml" | head -1` usa orden no determinístico y solo verifica el primer archivo encontrado. Cuando la solución tenga múltiples proyectos de test, proyectos con cobertura baja quedarán silenciados. — `.github/workflows/ci.yml:157-171` — Corrección: iterar todos los archivos XML con `while IFS= read -r f; do python3 - "$f" <<'PYEOF' ... PYEOF; done < <(find TestResults -name "coverage.cobertura.xml")`.
+- [ ] [MEDIA][Criterios] T4 marcado `[x]` con implementación parcial — T4 incluye "Caché de NuGet, pnpm store y build de Angular"; el workflow implementa NuGet y pnpm store pero no la caché de build de Angular (`.angular/cache`). La ausencia es justificable (SPA es stub hasta HU-00.04) pero la tarea está marcada completada sin nota de deferimiento. — `docs/implementation/stories/0-9-pipeline-integracion-continua.md:91` — Corrección: añadir sub-ítem T4b pendiente o nota en §Notas técnicas indicando que el caché Angular se añade en HU-00.04; desmarcar `[x]` del ítem global de T4 o acotarlo explícitamente.
+- [ ] [MEDIA][Pruebas] `compute-matrix.ts` sin cobertura (0 %) — la lógica de fallback `jobs.length ? jobs : ['repo-checks']` y la escritura a GITHUB_OUTPUT no están cubiertas. Sin `GITHUB_OUTPUT` definido (ejecución local), el script aborta con TypeError en `appendFileSync`. — `tools/ci/compute-matrix.ts:6-8` — Corrección: extraer la lógica de fallback+serialización a una función pura en `affected.ts` con test unitario, y añadir guard `if (process.env.GITHUB_OUTPUT)` antes de `appendFileSync`; o excluir explícitamente el archivo del umbral con `exclude: ['compute-matrix.ts']` en vitest.config.ts.
+
+#### Sugerencias (bajo el umbral)
+
+- [BAJA][Seguridad] Actions fijadas a major version (`@v4`) en lugar de SHA de commit — riesgo de supply-chain attack. — `.github/workflows/ci.yml` (todas las líneas `uses:`)
+- [BAJA][Seguridad] `${{ github.event_name }}` interpolado inline en `run:` en lugar de pasarse por variable de entorno (inconsistente con el patrón del H3 fix). — `.github/workflows/ci.yml:48`
+- [BAJA][Diseño] Fallback en `compute-matrix.ts:6` no documentado — cambios en `docs/` o `infra/` producen `jobs = []` y activan el fallback silenciosamente. Añadir comentario explicando la semántica.
+- [BAJA][Diseño] `compute-matrix.ts:2` importa `'./affected.ts'` (extensión `.ts`) mientras `affected.spec.ts:2` importa `'./affected.js'` (convención ESM). Inconsistencia menor; ambos funcionan en sus entornos respectivos.
+- [BAJA][Criterios] Jobs stub (`bff`, `spa`, `extension`, `contracts`) no documentados explícitamente en §Notas técnicas como pendientes de completarse en HU-00.03–07.
+
+---
 
 ### Iteración 1 — 2026-10-31
 
