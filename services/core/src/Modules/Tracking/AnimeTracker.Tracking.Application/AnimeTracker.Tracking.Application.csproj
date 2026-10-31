@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\AnimeTracker.Tracking.Domain\AnimeTracker.Tracking.Domain.csproj" />
+    <ProjectReference Include="..\..\..\SharedKernel\AnimeTracker.SharedKernel\AnimeTracker.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\Catalog\AnimeTracker.Catalog.Contracts\AnimeTracker.Catalog.Contracts.csproj" />
+    <ProjectReference Include="..\AnimeTracker.Tracking.Contracts\AnimeTracker.Tracking.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
