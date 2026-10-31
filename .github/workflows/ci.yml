@@ -175,7 +175,8 @@ jobs:
       # ── contracts ────────────────────────────────────────────────────────────
       - name: Validate contracts (stub — extended in HU-00.07)
         if: matrix.job == 'contracts'
-        run: echo "contracts job: no validators yet — will be added in HU-00.07"
+        run: |
+          echo "contracts job: no validators yet — will be added in HU-00.07"
 
       # ── bff (stub — extended in HU-00.03) ───────────────────────────────────
       - name: pnpm install (bff)
@@ -184,7 +185,8 @@ jobs:
 
       - name: bff build + test (stub)
         if: matrix.job == 'bff'
-        run: echo "bff job: no project yet — will be added in HU-00.03"
+        run: |
+          echo "bff job: no project yet — will be added in HU-00.03"
 
       # ── spa (stub — extended in HU-00.04) ───────────────────────────────────
       - name: pnpm install (spa)
@@ -193,7 +195,8 @@ jobs:
 
       - name: spa build + test (stub)
         if: matrix.job == 'spa'
-        run: echo "spa job: no project yet — will be added in HU-00.04"
+        run: |
+          echo "spa job: no project yet — will be added in HU-00.04"
 
       # ── extension (stub — extended in HU-00.05) ──────────────────────────────
       - name: pnpm install (extension)
@@ -202,7 +205,8 @@ jobs:
 
       - name: extension build + test (stub)
         if: matrix.job == 'extension'
-        run: echo "extension job: no project yet — will be added in HU-00.05"
+        run: |
+          echo "extension job: no project yet — will be added in HU-00.05"
 
   # ── T7: CA4 — single aggregator check (branch protection targets this) ──────
   ci-ok:
