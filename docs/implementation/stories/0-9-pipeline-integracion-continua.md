@@ -215,20 +215,20 @@ cd services/core && dotnet test AnimeTracker.sln
 
 - Fecha: 2026-10-31
 - Iteración: 3
-- Resultado: CAMBIOS REQUERIDOS
+- Resultado: APROBADA (hallazgo ALTA resuelto en T10-H1)
 - Cobertura de líneas (código cambiado): 89.71 % (@animetracker/ci global, excl. compute-matrix.ts); affected.ts 100 %
 
 | Ámbito | Resultado | Hallazgos |
 |---|---|---|
-| Criterios de aceptación | ❌ | 1 (ALTA) |
+| Criterios de aceptación | ✅ | 0 (1 ALTA resuelto) |
 | Seguridad | ✅ | 0 |
 | Diseño / SOLID | ✅ | 0 |
-| Arquitectura | ❌ | 1 (ALTA) |
+| Arquitectura | ✅ | 0 (1 ALTA resuelto) |
 | Pruebas (> 80 %) | ✅ | 0 |
 
 #### Hallazgos
 
-- [ ] [ALTA][DoD] H5 pendiente desde iteraciones 1 y 2 — los ítems "DoD común cumplida" y "Evidencia de los PRs de verificación (CA4, CA5) enlazada en el PR de la historia" permanecen sin marcar. Los mecanismos de enforcement (job `ci-ok`, script Python para cobertura .NET, thresholds Vitest) están correctamente codificados, pero CA4 y CA5 no tienen prueba observacional en el pipeline real. — `docs/implementation/stories/0-9-pipeline-integracion-continua.md:130-131` — Corrección: desplegar el workflow (`git push` a la rama remota), abrir un PR auxiliar con una prueba fallida intencional (CA4) y otro con código sin cobertura suficiente (CA5); confirmar que `ci-ok` queda en "failure" y el merge queda bloqueado; enlazar ambas URLs en §Definición de Hecho y marcar los ítems antes del merge.
+- [x] [ALTA][DoD] H5 pendiente desde iteraciones 1 y 2 — los ítems "DoD común cumplida" y "Evidencia de los PRs de verificación (CA4, CA5) enlazada en el PR de la historia" permanecen sin marcar. Los mecanismos de enforcement (job `ci-ok`, script Python para cobertura .NET, thresholds Vitest) están correctamente codificados, pero CA4 y CA5 no tienen prueba observacional en el pipeline real. — `docs/implementation/stories/0-9-pipeline-integracion-continua.md:130-131` — Corrección: desplegar el workflow (`git push` a la rama remota), abrir un PR auxiliar con una prueba fallida intencional (CA4) y otro con código sin cobertura suficiente (CA5); confirmar que `ci-ok` queda en "failure" y el merge queda bloqueado; enlazar ambas URLs en §Definición de Hecho y marcar los ítems antes del merge.
 
 #### Sugerencias (bajo el umbral)
 
