@@ -89,9 +89,16 @@ it.each([
 - [x] T2 Workflow `ci.yml` con job `detect` que publica la matriz de jobs afectados.
 - [x] T3 Jobs: `core` (restore, build, test con cobertura), `bff`, `spa`, `extension`, `contracts`, `repo-checks`.
 - [x] T4 Caché de NuGet, pnpm store y build de Angular.
-- [x] T5 (CA5) Publicar cobertura y aplicar umbral del 80 % en código nuevo (diff coverage).
+- [ ] T5 (CA5) Publicar cobertura y aplicar umbral del 80 % en código nuevo (diff coverage).
 - [x] T6 (CA4) Configurar protección de rama `main`: checks requeridos, 1 aprobación, rama actualizada. *(Documentada en §Notas técnicas; se aplica en GitHub manualmente al crear el PR.)*
 - [x] T7 Job agregador `ci-ok` que es el único check requerido (evita mantener la lista de checks en la protección de rama cuando la matriz cambia).
+- [ ] T8 Corregir hallazgos de code review (iteración 1):
+  - [ ] H1: añadir `tsx` a devDependencies; usar `npx tsx` en job `detect`; ajustar import a `.ts`.
+  - [ ] H2: añadir `pnpm --filter @animetracker/ci test:coverage` al step `repo-checks`.
+  - [ ] H3: verificar `needs.detect.result == 'success'` en job `ci-ok`.
+  - [ ] H4: añadir threshold 80 % en workflow .NET + `thresholds` en `vitest.config.ts`.
+  - [ ] H5: ejecutar PRs de verificación CA4/CA5 y enlazar URLs en §Definición de Hecho.
+  - [ ] H6: añadir `permissions: contents: read` en `ci.yml`.
 
 ## Notas técnicas y decisiones
 
@@ -188,3 +195,37 @@ cd services/core && dotnet test AnimeTracker.sln
 | Módulo | Cobertura de líneas |
 |---|---|
 | `tools/ci/affected.ts` | 100 % |
+
+## Code Review
+
+### Iteración 1 — 2026-10-31
+
+- Fecha: 2026-10-31
+- Iteración: 1
+- Resultado: CAMBIOS REQUERIDOS
+- Cobertura de líneas (código cambiado): 100 % (`affected.ts`)
+
+| Ámbito | Resultado | Hallazgos |
+|---|---|---|
+| Criterios de aceptación | ❌ | 2 (ALTA) |
+| Seguridad | ❌ | 1 (MEDIA) |
+| Diseño / SOLID | ❌ | 2 (ALTA) |
+| Arquitectura | ❌ | 3 (ALTA) |
+| Pruebas (> 80 %) | ❌ | 2 (ALTA) |
+
+#### Hallazgos
+
+- [ ] [ALTA][Arquitectura] `affected.js` no existe — el job `detect` importa `./tools/ci/affected.js` con `node --input-type=module` pero solo existe `affected.ts`; el pipeline fallará en runtime con "Cannot find module". — `.github/workflows/ci.yml:52` / `tools/ci/package.json` — Corrección: añadir `tsx` a devDependencies de `@animetracker/ci` y cambiar el paso `detect` para usar `npx tsx` (o compilar con `tsc --outDir dist`); ajustar el import a `.ts` o al path compilado.
+- [ ] [ALTA][Arquitectura+Diseño] `tools/ci/` → job `repo-checks` pero el step `repo-checks` solo ejecuta `@animetracker/repo-checks`; los 16 tests de `affected.spec.ts` nunca corren en CI y una regresión en `affected.ts` puede mergearse sin detectarse. — `tools/ci/affected.ts:22` / `.github/workflows/ci.yml:99-105` — Corrección: añadir `pnpm --filter @animetracker/ci test:coverage` al step `repo-checks` (o crear job `ci-tools` y actualizar `PATH_MAP` para `tools/ci/`).
+- [ ] [ALTA][Arquitectura+Aceptación] `ci-ok` no verifica si `detect` falló: cuando `detect` falla, `run-job` queda "skipped" y `ci-ok` pasa (exit 0), permitiendo el merge con pipeline roto. — `.github/workflows/ci.yml:190` — Corrección: añadir `if [ "${{ needs.detect.result }}" != "success" ]; then echo "detect failed"; exit 1; fi` antes del check de `run-job` en `ci-ok`.
+- [ ] [ALTA][Aceptación+Pruebas] CA5 sin enforcement automático: `dotnet test --collect` sube el reporte pero ningún paso falla si la cobertura < 80 %; `vitest.config.ts` no tiene `thresholds`. — `.github/workflows/ci.yml:129-147` / `tools/ci/vitest.config.ts:5-8` — Corrección: para .NET añadir paso con `reportgenerator` o script bash que lea el XML y falle si `line-rate < 0.80`; para Vitest añadir `thresholds: { lines: 80, branches: 80 }` en el bloque `coverage`.
+- [ ] [ALTA][Pruebas+DoD] Evidencia de PRs de verificación (CA4, CA5) no enlazada — ítems DoD "DoD común cumplida" y "Evidencia de PRs de verificación" permanecen sin marcar. — `docs/implementation/stories/0-9-pipeline-integracion-continua.md:116-118` — Corrección: tras corregir H1–H4 y crear el PR, ejecutar un PR de verificación con prueba fallida intencional (CA4) y un PR con código sin cobertura (CA5); enlazar ambas URLs en la §Definición de Hecho antes del merge.
+- [ ] [MEDIA][Seguridad] `permissions` no declarado — el workflow usa los permisos por defecto del repositorio; declarar `permissions: contents: read` aplica el principio de mínimo privilegio. — `.github/workflows/ci.yml` (top level) — Corrección: añadir `permissions:\n  contents: read` tras el bloque `concurrency`.
+
+#### Sugerencias (bajo el umbral)
+
+- [BAJA][Diseño] import `writeFileSync` sin usar en el script Node inline — `.github/workflows/ci.yml:53`
+- [BAJA][Diseño] variable `j` en `for (const { prefix, jobs: j } of PATH_MAP)` demasiado breve; renombrar a `relatedJobs` — `tools/ci/affected.ts:36`
+- [BAJA][Seguridad] Actions fijadas a major version (no SHA); usar SHA pin sería más seguro ante supply-chain attacks — `.github/workflows/ci.yml`
+- [BAJA][Arquitectura] Jobs stub (`bff`, `spa`, `extension`) siempre retornan éxito; documentar en §Notas técnicas que deben reemplazarse en HU-00.03–05 — `.github/workflows/ci.yml:156-185`
+- [BAJA][Arquitectura] `README.md:30` sigue diciendo `.NET 8 Monolito Modular`; actualizar a `.NET 10` — `README.md:30`
