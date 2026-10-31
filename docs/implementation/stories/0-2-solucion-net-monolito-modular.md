@@ -335,6 +335,25 @@ dotnet test AnimeTracker.sln
 
 ## Code Review
 
+### Iteración 4 (T11) — 2026-10-31
+
+- Fecha: 2026-10-31
+- Iteración: 4 (tras correcciones T11)
+- Resultado: APROBADA
+- Cobertura de líneas (código cambiado): 46/46 pruebas en verde; 3/3 nuevas pruebas cubren las ramas previamente no ejercitadas del guard y del middleware.
+
+| Ámbito | Resultado | Hallazgos |
+|---|---|---|
+| Criterios de aceptación | ✅ | 0 |
+| Seguridad | ✅ | 0 |
+| Diseño / SOLID | ✅ | 0 |
+| Arquitectura | ✅ | 0 |
+| Pruebas (> 80 %) | ✅ | 0 |
+
+*Todos los hallazgos MEDIA de la iteración 3 quedan resueltos en T11.*
+
+---
+
 ### Iteración 3 (T10) — 2026-10-31
 
 - Fecha: 2026-10-31
