@@ -52,3 +52,48 @@ export function affectedJobs(changedFiles: string[]): Job[] {
 export function computeMatrix(jobs: Job[]): string {
   return JSON.stringify({ job: jobs.length ? jobs : ['repo-checks'] });
 }
+
+// ─── CA5 verification: intentionally uncovered multi-line code ───────────────
+// These functions are NOT tested. Their purpose is to verify that the CI
+// coverage threshold (80 % lines) fails when new code lacks test coverage.
+// EXISTS ONLY IN verify/ca5-coverage — DELETE BEFORE MERGE.
+export function _ca5_block1(x: number): string {
+  if (x > 0) {
+    return 'positive';
+  }
+  if (x < 0) {
+    return 'negative';
+  }
+  return 'zero';
+}
+export function _ca5_block2(x: number, y: number): number {
+  if (x === y) {
+    return 0;
+  }
+  if (x > y) {
+    return 1;
+  }
+  return -1;
+}
+export function _ca5_block3(items: string[]): string {
+  const result: string[] = [];
+  for (const item of items) {
+    result.push(item.toUpperCase());
+  }
+  return result.join(',');
+}
+export function _ca5_block4(n: number): number[] {
+  const arr: number[] = [];
+  for (let i = 0; i < n; i++) {
+    arr.push(i * i);
+  }
+  return arr;
+}
+export function _ca5_block5(map: Record<string, number>): number {
+  let total = 0;
+  for (const key of Object.keys(map)) {
+    total += map[key];
+  }
+  return total;
+}
+// ─────────────────────────────────────────────────────────────────────────────
