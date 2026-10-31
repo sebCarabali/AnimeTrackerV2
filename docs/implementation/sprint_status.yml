@@ -132,7 +132,7 @@ epicas:
       0-8-persistencia-migraciones-por-modulo:
         { id: HU-00.08, titulo: Persistencia y migraciones por módulo, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.02], archivo: stories/0-8-persistencia-migraciones-por-modulo.md }
       0-9-pipeline-integracion-continua:
-        { id: HU-00.09, titulo: Pipeline de integración continua, prioridad: Must, puntos: 5, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-9-pipeline-integracion-continua.md }
+        { id: HU-00.09, titulo: Pipeline de integración continua, prioridad: Must, puntos: 5, estado: in-progress, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-9-pipeline-integracion-continua.md }
       0-10-despliegue-continuo-staging:
         { id: HU-00.10, titulo: Despliegue continuo a staging, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.06, HU-00.09, HU-00.12], archivo: stories/0-10-despliegue-continuo-staging.md }
       0-11-observabilidad-base:
@@ -234,7 +234,7 @@ preguntas_abiertas:
   - { id: Q3, pregunta: "¿Jikan, AniList o ambas como fuente de catálogo y horarios?", afecta: [HU-02.04, HU-05.05], estado: abierta }
   - { id: Q4, pregunta: "¿Login con proveedores externos (Google, Discord) además de email?", afecta: [EP-01], estado: abierta }
   - { id: Q5, pregunta: "¿Plataforma de staging (contenedores gestionados, Kubernetes, VM)?", afecta: [HU-00.10], estado: abierta, resolver_antes_de: sprint-2 }
-  - { id: Q6, pregunta: "¿Se confirma 80 % de cobertura en código nuevo como umbral?", afecta: [HU-00.09], estado: abierta, resolver_antes_de: sprint-1 }
+  - { id: Q6, pregunta: "¿Se confirma 80 % de cobertura en código nuevo como umbral?", afecta: [HU-00.09], estado: cerrada, decision: "80 % de líneas en código nuevo; sin umbral global inicial", resuelta: 2026-10-31 }
   - { id: Q7, pregunta: "¿Licencia de MediatR v13+ o alternativa (Mediator con generador de código)?", afecta: [HU-00.02], estado: cerrada, decision: "MediatR v12 (última versión libre, sin licencia comercial)", resuelta: 2026-10-29 }
 
 riesgos:
@@ -260,6 +260,13 @@ historial:
       Entity<TId> sin Equals/GetHashCode, cobertura <80%), 5 MEDIA (eventos en Entity vs AggregateRoot,
       TId notnull, /health sin auth, 5 Placeholder tests, DoD CI pendiente HU-00.09).
       T8 agregada con 8 ítems de corrección.
+  - fecha: 2026-10-31
+    cambio: >-
+      Readiness review de HU-00.09 (0-9-pipeline-integracion-continua): resultado 2
+      (require-review). Técnico: 2, Negocio: 2. Historia permanece en ready-for-dev.
+      Acciones pendientes: (1) resolver Q6 antes del 2026-11-02, (2) decidir Nx vs.
+      tools/ci/affected.ts como primera microtarea de T1, (3) confirmar GitHub Actions
+      y .NET 10.x en §Notas técnicas.
   - fecha: 2026-10-29
     cambio: >-
       Re-evaluación readiness HU-00.02: resultado 2 (require-review). Técnico: 2,
