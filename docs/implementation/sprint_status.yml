@@ -132,7 +132,7 @@ epicas:
       0-8-persistencia-migraciones-por-modulo:
         { id: HU-00.08, titulo: Persistencia y migraciones por módulo, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.02], archivo: stories/0-8-persistencia-migraciones-por-modulo.md }
       0-9-pipeline-integracion-continua:
-        { id: HU-00.09, titulo: Pipeline de integración continua, prioridad: Must, puntos: 5, estado: in-progress, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-9-pipeline-integracion-continua.md }
+        { id: HU-00.09, titulo: Pipeline de integración continua, prioridad: Must, puntos: 5, estado: review, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-9-pipeline-integracion-continua.md }
       0-10-despliegue-continuo-staging:
         { id: HU-00.10, titulo: Despliegue continuo a staging, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.06, HU-00.09, HU-00.12], archivo: stories/0-10-despliegue-continuo-staging.md }
       0-11-observabilidad-base:

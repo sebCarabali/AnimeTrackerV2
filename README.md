@@ -9,12 +9,12 @@ Plataforma para gestionar el consumo de anime, con auto-tracking mediante extens
 | Herramienta | Versión mínima | Notas |
 |-------------|---------------|-------|
 | **Node.js** | 24.x LTS | Usar `.nvmrc` con `nvm use` |
-| **.NET 8 SDK** | 8.0.x | Ver `global.json` para la versión exacta |
+| **.NET 10 SDK** | 10.0.x | Ver `global.json` para la versión exacta |
 | **Docker** | 27.x | Incluye Docker Compose v2 |
 | **pnpm** | 12.x | `npm install -g pnpm` |
 
 > El archivo `.nvmrc` en la raíz fija la versión de Node LTS.  
-> El archivo `global.json` en la raíz fija la versión del .NET 8 SDK.
+> El archivo `global.json` en la raíz fija la versión del .NET 10 SDK.
 
 ---
 
@@ -147,6 +147,43 @@ docs: actualiza instrucciones de arranque en README
 cd tools/repo-checks
 pnpm test
 ```
+
+---
+
+## CI — Integración continua
+
+El pipeline corre en **GitHub Actions** (`.github/workflows/ci.yml`) en cada PR hacia `main`.
+
+### Cómo funciona
+
+1. El job `detect` calcula los proyectos afectados por los archivos cambiados usando `tools/ci/affected.ts`.
+2. Se lanza una matriz de jobs (`run-job`) solo para los proyectos afectados.
+3. El job `ci-ok` agrega el resultado; es el **único check requerido** en la protección de rama.
+
+### Reproducir cada job localmente
+
+| Job | Comando |
+|-----|---------|
+| `repo-checks` | `pnpm --filter @animetracker/repo-checks test` |
+| `core` | `cd services/core && dotnet test AnimeTracker.sln` |
+| `core` (cobertura) | `cd services/core && dotnet test AnimeTracker.sln --collect:"XPlat Code Coverage"` |
+| `bff` | `pnpm --filter @animetracker/bff test` *(disponible en HU-00.03)* |
+| `spa` | `pnpm --filter @animetracker/spa test` *(disponible en HU-00.04)* |
+| `extension` | `pnpm --filter @animetracker/extension test` *(disponible en HU-00.05)* |
+| Afectados (local) | `cd tools/ci && node --input-type=module -e "import {affectedJobs} from './affected.js'; console.log(affectedJobs(process.argv.slice(1)))"` |
+
+### Cobertura
+
+- Umbral: **80 % de líneas en código nuevo** (sin umbral global inicial).
+- El reporte de cobertura del job `core` se sube como artefacto `coverage-core`.
+
+### Protección de rama `main` (configurar en GitHub una vez)
+
+> Settings → Branches → Add rule `main`
+> - Required status check: `ci-ok`
+> - Require branches to be up to date: ✓
+> - Require 1 approving review: ✓
+> - Include administrators: ✓
 
 ---
 

@@ -115,7 +115,7 @@ it.each([
 
 - [ ] DoD común cumplida.
 - [ ] Evidencia de los PRs de verificación (CA4, CA5) enlazada en el PR de la historia.
-- [ ] Sección "CI" en el README raíz con cómo reproducir cada job localmente.
+- [x] Sección "CI" en el README raíz con cómo reproducir cada job localmente.
 
 ## Readiness Review
 
@@ -141,6 +141,50 @@ it.each([
 
 ### Acciones para quedar Ready
 
-- [ ] Resolver Q6 antes del 2026-11-02: confirmar umbral 80 % de cobertura en código nuevo; cerrar Q6 en sprint_status.yml y actualizar CA5/T5 con el número definitivo.
-- [ ] Decidir Nx vs. `tools/ci/affected.ts` como primera microtarea de T1 (antes de escribir código); documentar en §Notas técnicas y ajustar T2/T3 si se elige Nx.
-- [ ] Actualizar §Notas técnicas: confirmar GitHub Actions como plataforma y referenciar .NET 10.x (no .NET 8) para el job `core`.
+- [x] Resolver Q6 antes del 2026-11-02: confirmar umbral 80 % de cobertura en código nuevo; cerrar Q6 en sprint_status.yml y actualizar CA5/T5 con el número definitivo. → Resuelto al iniciar story-dev.
+- [x] Decidir Nx vs. `tools/ci/affected.ts` como primera microtarea de T1 (antes de escribir código); documentar en §Notas técnicas y ajustar T2/T3 si se elige Nx. → `tools/ci/affected.ts` custom adoptado.
+- [x] Actualizar §Notas técnicas: confirmar GitHub Actions como plataforma y referenciar .NET 10.x (no .NET 8) para el job `core`. → Actualizado en §Notas técnicas.
+
+## Dev Agent Record
+
+- **Fecha:** 2026-10-31
+- **Rama:** `feature/story-0-9-pipeline-integracion-continua`
+- **Decisiones tomadas al inicio:** Nx descartado; `tools/ci/affected.ts` custom (siguiendo patrón `tools/repo-checks`). Q6 cerrada con 80 % de líneas en código nuevo.
+
+### Archivos creados / modificados
+
+| Archivo | Tipo |
+|---|---|
+| `tools/ci/affected.ts` | Nuevo |
+| `tools/ci/affected.spec.ts` | Nuevo |
+| `tools/ci/package.json` | Nuevo |
+| `tools/ci/vitest.config.ts` | Nuevo |
+| `.github/workflows/ci.yml` | Nuevo |
+| `README.md` | Modificado (sección CI + .NET 8 → .NET 10) |
+| `docs/implementation/sprint_status.yml` | Modificado (Q6 cerrada, HU-00.09 in-progress) |
+
+### Comandos de prueba y resultado
+
+```bash
+# tools/ci
+pnpm --filter @animetracker/ci test
+
+# tools/repo-checks (regresión)
+pnpm --filter @animetracker/repo-checks test
+
+# .NET (regresión)
+cd services/core && dotnet test AnimeTracker.sln
+```
+
+| Suite | Resultado | Pruebas |
+|---|---|---|
+| `@animetracker/ci` (affected.spec.ts) | ✅ Pass | 16/16 |
+| `@animetracker/repo-checks` (structure.spec.ts) | ✅ Pass | 23/23 |
+| .NET (AnimeTracker.sln) | ✅ Pass | 46/46 |
+| **Total** | **✅ 85/85** | |
+
+### Cobertura
+
+| Módulo | Cobertura de líneas |
+|---|---|
+| `tools/ci/affected.ts` | 100 % |
