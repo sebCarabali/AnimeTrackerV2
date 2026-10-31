@@ -416,6 +416,12 @@ dotnet test AnimeTracker.sln
 - [BAJA][Seguridad] `/health` serializa `e.Key` y `e.Value.Description`; aunque restringido por loopback guard, puede filtrar arquitectura interna si el acceso se amplía — `services/core/src/Host/AnimeTracker.Host/Program.cs:46`
 - [BAJA][DoD] Ítems "DoD común cumplida" y "Pruebas de arquitectura ejecutándose en CI" sin marcar; dependen de HU-00.09 (CI) y HU-00.10 (staging). Situación conocida y documentada en §Dev Notes — `docs/implementation/stories/0-2-solucion-net-monolito-modular.md:161`
 
+## Pull Request
+
+- URL: https://github.com/sebCarabali/AnimeTrackerV2/pull/4
+- Fecha: 2026-10-31
+- Estado: open
+
 ## Readiness Review
 
 - Fecha: 2026-10-29
