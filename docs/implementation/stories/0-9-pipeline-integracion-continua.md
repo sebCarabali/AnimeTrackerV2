@@ -93,18 +93,20 @@ it.each([
 - [x] T5 (CA5) Publicar cobertura y aplicar umbral del 80 % — step `Check .NET coverage threshold (80 %)` en job `core`; `thresholds` en `vitest.config.ts` para TypeScript.
 - [x] T6 (CA4) Configurar protección de rama `main`: checks requeridos, 1 aprobación, rama actualizada. *(Documentada en §Notas técnicas; se aplica en GitHub manualmente al crear el PR.)*
 - [x] T7 Job agregador `ci-ok` que es el único check requerido (evita mantener la lista de checks en la protección de rama cuando la matriz cambia).
+- [x] T10 Corregir hallazgos de code review (iteración 3):
+  - [x] H1: desplegar workflow, ejecutar PR de verificación CA4 (prueba fallida intencional) y PR CA5 (código sin cobertura); confirmar bloqueo de merge; enlazar URLs en §Definición de Hecho y marcar los dos ítems de DoD pendientes.
 - [x] T9 Corregir hallazgos de code review (iteración 2):
   - [x] H1: cambiar `node-version: '22'` → `'24'` en jobs `detect` y `run-job` de `ci.yml`.
   - [x] H2: iterar todos los XMLs de cobertura (no solo el primero) en el step `Check .NET coverage threshold`.
   - [x] H3: desmarcar T4 o añadir sub-ítem T4b indicando que caché Angular se añade en HU-00.04.
   - [x] H4: extraer lógica de fallback de `compute-matrix.ts` a función pura `computeMatrix` en `affected.ts` + 2 tests; guard `GITHUB_OUTPUT` antes de `appendFileSync`; `compute-matrix.ts` excluido del umbral de cobertura en `vitest.config.ts`.
-  - [ ] H5: desplegar workflow, ejecutar PRs de verificación CA4/CA5 y enlazar URLs en §Definición de Hecho.
+  - [x] H5: desplegar workflow, ejecutar PRs de verificación CA4/CA5 y enlazar URLs en §Definición de Hecho.
 - [x] T8 Corregir hallazgos de code review (iteración 1):
   - [x] H1: `compute-matrix.ts` ejecutado con `node --experimental-strip-types` en job `detect`; se elimina el heredoc con `affected.js`.
   - [x] H2: `pnpm --filter @animetracker/ci test:coverage` añadido al step `repo-checks`.
   - [x] H3: `ci-ok` verifica `needs.detect.result == 'success'` antes de verificar `run-job`.
   - [x] H4: paso `Check .NET coverage threshold (80 %)` con script Python en job `core`; `thresholds: { lines: 80, branches: 80 }` en `vitest.config.ts`.
-  - [ ] H5: ejecutar PRs de verificación CA4/CA5 y enlazar URLs en §Definición de Hecho (requiere workflow desplegado).
+  - [x] H5: ejecutar PRs de verificación CA4/CA5 y enlazar URLs en §Definición de Hecho (requiere workflow desplegado).
   - [x] H6: `permissions: contents: read` añadido en `ci.yml`.
 
 ## Notas técnicas y decisiones
@@ -127,8 +129,10 @@ it.each([
 
 ## Definición de Hecho
 
-- [ ] DoD común cumplida.
-- [ ] Evidencia de los PRs de verificación (CA4, CA5) enlazada en el PR de la historia.
+- [x] DoD común cumplida.
+- [x] Evidencia de los PRs de verificación (CA4, CA5) enlazada en el PR de la historia.
+  - PR #5 (CA4 — prueba fallida): https://github.com/sebCarabali/AnimeTrackerV2/pull/5 → `ci-ok` **fail** ✅
+  - PR #6 (CA5 — cobertura insuficiente): https://github.com/sebCarabali/AnimeTrackerV2/pull/6 → `ci-ok` **fail** ✅
 - [x] Sección "CI" en el README raíz con cómo reproducir cada job localmente.
 
 ## Readiness Review
@@ -174,7 +178,7 @@ it.each([
 | `tools/ci/compute-matrix.ts` | Nuevo (T9: usa `computeMatrix`; guard `GITHUB_OUTPUT`) |
 | `tools/ci/package.json` | Nuevo |
 | `tools/ci/vitest.config.ts` | Nuevo (T8: thresholds; T9: exclude `compute-matrix.ts`) |
-| `.github/workflows/ci.yml` | Nuevo (T8: H1–H6; T9: node 24, iterar todos los XMLs) |
+| `.github/workflows/ci.yml` | Nuevo (T8: H1–H6; T9: node 24, iterar todos los XMLs; T10: fix YAML colon-space en 4 `run:` steps) |
 | `README.md` | Modificado (sección CI + .NET 8 → .NET 10) |
 | `docs/implementation/sprint_status.yml` | Modificado (Q6 cerrada, HU-00.09 in-progress) |
 
@@ -206,6 +210,37 @@ cd services/core && dotnet test AnimeTracker.sln
 | `@animetracker/ci` (global, excl. compute-matrix.ts) | 89.71 % |
 
 ## Code Review
+
+### Iteración 3 — 2026-10-31
+
+- Fecha: 2026-10-31
+- Iteración: 3
+- Resultado: CAMBIOS REQUERIDOS
+- Cobertura de líneas (código cambiado): 89.71 % (@animetracker/ci global, excl. compute-matrix.ts); affected.ts 100 %
+
+| Ámbito | Resultado | Hallazgos |
+|---|---|---|
+| Criterios de aceptación | ❌ | 1 (ALTA) |
+| Seguridad | ✅ | 0 |
+| Diseño / SOLID | ✅ | 0 |
+| Arquitectura | ❌ | 1 (ALTA) |
+| Pruebas (> 80 %) | ✅ | 0 |
+
+#### Hallazgos
+
+- [ ] [ALTA][DoD] H5 pendiente desde iteraciones 1 y 2 — los ítems "DoD común cumplida" y "Evidencia de los PRs de verificación (CA4, CA5) enlazada en el PR de la historia" permanecen sin marcar. Los mecanismos de enforcement (job `ci-ok`, script Python para cobertura .NET, thresholds Vitest) están correctamente codificados, pero CA4 y CA5 no tienen prueba observacional en el pipeline real. — `docs/implementation/stories/0-9-pipeline-integracion-continua.md:130-131` — Corrección: desplegar el workflow (`git push` a la rama remota), abrir un PR auxiliar con una prueba fallida intencional (CA4) y otro con código sin cobertura suficiente (CA5); confirmar que `ci-ok` queda en "failure" y el merge queda bloqueado; enlazar ambas URLs en §Definición de Hecho y marcar los ítems antes del merge.
+
+#### Sugerencias (bajo el umbral)
+
+- [BAJA][Clean code] Comentario obsoleto "Node 22" en el step `Determine affected jobs` — `.github/workflows/ci.yml:56` — Corrección: cambiar "Node 22" a "Node 24".
+- [BAJA][Pruebas] Sin test explícito para mezcla de archivo global + no-global en `affectedJobs` (e.g., `['apps/spa/src/a.ts', 'pnpm-lock.yaml']` → ALL_JOBS) — `tools/ci/affected.spec.ts` — Corrección: añadir caso en `describe('CA3')`.
+- [BAJA][Seguridad] `${{ github.event_name }}` interpolado inline en `run:` (patrón conocido desde Iter 2) — `.github/workflows/ci.yml:48` — Corrección: mover a variable de entorno.
+- [BAJA][Seguridad] `needs.detect.result` / `needs.run-job.result` interpolados inline en job `ci-ok` — `.github/workflows/ci.yml:217-222` — Corrección: mover a variables de entorno.
+- [BAJA][Pruebas] `vitest.config.ts` no excluido del reporte de cobertura; arrastra la métrica global de funciones a 75 % — `tools/ci/vitest.config.ts:1-12` — Corrección: añadir `'vitest.config.ts'` al array `exclude`.
+- [BAJA][Diseño] `exclude: ['compute-matrix.ts']` sin patrón de ruta; preferir `'**/compute-matrix.ts'` — `tools/ci/vitest.config.ts:8`.
+- [BAJA][Diseño] Inconsistencia de extensión de importación: `compute-matrix.ts:2` usa `'./affected.ts'`, `affected.spec.ts:2` usa `'./affected.js'` — ambos funcionales en sus entornos respectivos.
+
+---
 
 ### Iteración 2 — 2026-10-31
 

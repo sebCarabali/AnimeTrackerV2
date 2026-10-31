@@ -132,7 +132,7 @@ epicas:
       0-8-persistencia-migraciones-por-modulo:
         { id: HU-00.08, titulo: Persistencia y migraciones por módulo, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.02], archivo: stories/0-8-persistencia-migraciones-por-modulo.md }
       0-9-pipeline-integracion-continua:
-        { id: HU-00.09, titulo: Pipeline de integración continua, prioridad: Must, puntos: 5, estado: in-progress, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-9-pipeline-integracion-continua.md }
+        { id: HU-00.09, titulo: Pipeline de integración continua, prioridad: Must, puntos: 5, estado: pull-request, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-9-pipeline-integracion-continua.md }
       0-10-despliegue-continuo-staging:
         { id: HU-00.10, titulo: Despliegue continuo a staging, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.06, HU-00.09, HU-00.12], archivo: stories/0-10-despliegue-continuo-staging.md }
       0-11-observabilidad-base:
@@ -242,6 +242,13 @@ riesgos:
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
 
 historial:
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.09 (0-9-pipeline-integracion-continua) regresada a in-progress tras code review
+      iteración 3. 1 hallazgo ALTA (DoD): H5 pendiente por tercer ciclo consecutivo — PRs de
+      verificación CA4/CA5 no ejecutados en pipeline real, evidencia no enlazada en §DoH.
+      T10 agregada con 1 ítem de corrección. 7 sugerencias BAJA registradas. Cobertura
+      @animetracker/ci 89.71 % (umbral superado). H1–H4 de iteración 2 confirmados resueltos.
   - fecha: 2026-10-29
     cambio: >-
       HU-00.02 (0-2-solucion-net-monolito-modular) promovida a review tras corrección T9.
