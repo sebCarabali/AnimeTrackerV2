@@ -137,6 +137,10 @@ Verificación negativa obligatoria: en una rama temporal, agregar una referencia
   - [x] Agregar guard en `Result<T>.Value`: lanzar `InvalidOperationException("Cannot access Value of a failed result.")` cuando `IsFailure=true`; actualizar `ResultTests` para verificar la excepción.
 - [x] T10 Corregir hallazgos de code review (tercera iteración):
   - [x] Corregir guard de `/health` para funcionar detrás de reverse proxy: agregar `app.UseForwardedHeaders(new ForwardedHeadersOptions { ... })` con `KnownProxies` explícitos antes del guard de IP, o reemplazar el guard por `RequireAuthorization()` con política dedicada antes de staging — `services/core/src/Host/AnimeTracker.Host/Program.cs:29`.
+- [ ] T11 Corregir hallazgos de code review (cuarta iteración):
+  - [ ] Vincular `ForwardedHeadersOptions` a `IConfiguration`: usar `builder.Services.Configure<ForwardedHeadersOptions>(builder.Configuration.GetSection(ForwardedHeadersOptions.ForwardedHeadersOptionsName))` + `app.UseForwardedHeaders()` sin argumentos; crear `appsettings.Staging.json` con la sección `ForwardedHeadersOptions:KnownProxies` — `services/core/src/Host/AnimeTracker.Host/Program.cs:24-31`.
+  - [ ] Agregar prueba de regresión para el path 403 del guard: test que establezca `RemoteIpAddress` a IP no-loopback (vía middleware de prueba) y verifique `StatusCode = 403` — `services/core/tests/Host/AnimeTracker.Host.IntegrationTests/HealthCheckTests.cs`.
+  - [ ] Agregar prueba de integración para `UseForwardedHeaders` + guard: test que envíe `X-Forwarded-For: 127.0.0.1` con proxy en `KnownProxies` y verifique que la IP es procesada y el acceso concedido — `services/core/tests/Host/AnimeTracker.Host.IntegrationTests/HealthCheckTests.cs`.
 
 ## Notas técnicas y decisiones
 
@@ -304,6 +308,37 @@ dotnet test AnimeTracker.sln
 
 ## Code Review
 
+### Iteración 3 (T10) — 2026-10-31
+
+- Fecha: 2026-10-31
+- Iteración: 3 (tras corrección T10)
+- Resultado: CAMBIOS REQUERIDOS
+- Cobertura de líneas (código cambiado): 93.6 % (Program.cs; código generado OpenAPI de .NET 10 excluido del cálculo real)
+
+| Ámbito | Resultado | Hallazgos |
+|---|---|---|
+| Criterios de aceptación | ✅ | 0 |
+| Seguridad | ✅ | 0 |
+| Diseño / SOLID | ❌ | 1 (MEDIA) |
+| Arquitectura | ❌ | 1 (MEDIA) |
+| Pruebas (> 80 %) | ❌ | 2 (MEDIA) |
+
+#### Hallazgos
+
+- [ ] [MEDIA][Diseño/Arquitectura] `ForwardedHeadersOptions` construido inline y nunca vinculado a `IConfiguration`; el comentario indica agregar `ForwardedHeadersOptions:KnownProxies` en `appsettings.{Env}.json` pero el código ignora esa sección. Consecuencia: en staging el guard seguirá fallando igual que el problema original de T10 (KnownProxies vacíos = solo loopback aceptado como proxy). — `services/core/src/Host/AnimeTracker.Host/Program.cs:24-31` — Corrección: `builder.Services.Configure<ForwardedHeadersOptions>(builder.Configuration.GetSection(ForwardedHeadersOptions.ForwardedHeadersOptionsName))` + `app.UseForwardedHeaders()` sin argumentos; añadir sección en `appsettings.Staging.json` con IP del proxy.
+- [ ] [MEDIA][Pruebas] Rama del guard (`ip is not null && !IPAddress.IsLoopback(ip)` → 403) con hits=0 en coverlet; `RemoteIpAddress=null` en `WebApplicationFactory` siempre la elude. Comportamiento de seguridad central sin prueba de regresión. — `services/core/tests/Host/AnimeTracker.Host.IntegrationTests/HealthCheckTests.cs:7` + `Program.cs:40-43` — Corrección: prueba que establezca `RemoteIpAddress` a IP no-loopback (vía middleware de prueba) y verifique 403.
+- [ ] [MEDIA][Pruebas] Interacción `UseForwardedHeaders` → `RemoteIpAddress` → guard no verificada: eliminar o reordenar el middleware no rompería ninguna prueba. — `services/core/tests/Host/AnimeTracker.Host.IntegrationTests/HealthCheckTests.cs:7` — Corrección: prueba que envíe `X-Forwarded-For: 127.0.0.1` con proxy en `KnownProxies` y verifique que la IP es procesada y el acceso concedido.
+
+#### Sugerencias (bajo el umbral)
+
+- [BAJA][Requisitos] `appsettings.Staging.json` con `ForwardedHeadersOptions:KnownProxies` debe existir antes de HU-00.10; sin ello `/health` retornará 403 en staging. — `Program.cs:25-27`
+- [BAJA][Diseño] `ForwardedHeaders.XForwardedProto` no incluido; puede afectar detección de esquema HTTPS en cookies/redirects de historias posteriores. — `Program.cs:30`
+- [BAJA][Pruebas] Cobertura `AnimeTracker.Host` 11.1% es artefacto de código generado OpenAPI de .NET 10; `Program.cs` real: 93.6%. Filtrar con `ExcludeByFile=**/obj/**/*.generated.cs`.
+
+---
+
+### Iteración 2 (T8) — 2026-10-29 — resuelto en T9
+
 - Fecha: 2026-10-29
 - Iteración: 2 (tras correcciones T8)
 - Resultado: CAMBIOS REQUERIDOS
@@ -317,9 +352,9 @@ dotnet test AnimeTracker.sln
 | Arquitectura | ✅ | 0 |
 | Pruebas (> 80 %) | ✅ | 0 |
 
-### Hallazgos
+#### Hallazgos
 
-- [ ] [MEDIA][Diseño] `Result<T>.Value` es `T?` accesible sin guard cuando `IsFailure=true`; un consumidor que omita la verificación de `IsSuccess` obtiene `default(T)` silenciosamente, ocultando el fallo en lugar de evidenciarlo. — `services/core/src/SharedKernel/AnimeTracker.SharedKernel/Result.cs:14` — Corrección: convertir `Value` en propiedad computada con campo de respaldo: `public T Value => IsSuccess ? _value! : throw new InvalidOperationException("Cannot access Value of a failed result.");`; actualizar `ResultTests` para verificar la excepción.
+- [x] [MEDIA][Diseño] `Result<T>.Value` es `T?` accesible sin guard cuando `IsFailure=true`; un consumidor que omita la verificación de `IsSuccess` obtiene `default(T)` silenciosamente, ocultando el fallo en lugar de evidenciarlo. — `services/core/src/SharedKernel/AnimeTracker.SharedKernel/Result.cs:14` — Corrección: convertir `Value` en propiedad computada con campo de respaldo: `public T Value => IsSuccess ? _value! : throw new InvalidOperationException("Cannot access Value of a failed result.");`; actualizar `ResultTests` para verificar la excepción. → **Resuelto en T9**.
 
 ### Sugerencias (bajo el umbral)
 
