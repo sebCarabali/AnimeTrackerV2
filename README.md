@@ -27,7 +27,7 @@ animetracker/
 │   ├── bff/          # NestJS BFF — API Gateway y agregador
 │   └── extension/    # Extensión de navegador — auto-tracker
 ├── services/
-│   └── core/         # .NET 8 Monolito Modular — lógica de negocio
+│   └── core/         # .NET 10 Monolito Modular — lógica de negocio
 ├── contracts/        # Contratos OpenAPI (API-first)
 ├── infra/            # Docker Compose, Kubernetes, scripts de CI/CD
 └── tools/
@@ -170,7 +170,7 @@ El pipeline corre en **GitHub Actions** (`.github/workflows/ci.yml`) en cada PR 
 | `bff` | `pnpm --filter @animetracker/bff test` *(disponible en HU-00.03)* |
 | `spa` | `pnpm --filter @animetracker/spa test` *(disponible en HU-00.04)* |
 | `extension` | `pnpm --filter @animetracker/extension test` *(disponible en HU-00.05)* |
-| Afectados (local) | `cd tools/ci && node --input-type=module -e "import {affectedJobs} from './affected.js'; console.log(affectedJobs(process.argv.slice(1)))"` |
+| Afectados (local) | `CHANGED_FILES="apps/spa/src/app.ts" node --experimental-strip-types tools/ci/compute-matrix.ts` |
 
 ### Cobertura
 

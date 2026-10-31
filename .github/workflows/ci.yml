@@ -6,6 +6,10 @@ on:
   push:
     branches: [main]
 
+# H6: minimum required permissions (principle of least privilege)
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -36,29 +40,23 @@ jobs:
 
       - name: Compute changed files
         id: changed
+        # H3 fix: pass SHAs via env vars instead of inline interpolation
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE=${{ github.event.pull_request.base.sha }}
+            BASE="$PR_BASE_SHA"
           else
-            BASE=${{ github.event.before }}
+            BASE="$PUSH_BEFORE_SHA"
           fi
           FILES=$(git diff --name-only "$BASE"...HEAD | tr '\n' ' ')
           echo "files=$FILES" >> "$GITHUB_OUTPUT"
 
+      # H1 fix: run compute-matrix.ts directly via Node 22 --experimental-strip-types
       - name: Determine affected jobs
         id: set-matrix
-        run: |
-          node --input-type=module <<'EOF'
-          import { affectedJobs } from './tools/ci/affected.js';
-          import { writeFileSync } from 'node:fs';
-          import { appendFileSync } from 'node:fs';
-
-          const files = process.env.CHANGED_FILES?.split(' ').filter(Boolean) ?? [];
-          const jobs = affectedJobs(files);
-          const matrix = JSON.stringify({ job: jobs.length ? jobs : ['repo-checks'] });
-          appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${matrix}\n`);
-          console.log('Affected jobs:', matrix);
-          EOF
+        run: node --experimental-strip-types tools/ci/compute-matrix.ts
         env:
           CHANGED_FILES: ${{ steps.changed.outputs.files }}
 
@@ -96,13 +94,20 @@ jobs:
           key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: pnpm-store-${{ runner.os }}-
 
-      - name: pnpm install (repo-checks)
+      # H2 fix: install and run both repo-checks AND ci tool suite
+      - name: pnpm install (repo-checks + ci tools)
         if: matrix.job == 'repo-checks'
-        run: pnpm --filter @animetracker/repo-checks install
+        run: |
+          pnpm --filter @animetracker/repo-checks install
+          pnpm --filter @animetracker/ci install
 
       - name: Run repo-checks
         if: matrix.job == 'repo-checks'
         run: pnpm --filter @animetracker/repo-checks test:coverage
+
+      - name: Run ci-tools tests
+        if: matrix.job == 'repo-checks'
+        run: pnpm --filter @animetracker/ci test:coverage
 
       # ── core (.NET) ──────────────────────────────────────────────────────────
       - name: Setup .NET 10
@@ -128,7 +133,6 @@ jobs:
         if: matrix.job == 'core'
         run: dotnet build services/core/AnimeTracker.sln --no-restore --configuration Release
 
-      # T5: CA5 — coverage threshold 80 % on new code
       - name: dotnet test (with coverage)
         if: matrix.job == 'core'
         run: |
@@ -145,6 +149,26 @@ jobs:
         with:
           name: coverage-core
           path: TestResults/**/coverage.cobertura.xml
+
+      # T5/CA5 fix (H4): enforce 80 % line coverage threshold on .NET results
+      - name: Check .NET coverage threshold (80 %)
+        if: matrix.job == 'core'
+        run: |
+          COVERAGE_FILE=$(find TestResults -name "coverage.cobertura.xml" | head -1)
+          if [ -z "$COVERAGE_FILE" ]; then
+            echo "ERROR: No coverage.cobertura.xml found in TestResults"
+            exit 1
+          fi
+          python3 - "$COVERAGE_FILE" <<'PYEOF'
+          import sys, xml.etree.ElementTree as ET
+          tree = ET.parse(sys.argv[1])
+          rate = float(tree.getroot().get("line-rate", "0"))
+          print(f"Line coverage: {rate:.1%}")
+          if rate < 0.80:
+              print(f"ERROR: coverage {rate:.1%} is below the 80 % threshold")
+              sys.exit(1)
+          print("Coverage OK (>= 80 %)")
+          PYEOF
 
       # ── contracts ────────────────────────────────────────────────────────────
       - name: Validate contracts (stub — extended in HU-00.07)
@@ -187,6 +211,11 @@ jobs:
     steps:
       - name: Check all jobs passed
         run: |
+          # H3 fix: fail if detect itself failed (run-job would be 'skipped' but pipeline is broken)
+          if [ "${{ needs.detect.result }}" != "success" ]; then
+            echo "detect job failed or was skipped: ${{ needs.detect.result }}"
+            exit 1
+          fi
           if [ "${{ needs.run-job.result }}" != "success" ] && [ "${{ needs.run-job.result }}" != "skipped" ]; then
             echo "One or more CI jobs failed: ${{ needs.run-job.result }}"
             exit 1

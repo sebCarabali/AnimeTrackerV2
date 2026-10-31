@@ -89,16 +89,16 @@ it.each([
 - [x] T2 Workflow `ci.yml` con job `detect` que publica la matriz de jobs afectados.
 - [x] T3 Jobs: `core` (restore, build, test con cobertura), `bff`, `spa`, `extension`, `contracts`, `repo-checks`.
 - [x] T4 Caché de NuGet, pnpm store y build de Angular.
-- [ ] T5 (CA5) Publicar cobertura y aplicar umbral del 80 % en código nuevo (diff coverage).
+- [x] T5 (CA5) Publicar cobertura y aplicar umbral del 80 % — step `Check .NET coverage threshold (80 %)` en job `core`; `thresholds` en `vitest.config.ts` para TypeScript.
 - [x] T6 (CA4) Configurar protección de rama `main`: checks requeridos, 1 aprobación, rama actualizada. *(Documentada en §Notas técnicas; se aplica en GitHub manualmente al crear el PR.)*
 - [x] T7 Job agregador `ci-ok` que es el único check requerido (evita mantener la lista de checks en la protección de rama cuando la matriz cambia).
-- [ ] T8 Corregir hallazgos de code review (iteración 1):
-  - [ ] H1: añadir `tsx` a devDependencies; usar `npx tsx` en job `detect`; ajustar import a `.ts`.
-  - [ ] H2: añadir `pnpm --filter @animetracker/ci test:coverage` al step `repo-checks`.
-  - [ ] H3: verificar `needs.detect.result == 'success'` en job `ci-ok`.
-  - [ ] H4: añadir threshold 80 % en workflow .NET + `thresholds` en `vitest.config.ts`.
-  - [ ] H5: ejecutar PRs de verificación CA4/CA5 y enlazar URLs en §Definición de Hecho.
-  - [ ] H6: añadir `permissions: contents: read` en `ci.yml`.
+- [x] T8 Corregir hallazgos de code review (iteración 1):
+  - [x] H1: `compute-matrix.ts` ejecutado con `node --experimental-strip-types` en job `detect`; se elimina el heredoc con `affected.js`.
+  - [x] H2: `pnpm --filter @animetracker/ci test:coverage` añadido al step `repo-checks`.
+  - [x] H3: `ci-ok` verifica `needs.detect.result == 'success'` antes de verificar `run-job`.
+  - [x] H4: paso `Check .NET coverage threshold (80 %)` con script Python en job `core`; `thresholds: { lines: 80, branches: 80 }` en `vitest.config.ts`.
+  - [ ] H5: ejecutar PRs de verificación CA4/CA5 y enlazar URLs en §Definición de Hecho (requiere workflow desplegado).
+  - [x] H6: `permissions: contents: read` añadido en `ci.yml`.
 
 ## Notas técnicas y decisiones
 
@@ -164,9 +164,10 @@ it.each([
 |---|---|
 | `tools/ci/affected.ts` | Nuevo |
 | `tools/ci/affected.spec.ts` | Nuevo |
+| `tools/ci/compute-matrix.ts` | Nuevo |
 | `tools/ci/package.json` | Nuevo |
-| `tools/ci/vitest.config.ts` | Nuevo |
-| `.github/workflows/ci.yml` | Nuevo |
+| `tools/ci/vitest.config.ts` | Nuevo (thresholds añadidos en T8) |
+| `.github/workflows/ci.yml` | Nuevo (H1–H6 aplicados en T8) |
 | `README.md` | Modificado (sección CI + .NET 8 → .NET 10) |
 | `docs/implementation/sprint_status.yml` | Modificado (Q6 cerrada, HU-00.09 in-progress) |
 

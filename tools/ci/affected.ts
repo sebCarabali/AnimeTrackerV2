@@ -33,9 +33,9 @@ export function affectedJobs(changedFiles: string[]): Job[] {
     if (GLOBAL_PATTERNS.some((p) => p.test(file))) {
       return [...ALL_JOBS];
     }
-    for (const { prefix, jobs: j } of PATH_MAP) {
+    for (const { prefix, jobs: relatedJobs } of PATH_MAP) {
       if (prefix.test(file)) {
-        j.forEach((job) => jobs.add(job));
+        relatedJobs.forEach((job) => jobs.add(job));
         break;
       }
     }

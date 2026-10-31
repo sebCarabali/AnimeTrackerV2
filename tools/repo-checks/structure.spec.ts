@@ -38,8 +38,8 @@ describe('CA2 — README raíz', () => {
     expect(readContent()).toMatch(/Node/i);
   });
 
-  it('menciona .NET 8 como requisito previo', () => {
-    expect(readContent()).toMatch(/\.NET\s*8/i);
+  it('menciona .NET 10 como requisito previo', () => {
+    expect(readContent()).toMatch(/\.NET\s*10/i);
   });
 
   it('menciona Docker como requisito previo', () => {
