@@ -135,6 +135,8 @@ Verificación negativa obligatoria: en una rama temporal, agregar una referencia
   - [x] Reemplazar las 5 pruebas Placeholder por pruebas de arranque real o marcar con TODO+ticket.
 - [x] T9 Corregir hallazgos de code review (segunda iteración):
   - [x] Agregar guard en `Result<T>.Value`: lanzar `InvalidOperationException("Cannot access Value of a failed result.")` cuando `IsFailure=true`; actualizar `ResultTests` para verificar la excepción.
+- [x] T10 Corregir hallazgos de code review (tercera iteración):
+  - [x] Corregir guard de `/health` para funcionar detrás de reverse proxy: agregar `app.UseForwardedHeaders(new ForwardedHeadersOptions { ... })` con `KnownProxies` explícitos antes del guard de IP, o reemplazar el guard por `RequireAuthorization()` con política dedicada antes de staging — `services/core/src/Host/AnimeTracker.Host/Program.cs:29`.
 
 ## Notas técnicas y decisiones
 
@@ -227,6 +229,32 @@ dotnet test AnimeTracker.sln
 ```powershell
 cd services/core
 dotnet test AnimeTracker.sln --collect:"XPlat Code Coverage"
+```
+
+| Suite | Resultado | Pruebas |
+|---|---|---|
+| ArchitectureTests | ✅ Pass | 18/18 |
+| Host.IntegrationTests | ✅ Pass | 1/1 |
+| Tracking.IntegrationTests | ✅ Pass | 2/2 |
+| SharedKernel.UnitTests | ✅ Pass | 18/18 |
+| Catalog.UnitTests | ✅ Pass | 1/1 |
+| Tracking.UnitTests | ✅ Pass | 1/1 |
+| Calendar.UnitTests | ✅ Pass | 1/1 |
+| Catalog.IntegrationTests | ✅ Pass | 1/1 |
+| Calendar.IntegrationTests | ✅ Pass | 1/1 |
+| **Total** | **✅ 44/44** | |
+
+### Archivos adicionales (iteración T10)
+
+| Archivo | Tipo |
+|---|---|
+| `services/core/src/Host/AnimeTracker.Host/Program.cs` | Modificado (`using Microsoft.AspNetCore.HttpOverrides` + `app.UseForwardedHeaders` antes del guard de `/health`) |
+
+### Comandos de prueba y resultado (iteración T10)
+
+```powershell
+cd services/core
+dotnet test AnimeTracker.sln
 ```
 
 | Suite | Resultado | Pruebas |
