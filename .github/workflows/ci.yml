@@ -1,0 +1,194 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── T1/CA1-CA3: Detect which jobs are affected by the changed files ─────────
+  detect:
+    name: Detect affected jobs
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install tools/ci deps
+        run: pnpm --filter @animetracker/ci install
+
+      - name: Compute changed files
+        id: changed
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE=${{ github.event.pull_request.base.sha }}
+          else
+            BASE=${{ github.event.before }}
+          fi
+          FILES=$(git diff --name-only "$BASE"...HEAD | tr '\n' ' ')
+          echo "files=$FILES" >> "$GITHUB_OUTPUT"
+
+      - name: Determine affected jobs
+        id: set-matrix
+        run: |
+          node --input-type=module <<'EOF'
+          import { affectedJobs } from './tools/ci/affected.js';
+          import { writeFileSync } from 'node:fs';
+          import { appendFileSync } from 'node:fs';
+
+          const files = process.env.CHANGED_FILES?.split(' ').filter(Boolean) ?? [];
+          const jobs = affectedJobs(files);
+          const matrix = JSON.stringify({ job: jobs.length ? jobs : ['repo-checks'] });
+          appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${matrix}\n`);
+          console.log('Affected jobs:', matrix);
+          EOF
+        env:
+          CHANGED_FILES: ${{ steps.changed.outputs.files }}
+
+  # ── T3: Run each affected job from the matrix ───────────────────────────────
+  run-job:
+    name: ${{ matrix.job }}
+    needs: detect
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.detect.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── repo-checks ─────────────────────────────────────────────────────────
+      - name: Setup pnpm (repo-checks / spa / bff / extension)
+        if: matrix.job != 'core' && matrix.job != 'contracts'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Setup Node (repo-checks / spa / bff / extension)
+        if: matrix.job != 'core' && matrix.job != 'contracts'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      # T4: pnpm store cache
+      - name: Restore pnpm store
+        if: matrix.job != 'core' && matrix.job != 'contracts'
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: pnpm-store-${{ runner.os }}-
+
+      - name: pnpm install (repo-checks)
+        if: matrix.job == 'repo-checks'
+        run: pnpm --filter @animetracker/repo-checks install
+
+      - name: Run repo-checks
+        if: matrix.job == 'repo-checks'
+        run: pnpm --filter @animetracker/repo-checks test:coverage
+
+      # ── core (.NET) ──────────────────────────────────────────────────────────
+      - name: Setup .NET 10
+        if: matrix.job == 'core'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      # T4: NuGet cache
+      - name: Restore NuGet cache
+        if: matrix.job == 'core'
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('services/core/**/*.csproj', 'services/core/Directory.Packages.props') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: dotnet restore
+        if: matrix.job == 'core'
+        run: dotnet restore services/core/AnimeTracker.sln
+
+      - name: dotnet build
+        if: matrix.job == 'core'
+        run: dotnet build services/core/AnimeTracker.sln --no-restore --configuration Release
+
+      # T5: CA5 — coverage threshold 80 % on new code
+      - name: dotnet test (with coverage)
+        if: matrix.job == 'core'
+        run: |
+          dotnet test services/core/AnimeTracker.sln \
+            --no-build --configuration Release \
+            --collect:"XPlat Code Coverage" \
+            --results-directory TestResults \
+            --logger "trx" \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+      - name: Upload coverage report
+        if: matrix.job == 'core'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-core
+          path: TestResults/**/coverage.cobertura.xml
+
+      # ── contracts ────────────────────────────────────────────────────────────
+      - name: Validate contracts (stub — extended in HU-00.07)
+        if: matrix.job == 'contracts'
+        run: echo "contracts job: no validators yet — will be added in HU-00.07"
+
+      # ── bff (stub — extended in HU-00.03) ───────────────────────────────────
+      - name: pnpm install (bff)
+        if: matrix.job == 'bff'
+        run: pnpm --filter @animetracker/bff install --if-present
+
+      - name: bff build + test (stub)
+        if: matrix.job == 'bff'
+        run: echo "bff job: no project yet — will be added in HU-00.03"
+
+      # ── spa (stub — extended in HU-00.04) ───────────────────────────────────
+      - name: pnpm install (spa)
+        if: matrix.job == 'spa'
+        run: pnpm --filter @animetracker/spa install --if-present
+
+      - name: spa build + test (stub)
+        if: matrix.job == 'spa'
+        run: echo "spa job: no project yet — will be added in HU-00.04"
+
+      # ── extension (stub — extended in HU-00.05) ──────────────────────────────
+      - name: pnpm install (extension)
+        if: matrix.job == 'extension'
+        run: pnpm --filter @animetracker/extension install --if-present
+
+      - name: extension build + test (stub)
+        if: matrix.job == 'extension'
+        run: echo "extension job: no project yet — will be added in HU-00.05"
+
+  # ── T7: CA4 — single aggregator check (branch protection targets this) ──────
+  ci-ok:
+    name: ci-ok
+    needs: [detect, run-job]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check all jobs passed
+        run: |
+          if [ "${{ needs.run-job.result }}" != "success" ] && [ "${{ needs.run-job.result }}" != "skipped" ]; then
+            echo "One or more CI jobs failed: ${{ needs.run-job.result }}"
+            exit 1
+          fi
+          echo "All CI jobs passed."
