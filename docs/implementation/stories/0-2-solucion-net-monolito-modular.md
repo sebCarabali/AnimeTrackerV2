@@ -137,10 +137,10 @@ Verificación negativa obligatoria: en una rama temporal, agregar una referencia
   - [x] Agregar guard en `Result<T>.Value`: lanzar `InvalidOperationException("Cannot access Value of a failed result.")` cuando `IsFailure=true`; actualizar `ResultTests` para verificar la excepción.
 - [x] T10 Corregir hallazgos de code review (tercera iteración):
   - [x] Corregir guard de `/health` para funcionar detrás de reverse proxy: agregar `app.UseForwardedHeaders(new ForwardedHeadersOptions { ... })` con `KnownProxies` explícitos antes del guard de IP, o reemplazar el guard por `RequireAuthorization()` con política dedicada antes de staging — `services/core/src/Host/AnimeTracker.Host/Program.cs:29`.
-- [ ] T11 Corregir hallazgos de code review (cuarta iteración):
-  - [ ] Vincular `ForwardedHeadersOptions` a `IConfiguration`: usar `builder.Services.Configure<ForwardedHeadersOptions>(builder.Configuration.GetSection(ForwardedHeadersOptions.ForwardedHeadersOptionsName))` + `app.UseForwardedHeaders()` sin argumentos; crear `appsettings.Staging.json` con la sección `ForwardedHeadersOptions:KnownProxies` — `services/core/src/Host/AnimeTracker.Host/Program.cs:24-31`.
-  - [ ] Agregar prueba de regresión para el path 403 del guard: test que establezca `RemoteIpAddress` a IP no-loopback (vía middleware de prueba) y verifique `StatusCode = 403` — `services/core/tests/Host/AnimeTracker.Host.IntegrationTests/HealthCheckTests.cs`.
-  - [ ] Agregar prueba de integración para `UseForwardedHeaders` + guard: test que envíe `X-Forwarded-For: 127.0.0.1` con proxy en `KnownProxies` y verifique que la IP es procesada y el acceso concedido — `services/core/tests/Host/AnimeTracker.Host.IntegrationTests/HealthCheckTests.cs`.
+- [x] T11 Corregir hallazgos de code review (cuarta iteración):
+  - [x] Vincular `ForwardedHeadersOptions` a `IConfiguration`: usar `builder.Services.AddOptions<ForwardedHeadersOptions>().Configure<IConfiguration>(...)` + `app.UseForwardedHeaders()` sin argumentos; `KnownProxies` se leen de `"ForwardedHeadersOptions:KnownProxies"` en appsettings — `services/core/src/Host/AnimeTracker.Host/Program.cs`.
+  - [x] Agregar prueba de regresión para el path 403 del guard: `Health_rechaza_peticion_desde_ip_no_loopback` — `services/core/tests/Host/AnimeTracker.Host.IntegrationTests/HealthCheckTests.cs`.
+  - [x] Agregar prueba de integración para `UseForwardedHeaders` + guard: `Health_permite_acceso_via_proxy_conocido_con_X_Forwarded_For_loopback` — `services/core/tests/Host/AnimeTracker.Host.IntegrationTests/HealthCheckTests.cs`.
 
 ## Notas técnicas y decisiones
 
@@ -247,6 +247,33 @@ dotnet test AnimeTracker.sln --collect:"XPlat Code Coverage"
 | Catalog.IntegrationTests | ✅ Pass | 1/1 |
 | Calendar.IntegrationTests | ✅ Pass | 1/1 |
 | **Total** | **✅ 44/44** | |
+
+### Archivos adicionales (iteración T11)
+
+| Archivo | Tipo |
+|---|---|
+| `services/core/src/Host/AnimeTracker.Host/Program.cs` | Modificado (`AddOptions<ForwardedHeadersOptions>().Configure<IConfiguration>` + `app.UseForwardedHeaders()` sin argumentos) |
+| `services/core/src/Host/AnimeTracker.Host/appsettings.json` | Modificado (sección `ForwardedHeadersOptions:KnownProxies: []`) |
+| `services/core/tests/Host/AnimeTracker.Host.IntegrationTests/HealthCheckTests.cs` | Modificado (2 nuevas pruebas + `FakeRemoteIpStartupFilter`) |
+
+### Comandos de prueba y resultado (iteración T11)
+
+```powershell
+cd services/core
+dotnet test AnimeTracker.sln
+```
+
+| Suite | Resultado | Pruebas |
+|---|---|---|
+| Host.IntegrationTests | ✅ Pass | 3/3 (incluye 2 nuevas) |
+| ArchitectureTests | ✅ Pass | 18/18 |
+| Tracking.IntegrationTests | ✅ Pass | 2/2 |
+| SharedKernel.UnitTests | ✅ Pass | 18/18 |
+| Catalog/Tracking/Calendar UnitTests | ✅ Pass | 1+1+1/3 |
+| Catalog/Calendar IntegrationTests | ✅ Pass | 1+1/2 |
+| **Total** | **✅ 46/46** | |
+
+---
 
 ### Archivos adicionales (iteración T10)
 

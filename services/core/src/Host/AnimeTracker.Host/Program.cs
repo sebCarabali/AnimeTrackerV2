@@ -16,19 +16,28 @@ builder.Services
 
 builder.Services.AddOpenApi();
 
+// Proxy IPs come from "ForwardedHeadersOptions:KnownProxies" in appsettings.{Env}.json.
+// Replace the loopback guard below with RequireAuthorization() once EP-01 lands.
+builder.Services.AddOptions<ForwardedHeadersOptions>()
+    .Configure<IConfiguration>((options, config) =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor;
+        foreach (var ip in config
+            .GetSection("ForwardedHeadersOptions:KnownProxies")
+            .GetChildren()
+            .Select(x => IPAddress.TryParse(x.Value, out var addr) ? addr : null)
+            .OfType<IPAddress>())
+            options.KnownProxies.Add(ip);
+    });
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 
-// Populate RemoteIpAddress with the real client IP when behind a reverse proxy.
-// Before staging: register known proxy addresses in appsettings.{Environment}.json
-// under "ForwardedHeadersOptions:KnownProxies". Replace the loopback guard below
-// with RequireAuthorization() once EP-01 lands.
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor
-});
+// Populate RemoteIpAddress from X-Forwarded-For when behind a trusted proxy.
+// Trusted proxies: loopback by default + those in "ForwardedHeadersOptions:KnownProxies".
+app.UseForwardedHeaders();
 
 // Restrict /health to loopback until auth is in place (OWASP A05/A01).
 // null RemoteIpAddress = in-process transport (tests, local proxy); allow through.
