@@ -5,6 +5,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
+      exclude: ['compute-matrix.ts'],
       thresholds: { lines: 80, branches: 80 },
     },
   },

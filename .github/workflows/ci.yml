@@ -32,7 +32,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
 
       - name: Install tools/ci deps
@@ -82,7 +82,7 @@ jobs:
         if: matrix.job != 'core' && matrix.job != 'contracts'
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'pnpm'
 
       # T4: pnpm store cache
@@ -154,12 +154,13 @@ jobs:
       - name: Check .NET coverage threshold (80 %)
         if: matrix.job == 'core'
         run: |
-          COVERAGE_FILE=$(find TestResults -name "coverage.cobertura.xml" | head -1)
-          if [ -z "$COVERAGE_FILE" ]; then
+          mapfile -t COVERAGE_FILES < <(find TestResults -name "coverage.cobertura.xml")
+          if [ ${#COVERAGE_FILES[@]} -eq 0 ]; then
             echo "ERROR: No coverage.cobertura.xml found in TestResults"
             exit 1
           fi
-          python3 - "$COVERAGE_FILE" <<'PYEOF'
+          for COVERAGE_FILE in "${COVERAGE_FILES[@]}"; do
+            python3 - "$COVERAGE_FILE" <<'PYEOF'
           import sys, xml.etree.ElementTree as ET
           tree = ET.parse(sys.argv[1])
           rate = float(tree.getroot().get("line-rate", "0"))
@@ -169,6 +170,7 @@ jobs:
               sys.exit(1)
           print("Coverage OK (>= 80 %)")
           PYEOF
+          done
 
       # ── contracts ────────────────────────────────────────────────────────────
       - name: Validate contracts (stub — extended in HU-00.07)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { affectedJobs, type Job } from './affected.js';
+import { affectedJobs, computeMatrix, type Job } from './affected.js';
 
 const sorted = (jobs: Job[]) => [...jobs].sort();
 
@@ -64,5 +64,16 @@ describe('edge cases', () => {
 
   it('unknown path → no jobs', () => {
     expect(affectedJobs(['infra/docker-compose.yml'])).toEqual([]);
+  });
+});
+
+// computeMatrix — matrix serialization with fallback
+describe('computeMatrix', () => {
+  it('wraps job list into matrix object JSON', () => {
+    expect(computeMatrix(['spa', 'core'])).toBe(JSON.stringify({ job: ['spa', 'core'] }));
+  });
+
+  it('falls back to repo-checks when job list is empty', () => {
+    expect(computeMatrix([])).toBe(JSON.stringify({ job: ['repo-checks'] }));
   });
 });

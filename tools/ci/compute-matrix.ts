@@ -1,9 +1,11 @@
 import { appendFileSync } from 'node:fs';
-import { affectedJobs } from './affected.ts';
+import { affectedJobs, computeMatrix } from './affected.ts';
 
 const files = process.env.CHANGED_FILES?.split(' ').filter(Boolean) ?? [];
 const jobs = affectedJobs(files);
-const matrix = JSON.stringify({ job: jobs.length ? jobs : ['repo-checks'] });
+const matrix = computeMatrix(jobs);
 
-appendFileSync(process.env.GITHUB_OUTPUT!, `matrix=${matrix}\n`);
+if (process.env.GITHUB_OUTPUT) {
+  appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${matrix}\n`);
+}
 console.log('Affected jobs:', matrix);

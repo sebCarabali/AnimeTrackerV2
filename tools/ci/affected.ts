@@ -43,3 +43,12 @@ export function affectedJobs(changedFiles: string[]): Job[] {
 
   return [...jobs];
 }
+
+/**
+ * Wraps a job list into the GitHub Actions matrix JSON string.
+ * Falls back to ['repo-checks'] when no jobs are affected so the
+ * pipeline always has at least one job to run.
+ */
+export function computeMatrix(jobs: Job[]): string {
+  return JSON.stringify({ job: jobs.length ? jobs : ['repo-checks'] });
+}

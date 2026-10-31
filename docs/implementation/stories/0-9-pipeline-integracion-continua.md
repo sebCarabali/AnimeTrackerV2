@@ -88,15 +88,16 @@ it.each([
 - [x] T1 (CA1–CA3) `tools/ci/affected.ts` con el mapa archivo → job y sus pruebas (o adoptar Nx `affected` si se elige Nx para el monorepo).
 - [x] T2 Workflow `ci.yml` con job `detect` que publica la matriz de jobs afectados.
 - [x] T3 Jobs: `core` (restore, build, test con cobertura), `bff`, `spa`, `extension`, `contracts`, `repo-checks`.
-- [x] T4 Caché de NuGet, pnpm store y build de Angular.
+- [x] T4 Caché de NuGet y pnpm store.
+  - [ ] T4b Caché de Angular (`.angular/cache`) — se añade en HU-00.04 al inicializar la SPA.
 - [x] T5 (CA5) Publicar cobertura y aplicar umbral del 80 % — step `Check .NET coverage threshold (80 %)` en job `core`; `thresholds` en `vitest.config.ts` para TypeScript.
 - [x] T6 (CA4) Configurar protección de rama `main`: checks requeridos, 1 aprobación, rama actualizada. *(Documentada en §Notas técnicas; se aplica en GitHub manualmente al crear el PR.)*
 - [x] T7 Job agregador `ci-ok` que es el único check requerido (evita mantener la lista de checks en la protección de rama cuando la matriz cambia).
-- [ ] T9 Corregir hallazgos de code review (iteración 2):
-  - [ ] H1: cambiar `node-version: '22'` → `'24'` en jobs `detect` y `run-job` de `ci.yml`.
-  - [ ] H2: iterar todos los XMLs de cobertura (no solo el primero) en el step `Check .NET coverage threshold`.
-  - [ ] H3: desmarcar T4 o añadir sub-ítem T4b indicando que caché Angular se añade en HU-00.04.
-  - [ ] H4: extraer lógica de fallback de `compute-matrix.ts` a función pura en `affected.ts` + test; añadir guard `GITHUB_OUTPUT` antes de `appendFileSync`.
+- [x] T9 Corregir hallazgos de code review (iteración 2):
+  - [x] H1: cambiar `node-version: '22'` → `'24'` en jobs `detect` y `run-job` de `ci.yml`.
+  - [x] H2: iterar todos los XMLs de cobertura (no solo el primero) en el step `Check .NET coverage threshold`.
+  - [x] H3: desmarcar T4 o añadir sub-ítem T4b indicando que caché Angular se añade en HU-00.04.
+  - [x] H4: extraer lógica de fallback de `compute-matrix.ts` a función pura `computeMatrix` en `affected.ts` + 2 tests; guard `GITHUB_OUTPUT` antes de `appendFileSync`; `compute-matrix.ts` excluido del umbral de cobertura en `vitest.config.ts`.
   - [ ] H5: desplegar workflow, ejecutar PRs de verificación CA4/CA5 y enlazar URLs en §Definición de Hecho.
 - [x] T8 Corregir hallazgos de code review (iteración 1):
   - [x] H1: `compute-matrix.ts` ejecutado con `node --experimental-strip-types` en job `detect`; se elimina el heredoc con `affected.js`.
@@ -168,12 +169,12 @@ it.each([
 
 | Archivo | Tipo |
 |---|---|
-| `tools/ci/affected.ts` | Nuevo |
-| `tools/ci/affected.spec.ts` | Nuevo |
-| `tools/ci/compute-matrix.ts` | Nuevo |
+| `tools/ci/affected.ts` | Nuevo (T9: función `computeMatrix` añadida) |
+| `tools/ci/affected.spec.ts` | Nuevo (T9: 2 tests de `computeMatrix` añadidos) |
+| `tools/ci/compute-matrix.ts` | Nuevo (T9: usa `computeMatrix`; guard `GITHUB_OUTPUT`) |
 | `tools/ci/package.json` | Nuevo |
-| `tools/ci/vitest.config.ts` | Nuevo (thresholds añadidos en T8) |
-| `.github/workflows/ci.yml` | Nuevo (H1–H6 aplicados en T8) |
+| `tools/ci/vitest.config.ts` | Nuevo (T8: thresholds; T9: exclude `compute-matrix.ts`) |
+| `.github/workflows/ci.yml` | Nuevo (T8: H1–H6; T9: node 24, iterar todos los XMLs) |
 | `README.md` | Modificado (sección CI + .NET 8 → .NET 10) |
 | `docs/implementation/sprint_status.yml` | Modificado (Q6 cerrada, HU-00.09 in-progress) |
 
@@ -192,16 +193,17 @@ cd services/core && dotnet test AnimeTracker.sln
 
 | Suite | Resultado | Pruebas |
 |---|---|---|
-| `@animetracker/ci` (affected.spec.ts) | ✅ Pass | 16/16 |
+| `@animetracker/ci` (affected.spec.ts) | ✅ Pass | 18/18 |
 | `@animetracker/repo-checks` (structure.spec.ts) | ✅ Pass | 23/23 |
 | .NET (AnimeTracker.sln) | ✅ Pass | 46/46 |
-| **Total** | **✅ 85/85** | |
+| **Total** | **✅ 87/87** | |
 
 ### Cobertura
 
 | Módulo | Cobertura de líneas |
 |---|---|
 | `tools/ci/affected.ts` | 100 % |
+| `@animetracker/ci` (global, excl. compute-matrix.ts) | 89.71 % |
 
 ## Code Review
 
