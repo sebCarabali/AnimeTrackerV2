@@ -18,6 +18,15 @@ importers:
         specifier: ^9.1.6
         version: 9.1.7
 
+  tools/ci:
+    devDependencies:
+      '@vitest/coverage-v8':
+        specifier: ^2.1.0
+        version: 2.1.9(supports-color@7.2.0)(vitest@2.1.9(@types/node@26.6.5)(supports-color@7.2.0))
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@26.6.5)(supports-color@7.2.0)
+
   tools/repo-checks:
     devDependencies:
       '@vitest/coverage-v8':
