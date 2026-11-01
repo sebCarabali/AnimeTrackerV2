@@ -8,7 +8,7 @@
 | Prioridad | Must |
 | Estimación | 5 pts |
 | Sprint | sprint-1 |
-| Estado | review |
+| Estado | in-progress |
 | Depende de | HU-00.01, HU-00.09 |
 | Bloquea | HU-00.03, HU-00.04, HU-07.02 y cualquier endpoint nuevo |
 
@@ -106,6 +106,11 @@ public async Task Health_responde_segun_contrato()
   - [x] H5: Actualizar ADR-003 sección "Consecuencias" y "Alternativas consideradas" con YamlDotNet y `.reporoot`.
   - [x] H6: Extender regla Spectral `error-response-problem-details` para validar `application/problem+json`.
   - [x] H7: Añadir tests unitarios para las 7 ramas de error de `ContractAssert`.
+- [x] T9 Corregir hallazgos de code review (iteración 2):
+  - [x] H1: Corregir typo `stagin` → `staging` en `.github/workflows/ci.yml:5,7` (branches de `pull_request` y `push`).
+  - [x] H2: Implementar bypass de versión mayor en job `contracts`: comparar `info.version` del contrato en `main` vs. PR; si el segmento mayor aumenta, omitir `oasdiff` con mensaje explicativo. `.github/workflows/ci.yml:194-212`.
+  - [x] H3: Añadir test en `ContractAssertUnitTests.cs` que envíe `1.5` donde el esquema espera `type: integer` y verifique que se lanza `ContractViolationException` (cobertura de arm H2/TryGetInt64).
+  - [x] H4: Añadir test en `ContractAssertUnitTests.cs` con spec YAML sin clave `paths:` y verificar que se lanza `ContractViolationException` con mensaje `"paths"` (cobertura de rama `?? throw` línea 38).
 
 ## Notas técnicas y decisiones
 
@@ -166,44 +171,44 @@ public async Task Health_responde_segun_contrato()
 
 - Fecha: 2026-10-31
 - Resultado: CAMBIOS REQUERIDOS
-- Cobertura de líneas (AnimeTracker.Testing): 84.16 % ✓ (umbral 80 % superado)
+- Cobertura de líneas (AnimeTracker.Testing): 93.0 % ✓ (umbral 80 % superado)
 
 | Ámbito | Resultado | Hallazgos |
 |---|---|---|
-| Criterios de aceptación | ❌ | 1 |
+| Criterios de aceptación | ❌ | 2 |
 | Seguridad | ✅ | 0 |
-| Diseño / SOLID | ❌ | 3 |
-| Arquitectura | ❌ | 3 |
-| Pruebas (> 80 %) | ❌ | 1 |
+| Diseño / SOLID | ✅ | 0 |
+| Arquitectura | ✅ | 0 |
+| Pruebas (> 80 %) | ❌ | 2 |
 
 ### Hallazgos
 
-- [ ] [ALTA][Arquitectura] El job `contracts` en `ci.yml` sigue siendo el stub original (`echo "no validators yet"`); Spectral y oasdiff corren en el workflow separado `openapi-contracts.yml` que no es agregado por `ci-ok`. Los cambios incompatibles y violaciones de estilo no bloquean el merge. DoD dice "Spectral y oasdiff obligatorios en la protección de rama". — `.github/workflows/ci.yml:176-179` — Corrección sugerida: reemplazar el stub en el job `contracts` de `ci.yml` con los pasos reales de Spectral y oasdiff, de modo que queden dentro del árbol que `ci-ok` agrega.
+- [ ] [ALTA][Aceptación] Typo `stagin` en los triggers `branches` de `ci.yml` (líneas 5 y 7): CI no se dispara en PRs ni pushes hacia `staging`, dejando el paso `dev → staging` sin cobertura de `ci-ok`. DoD exige "Spectral y oasdiff obligatorios en la protección de rama". — `.github/workflows/ci.yml:5,7` — Corrección: cambiar `stagin` por `staging` en ambas listas de `branches`.
 
-- [ ] [MEDIA][Diseño] `ValidateSchema` valida el tipo `"integer"` con `element.ValueKind == JsonValueKind.Number`, idéntico a `"number"`: un valor decimal como `1.5` pasa la validación de `integer` sin error. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:107-108` — Corrección sugerida: para `"integer"` verificar adicionalmente `element.TryGetInt64(out _)`.
+- [ ] [ALTA][CA3] Bypass por versión mayor no implementado: la condición "A menos que el PR incremente la versión mayor del contrato" de CA3 no está implementada. `oasdiff` se ejecuta incondicionalmente (solo omite si el archivo es nuevo); un PR legítimo v1→v2 con breaking changes intencionados fallará CI sin poder mergear. Tampoco hay prueba automatizada para este escenario. — `.github/workflows/ci.yml:194-212` — Corrección: antes de ejecutar `oasdiff`, comparar `info.version` del contrato en `main` vs. PR; si el segmento mayor aumentó, omitir el check con mensaje explicativo.
 
-- [ ] [MEDIA][Diseño] `SatisfiesAsync` retorna sin error cuando el contrato no declara `content` en la respuesta, aunque la respuesta HTTP tenga cuerpo. Una omisión accidental de `content` en el YAML hace que todos los tests pasen sin validar nada. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:57-59` — Corrección sugerida: lanzar `ContractViolationException` si el body no está vacío pero el contrato no declara `content`.
+- [ ] [MEDIA][Pruebas] Corrección H2 (integer TryGetInt64) sin cobertura de regresión: el arm `"integer"` del switch en `ValidateSchema` tiene 0 hits porque ningún campo del esquema `/health` es `type: integer`. Si el fix se revierte silenciosamente, ningún test lo detectaría. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:118` — Corrección: añadir test en `ContractAssertUnitTests.cs` que envíe `1.5` donde el esquema espera `integer` y verifique que se lanza `ContractViolationException`.
 
-- [ ] [MEDIA][Diseño/Arquitectura] `ResolveSpecPath` busca `pnpm-workspace.yaml` como ancla de la raíz del repositorio desde código .NET, acoplando la infraestructura de pruebas .NET a un artefacto exclusivo del ecosistema JavaScript. CLAUDE.md indica que `services/core` es solución .NET standalone. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:174-186` — Corrección sugerida: usar `AnimeTracker.sln` o un archivo `.reporoot` como ancla, o leer `REPO_ROOT` desde variable de entorno con fallback al heurístico.
-
-- [ ] [MEDIA][Arquitectura] ADR-003 menciona `Microsoft.OpenApi.Readers` en la sección "Consecuencias" pero la implementación real usa `YamlDotNet 16.3.0`. La justificación (conflicto en runtime) está en Dev Notes de la historia pero no en el ADR. — `docs/adr/ADR-003-contratos-primero.md` — Corrección sugerida: actualizar "Consecuencias" para mencionar YamlDotNet y añadir en "Alternativas consideradas" la razón por la que se descartó Microsoft.OpenApi.Readers.
-
-- [ ] [MEDIA][Aceptación] La regla Spectral `error-response-problem-details` solo verifica que el campo `content` esté definido en respuestas 4xx/5xx, no que el media-type sea `application/problem+json` ni que el schema referencie `Problem`. Un endpoint con error en `application/json` pasa el lint. La historia exige formato RFC 9457. — `.spectral.yaml:33-40` — Corrección sugerida: extender la regla para validar que las claves del mapa `content` de respuestas de error sigan el patrón `application/problem+json`.
-
-- [ ] [MEDIA][Pruebas] `ContractAssert` tiene al menos 7 ramas de error sin prueba automatizada: path no encontrado (L37-38), método no encontrado (L43-45), sin sección `responses` (L48-49), status code no declarado (L52-54), Content-Type no declarado (L76-78), fallo de resolución `$ref` (L161-162) y raíz no encontrada (L185-187). Como infraestructura central para futuros tests de contrato, estos gaps reducen la confiabilidad. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:37-78,161-187` — Corrección sugerida: añadir tests unitarios (sin `WebApplicationFactory`) que ejerciten cada rama usando respuestas falsas (`HttpResponseMessage`).
+- [ ] [MEDIA][Pruebas] Rama "sin sección paths" sin cobertura: la línea 38 (`?? throw ContractViolationException("No 'paths'...")`) tiene 50 % de cobertura de ramas porque ningún test usa un spec sin clave `paths:`. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:37-38` — Corrección: añadir test en `ContractAssertUnitTests.cs` con YAML sin `paths:` y verificar la excepción.
 
 ### Sugerencias (bajo el umbral)
 
-- [BAJA][Diseño] `ContractAssert.SatisfiesAsync` agrupa resolución de ruta en disco, navegación del árbol OpenAPI y validación recursiva en un solo método estático; considerar extraer métodos o cachear el spec parseado para futura extensibilidad. — `ContractAssert.cs:24-88`
-- [BAJA][Diseño] `ContractViolationException` solo expone el constructor `(string message)`; la guía CA1032 requiere también `()` y `(string, Exception)`. — `ContractViolationException.cs:3`
-- [BAJA][Diseño] Los dos tests negativos no liberan `HttpResponseMessage` (implementa `IDisposable`); usar `await using var fakeResponse`. — `ContractTests.cs:30,45`
-- [BAJA][Diseño] La ruta al binario de Spectral se calcula dos veces en el mismo `describe`; extraer a constante de módulo. — `contracts.spec.ts:48,71`
-- [BAJA][Pruebas] Las aserciones de los tests negativos usan `ShouldContain("status")` en lugar de mensajes específicos (`"Missing required property"` / `"Type mismatch"`), reduciendo la capacidad de detectar regresiones. — `ContractTests.cs:39,55`
-- [BAJA][Pruebas] La alternativa `"path"` en el regex de CA2 (`/operationId|path|casing|Problem/i`) es demasiado permisiva; eliminar `"path"` para restringir la aserción a las reglas relevantes. — `contracts.spec.ts:61`
-- [BAJA][Arquitectura] `ContractAssert` no maneja `allOf`, `oneOf`, `anyOf` ni `$ref` a archivos externos; documentar las limitaciones conocidas del validador. — `ContractAssert.cs`
-- [BAJA][Seguridad] `openapi-contracts.yml` instala `oasdiff` y `@stoplight/spectral-cli` sin versión fijada (supply chain); fijar versiones exactas. — `openapi-contracts.yml:22,29`
-- [BAJA][Seguridad] `openapi-contracts.yml` no declara bloque `permissions:`; agregar `permissions: contents: read` como mínimo privilegio. — `openapi-contracts.yml:1`
-- [BAJA][Seguridad] `spawnSync` con `shell: true` en los tests de contratos; las rutas derivan de `import.meta.url` por lo que el riesgo actual es bajo, pero considerar eliminar `shell: true`. — `contracts.spec.ts:55,79,99,115`
+- [BAJA][CI] Job `contracts` no configura Node.js explícitamente; depende de la versión preinstalada en `ubuntu-latest`, que puede cambiar. — `.github/workflows/ci.yml:76,182` — Agregar paso `uses: actions/setup-node@v4` condicional `if: matrix.job == 'contracts'`.
+- [BAJA][Pruebas] Regex de aserción CA2 incluye `"path"` demasiado permisivo (`/operationId|path|casing|Problem/i`); reemplazar `path` por `kebab` o el nombre exacto de la regla. — `tools/repo-checks/contracts.spec.ts:61`
+- [BAJA][Arquitectura] `openapi-contracts.yml` duplica los mismos pasos Spectral + oasdiff de `ci.yml` tras la corrección T8/H1; considerar deprecar o convertir en `workflow_dispatch` manual. — `.github/workflows/openapi-contracts.yml`
+- [BAJA][Diseño] `SatisfiesAsync` no documenta que body vacío pasa sin error aunque `content` esté declarado; añadir comentario explicativo. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:72`
+- [BAJA][Diseño] Comentario `// on Windows` en `ContractAssertUnitTests.cs:24` es inexacto; el comportamiento de `Path.Combine` con segunda ruta absoluta es multiplataforma en .NET. — `services/core/tests/Host/AnimeTracker.Host.IntegrationTests/ContractAssertUnitTests.cs:24`
+- [BAJA][Diseño] Switch en `ValidateSchema` no maneja el tipo `null` de OpenAPI 3.1 (retorna `true` por el arm `_`); documentar la limitación. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:112`
+- [BAJA][Diseño] `ValidateSchema` no valida el subesquema `items` de arrays; documentar la limitación. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:129`
+- [BAJA][Pruebas] Tres ramas de retorno anticipado sin cobertura: body vacío con content declarado (L69); body whitespace con content declarado (L73); schema null (L92). — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:69,73,92`
+- [BAJA][Pruebas] Happy-path de `REPO_ROOT` sin cobertura; ningún test establece `REPO_ROOT` y verifica la ruta resuelta. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:190`
+- [BAJA][Pruebas] Aserción de Branch 6 (`$ref`) demasiado genérica (`ShouldContain("$ref")`); añadir `ShouldContain("NonExistent")` para verificar el componente específico. — `services/core/tests/Host/AnimeTracker.Host.IntegrationTests/ContractAssertUnitTests.cs:201`
+- [BAJA][Seguridad] `@stoplight/spectral-cli` instalado sin versión fijada (supply chain risk). — `.github/workflows/ci.yml:182`, `openapi-contracts.yml:22`
+- [BAJA][Seguridad] `oasdiff` instalado con `@latest` (supply chain risk). — `.github/workflows/ci.yml:191`, `openapi-contracts.yml:29`
+- [BAJA][Seguridad] `openapi-contracts.yml` sin bloque `permissions:`; agregar `permissions: contents: read`. — `.github/workflows/openapi-contracts.yml`
+- [BAJA][Seguridad] `spawnSync` con `shell: true` innecesario en las 4 llamadas; las rutas son fijas pero el flag aumenta la superficie de riesgo. — `tools/repo-checks/contracts.spec.ts:55,79,99,117`
+- [BAJA][Seguridad] Acciones de GitHub ancladas a tag de versión mayor (`@v4`) en lugar de SHA de commit; los tags son mutables. — `.github/workflows/ci.yml`, `.github/workflows/openapi-contracts.yml`
+- [BAJA][Seguridad] Path traversal teórico en `ResolveSpecPath`; el parámetro `spec` no valida `..` ni rutas absolutas. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:188-201`
 
 ## Dev Agent Record
 
@@ -240,3 +245,8 @@ pnpm --filter @animetracker/repo-checks test
 - .NET: 56 pruebas, 0 fallos (14 IntegrationTests: 3 contratos + 8 unit + 3 health; 18 arch; etc.)
 - TypeScript/Vitest: 33 pruebas, 0 fallos
 - Cobertura `AnimeTracker.Testing`: 91.2 % líneas (umbral 80 % ✓)
+
+### Resultados (iteración 3 — T9 completado)
+- .NET: 58 pruebas, 0 fallos (16 IntegrationTests: 3 contratos + 10 unit + 3 health; 18 arch; etc.)
+- TypeScript/Vitest: 33 pruebas, 0 fallos
+- Cobertura `AnimeTracker.Testing`: 93.8 % líneas (umbral 80 % ✓)

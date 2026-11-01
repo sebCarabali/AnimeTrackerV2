@@ -201,6 +201,51 @@ public sealed class ContractAssertUnitTests : IDisposable
         ex.Message.ShouldContain("$ref");
     }
 
+    // Branch H2-coverage: float value where schema expects type: integer must throw
+    [Fact]
+    public async Task SatisfiesAsync_float_value_for_integer_type_throws()
+    {
+        var spec = WriteSpec("""
+            openapi: '3.1.0'
+            paths:
+              /resource:
+                get:
+                  operationId: getResource
+                  responses:
+                    '200':
+                      description: OK
+                      content:
+                        application/json:
+                          schema:
+                            type: object
+                            properties:
+                              count:
+                                type: integer
+            """);
+
+        using var response = OkJson("{\"count\":1.5}");
+        await Should.ThrowAsync<ContractViolationException>(
+            () => ContractAssert.SatisfiesAsync(spec, "GET", "/resource", response));
+    }
+
+    // Branch "no paths": spec without paths key throws with "paths" in message
+    [Fact]
+    public async Task SatisfiesAsync_no_paths_section_throws()
+    {
+        var spec = WriteSpec("""
+            openapi: '3.1.0'
+            info:
+              title: Test
+              version: '1.0.0'
+            """);
+
+        using var response = OkJson("{}");
+        var ex = await Should.ThrowAsync<ContractViolationException>(
+            () => ContractAssert.SatisfiesAsync(spec, "GET", "/health", response));
+
+        ex.Message.ShouldContain("paths");
+    }
+
     // Branch 7: repository root not found (tested via internal ResolveSpecPath with a startDir
     // that has no AnimeTracker.sln in ancestor directories)
     [Fact]

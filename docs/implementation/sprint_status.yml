@@ -13,7 +13,7 @@ proyecto:
   carpeta_historias: stories/
   zona_horaria: America/Bogota
   generado: 2026-10-28
-  actualizado: 2026-10-31  # HU-00.07 promovida a review tras corrección T8 (7 hallazgos ALTA/MEDIA)
+  actualizado: 2026-10-31  # HU-00.07 promovida a review tras corrección T9 (iteración 3)
   cadencia_sprint: 2 semanas (10 días hábiles)
   velocidad_supuesta_pts: 24   # recalibrar tras el sprint-2 con la velocidad real
 
@@ -242,6 +242,21 @@ riesgos:
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
 
 historial:
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a review tras corrección T9 (iteración 3).
+      H1: typo stagin→staging en ci.yml branches (líneas 5 y 7). H2: bypass versión mayor en pasos
+      oasdiff (grep+sed extrae segmento mayor; si PR_MAJOR > BASE_MAJOR se omite oasdiff con mensaje).
+      H3: test SatisfiesAsync_float_value_for_integer_type_throws (1.5 con type:integer).
+      H4: test SatisfiesAsync_no_paths_section_throws (spec sin paths:). 58 pruebas .NET + 33 Vitest,
+      0 fallos. Cobertura AnimeTracker.Testing: 93.8 % ✓.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) regresada a in-progress tras code review iteración 2.
+      2 hallazgos ALTA: typo `stagin` en ci.yml triggers (rama staging sin CI) y bypass versión mayor
+      de CA3 no implementado. 2 hallazgos MEDIA: arm "integer" de ValidateSchema sin cobertura (H2),
+      rama "no paths" sin cobertura. 16 sugerencias BAJA. T9 agregada con 4 ítems de corrección.
+      Cobertura AnimeTracker.Testing: 93.0 % ✓. 57 pruebas .NET + 33 Vitest, 0 fallos.
   - fecha: 2026-10-31
     cambio: >-
       HU-00.07 (0-7-contratos-openapi-primero) promovida a review tras corrección T8.
