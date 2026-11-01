@@ -1,8 +1,15 @@
+using AnimeTracker.Calendar.Api;
+using AnimeTracker.Calendar.Application;
+using AnimeTracker.Catalog.Api;
+using AnimeTracker.Catalog.Application;
+using AnimeTracker.Tracking.Api;
+using AnimeTracker.Tracking.Application;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Shouldly;
 using System.Net;
 using System.Text.Json;
@@ -72,6 +79,90 @@ public class HealthCheckTests(WebApplicationFactory<Program> factory)
         var response = await client.SendAsync(request);
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public void Host_sin_catalog_connection_string_falla_nombrando_la_variable()
+    {
+        // T3/CA3: Arrange — Configuración SIN Catalog:ConnectionString
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Catalog:ConnectionString"] = null,
+                ["Tracking:ConnectionString"] = "dummy-tracking",
+                ["Calendar:ConnectionString"] = "dummy-calendar",
+            })
+            .Build();
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        // T3/CA3: Act & Assert — Debe fallar con OptionsValidationException
+        var ex = Assert.Throws<OptionsValidationException>(() =>
+        {
+            services.AddCatalogApplication(config);
+            var provider = services.BuildServiceProvider(validateScopes: true);
+            provider.GetRequiredService<IOptionsMonitor<AnimeTracker.Catalog.Application.Options.CatalogOptions>>();
+        });
+
+        ex.Message.ShouldContain("ConnectionString");
+        ex.Message.ShouldContain("required");
+    }
+
+    [Fact]
+    public void Host_sin_tracking_connection_string_falla_nombrando_la_variable()
+    {
+        // T3/CA3: Arrange — Configuración SIN Tracking:ConnectionString
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Catalog:ConnectionString"] = "dummy-catalog",
+                ["Tracking:ConnectionString"] = null,
+                ["Calendar:ConnectionString"] = "dummy-calendar",
+            })
+            .Build();
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        // T3/CA3: Act & Assert — Debe fallar con OptionsValidationException
+        var ex = Assert.Throws<OptionsValidationException>(() =>
+        {
+            services.AddTrackingApplication(config);
+            var provider = services.BuildServiceProvider(validateScopes: true);
+            provider.GetRequiredService<IOptionsMonitor<AnimeTracker.Tracking.Application.Options.TrackingOptions>>();
+        });
+
+        ex.Message.ShouldContain("ConnectionString");
+        ex.Message.ShouldContain("required");
+    }
+
+    [Fact]
+    public void Host_sin_calendar_application_connection_string_falla_nombrando_la_variable()
+    {
+        // T3/CA3: Arrange — Configuración SIN Calendar:ConnectionString
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Catalog:ConnectionString"] = "dummy-catalog",
+                ["Tracking:ConnectionString"] = "dummy-tracking",
+                ["Calendar:ConnectionString"] = null,
+            })
+            .Build();
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        // T3/CA3: Act & Assert — Debe fallar con OptionsValidationException
+        var ex = Assert.Throws<OptionsValidationException>(() =>
+        {
+            services.AddCalendarApplication(config);
+            var provider = services.BuildServiceProvider(validateScopes: true);
+            provider.GetRequiredService<IOptionsMonitor<AnimeTracker.Calendar.Application.Options.CalendarOptions>>();
+        });
+
+        ex.Message.ShouldContain("ConnectionString");
+        ex.Message.ShouldContain("required");
     }
 }
 
