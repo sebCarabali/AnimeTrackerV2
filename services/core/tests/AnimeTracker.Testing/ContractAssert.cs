@@ -1,9 +1,6 @@
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-
-[assembly: InternalsVisibleTo("AnimeTracker.Host.IntegrationTests")]
 
 namespace AnimeTracker.Testing;
 
@@ -182,8 +179,11 @@ public static class ContractAssert
         => obj as IDictionary<object, object>
            ?? throw new ContractViolationException($"Expected a mapping for {context} but got '{obj?.GetType().Name ?? "null"}'.");
 
-    // H4: exposed as internal for testing; supports REPO_ROOT env var and .reporoot marker anchor
-    internal static string ResolveSpecPath(string spec, string? startDir = null)
+    /// <summary>
+    /// Resolves <paramref name="spec"/> (a repo-relative path) to an absolute file path.
+    /// Checks <c>REPO_ROOT</c> env var first, then walks ancestor directories for a <c>.reporoot</c> marker.
+    /// </summary>
+    public static string ResolveSpecPath(string spec, string? startDir = null)
     {
         var root = Environment.GetEnvironmentVariable("REPO_ROOT");
         if (!string.IsNullOrWhiteSpace(root))

@@ -31,10 +31,15 @@ jobs:
 
       - name: Detección de Breaking Changes - BFF Público (CA3)
         run: |
-          # Verificamos si el archivo existe en la rama main
           if git rev-parse --verify origin/main:contracts/public/bff.v1.yaml >/dev/null 2>&1; then
-            git show origin/main:contracts/public/bff.v1.yaml > base-bff.yaml
-            oasdiff breaking base-bff.yaml contracts/public/bff.v1.yaml --fail-on ERR
+            git show origin/main:contracts/public/bff.v1.yaml > /tmp/base-bff.yaml
+            BASE_MAJOR=$(grep -m1 '^\s*version:' /tmp/base-bff.yaml | tr -d '"' | tr -d "'" | sed 's/.*version:[[:space:]]*//' | cut -d. -f1 || echo "0")
+            PR_MAJOR=$(grep -m1 '^\s*version:' contracts/public/bff.v1.yaml | tr -d '"' | tr -d "'" | sed 's/.*version:[[:space:]]*//' | cut -d. -f1 || echo "0")
+            if [ "${PR_MAJOR:-0}" -gt "${BASE_MAJOR:-0}" ]; then
+              echo "Major version bumped (${BASE_MAJOR}.x → ${PR_MAJOR}.x): skipping breaking-change check for bff.v1.yaml."
+            else
+              oasdiff breaking /tmp/base-bff.yaml contracts/public/bff.v1.yaml --fail-on ERR
+            fi
           else
             echo "El contrato bff.v1.yaml es nuevo en este PR. Omitiendo comparación de breaking changes."
           fi
@@ -42,8 +47,14 @@ jobs:
       - name: Detección de Breaking Changes - Core Interno (CA3)
         run: |
           if git rev-parse --verify origin/main:contracts/internal/core.v1.yaml >/dev/null 2>&1; then
-            git show origin/main:contracts/internal/core.v1.yaml > base-core.yaml
-            oasdiff breaking base-core.yaml contracts/internal/core.v1.yaml --fail-on ERR
+            git show origin/main:contracts/internal/core.v1.yaml > /tmp/base-core.yaml
+            BASE_MAJOR=$(grep -m1 '^\s*version:' /tmp/base-core.yaml | tr -d '"' | tr -d "'" | sed 's/.*version:[[:space:]]*//' | cut -d. -f1 || echo "0")
+            PR_MAJOR=$(grep -m1 '^\s*version:' contracts/internal/core.v1.yaml | tr -d '"' | tr -d "'" | sed 's/.*version:[[:space:]]*//' | cut -d. -f1 || echo "0")
+            if [ "${PR_MAJOR:-0}" -gt "${BASE_MAJOR:-0}" ]; then
+              echo "Major version bumped (${BASE_MAJOR}.x → ${PR_MAJOR}.x): skipping breaking-change check for core.v1.yaml."
+            else
+              oasdiff breaking /tmp/base-core.yaml contracts/internal/core.v1.yaml --fail-on ERR
+            fi
           else
             echo "El contrato core.v1.yaml es nuevo en este PR. Omitiendo comparación de breaking changes."
           fi
