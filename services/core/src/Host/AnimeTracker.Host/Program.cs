@@ -61,13 +61,11 @@ app.MapHealthChecks("/health", new HealthCheckOptions
         ctx.Response.ContentType = "application/json";
         var result = JsonSerializer.Serialize(new
         {
-            status = report.Status.ToString(),
-            modules = report.Entries.Select(e => new
-            {
-                name   = e.Key,
-                status = e.Value.Status.ToString(),
-                description = e.Value.Description
-            })
+            status    = report.Status.ToString(),
+            timestamp = DateTime.UtcNow.ToString("o"),
+            entries   = report.Entries.ToDictionary(
+                e => e.Key,
+                e => new { status = e.Value.Status.ToString(), description = e.Value.Description })
         });
         await ctx.Response.WriteAsync(result);
     }

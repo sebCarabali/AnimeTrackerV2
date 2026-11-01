@@ -1,0 +1,53 @@
+extends: ["spectral:oas"]
+rules:
+  operation-operationId-defined:
+    description: "Every operation must define an operationId"
+    given: "$.paths.*[get,post,put,delete,patch,options,head]"
+    severity: error
+    recommended: true
+    then:
+      field: operationId
+      function: defined
+
+  operation-operationId-camelCase:
+    description: "operationId must be in camelCase"
+    given: "$.paths.*[get,post,put,delete,patch,options,head]"
+    severity: error
+    recommended: true
+    then:
+      field: operationId
+      function: casing
+      functionOptions:
+        type: camel
+
+  paths-kebab-case:
+    description: "All path segments must be lowercase kebab-case"
+    given: "$.paths[*]~"
+    severity: error
+    recommended: true
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(/[a-z0-9-{}]*)+$"
+
+  error-response-problem-details:
+    description: "Error responses (4xx and 5xx) must have content defined"
+    given: "$.paths.*[get,post,put,delete,patch].responses[?(@property >= 400 && @property < 600)]"
+    severity: error
+    recommended: true
+    then:
+      field: content
+      function: defined
+
+  error-response-problem-json-media-type:
+    description: "Error responses must use application/problem+json as content type (RFC 9457)"
+    given: "$.paths.*[get,post,put,delete,patch].responses[?(@property >= 400 && @property < 600)].content"
+    severity: error
+    recommended: true
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          required:
+            - "application/problem+json"

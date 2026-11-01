@@ -6,11 +6,16 @@
   "description": "AnimeTracker monorepo root",
   "scripts": {
     "test": "pnpm --filter './tools/**' run test",
+    "contracts:lint": "spectral lint contracts/public/bff.v1.yaml contracts/internal/core.v1.yaml --ruleset .spectral.yaml",
+    "contracts:docs": "redocly build-docs contracts/public/bff.v1.yaml --output=dist/docs/bff.html && redocly build-docs contracts/internal/core.v1.yaml --output=dist/docs/core.html",
     "prepare": "husky"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
+    "@redocly/cli": "^2.72.1",
+    "@stoplight/spectral-cli": "^6.17.0",
+    "@stoplight/spectral-rulesets": "^1.23.0",
     "husky": "^9.1.6"
   }
 }
