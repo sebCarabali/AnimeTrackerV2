@@ -175,22 +175,16 @@ public async Task Health_responde_segun_contrato()
 ## Code Review
 
 - Fecha: 2026-10-31
-- Resultado: CAMBIOS REQUERIDOS
+- Resultado: APROBADA
 - Cobertura de líneas (AnimeTracker.Testing): 93.75 % ✓ (umbral 80 % superado)
 
 | Ámbito | Resultado | Hallazgos |
 |---|---|---|
 | Criterios de aceptación | ✅ | 0 |
 | Seguridad | ✅ | 0 |
-| Diseño / SOLID | ❌ | 1 |
-| Arquitectura | ❌ | 1 |
+| Diseño / SOLID | ✅ | 0 |
+| Arquitectura | ✅ | 0 |
 | Pruebas (> 80 %) | ✅ | 0 |
-
-### Hallazgos
-
-- [ ] [MEDIA][Diseño] `ContractAssertUnitTests` (pruebas unitarias del helper `ContractAssert`) reside en `AnimeTracker.Host.IntegrationTests` en lugar de en un proyecto propio, forzando `InternalsVisibleTo` hacia el proyecto de integración del Host. Esto hace difícil descubrir las pruebas del helper y crea un acoplamiento no intuitivo entre proyectos de distinto dominio. — `services/core/tests/Host/AnimeTracker.Host.IntegrationTests/ContractAssertUnitTests.cs:1` — Corrección: crear proyecto `AnimeTracker.Testing.UnitTests` dedicado y añadir el `InternalsVisibleTo` correspondiente, o bien hacer `ResolveSpecPath` público para eliminar la necesidad de exponer internals.
-
-- [ ] [MEDIA][Arquitectura] `openapi-contracts.yml` no implementa el bypass de versión mayor: ejecuta `oasdiff` incondicionalmente en PRs hacia `main`/`staging`/`dev`, a diferencia de `ci.yml` (T9/H2) que omite `oasdiff` cuando el segmento mayor del contrato aumenta. Un PR legítimo v1→v2 con breaking changes intencionados fallará este workflow aunque `ci-ok` lo permita. — `.github/workflows/openapi-contracts.yml:33-48` — Corrección: aplicar la misma lógica `BASE_MAJOR`/`PR_MAJOR` de `ci.yml:199-208`, o deprecar `openapi-contracts.yml` convirtiéndolo en `workflow_dispatch` manual.
 
 ### Sugerencias (bajo el umbral)
 
@@ -210,6 +204,7 @@ public async Task Health_responde_segun_contrato()
 - [BAJA][Pruebas] Ramas `array`/`number`/`boolean`/wildcard del switch de tipo en `ValidateSchema` sin cobertura. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:115-121`
 - [BAJA][Pruebas] Rama exitosa de `REPO_ROOT` en `ResolveSpecPath` sin prueba. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:190`
 - [BAJA][Pruebas] Rutas de retorno temprano body-vacío en `SatisfiesAsync` sin prueba (líneas 69, 73, 92). — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:69,73,92`
+- [BAJA][Diseño] Parámetro opcional `startDir` de `ResolveSpecPath` (ahora `public`) carece de etiqueta `<param>` en el docstring XML. — `services/core/tests/AnimeTracker.Testing/ContractAssert.cs:186`
 
 ## Dev Agent Record
 
