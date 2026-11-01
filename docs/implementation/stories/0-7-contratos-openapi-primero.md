@@ -255,3 +255,9 @@ pnpm --filter @animetracker/repo-checks test
 - .NET: 58 pruebas, 0 fallos
 - TypeScript/Vitest: 33 pruebas, 0 fallos
 - Cobertura `AnimeTracker.Testing`: 93.75 % líneas (umbral 80 % ✓)
+
+## Pull Request
+
+- URL: https://github.com/sebCarabali/AnimeTrackerV2/pull/15
+- Fecha: 2026-10-31
+- Base: dev
