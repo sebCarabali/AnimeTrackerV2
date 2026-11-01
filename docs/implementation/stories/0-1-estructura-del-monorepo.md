@@ -8,7 +8,7 @@
 | Prioridad | Must |
 | Estimación | 3 pts |
 | Sprint | sprint-1 |
-| Estado | review |
+| Estado | done |
 | Depende de | — |
 | Bloquea | Todas las demás historias de EP-00 |
 
