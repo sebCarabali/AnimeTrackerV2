@@ -26,7 +26,7 @@ jobs:
 
       - name: Instalar oasdiff
         run: |
-          go install github.com/tufin/oasdiff@latest
+          go install github.com/oasdiff/oasdiff@latest
           sudo mv $(go env GOPATH)/bin/oasdiff /usr/local/bin/
 
       - name: Detección de Breaking Changes - BFF Público (CA3)
