@@ -96,6 +96,13 @@ describe('GET /health', () => {
 - [x] T6 Dockerfile multietapa del BFF (usado en HU-00.06).
 - [x] T7 (ADR-003 §5) Instalar y configurar `jest-openapi` en `apps/bff`: añadir `setupFilesAfterEnv` apuntando a `contracts/public/bff.v1.yaml` para que cada test E2E de módulo valide automáticamente las respuestas contra el contrato.
 - [x] T8 Pruebas unitarias de `CoreHealthIndicator` (CA3) y pruebas E2E de módulo de `/health`, `/health/ready` (CA1, CA2) y del prefijo `/api/v1` (CA5).
+- [x] T9 Corregir hallazgos de code review (2026-11-01):
+  - [x] Entrecomillar o reformular el `name:` del step "Build bff" en `ci.yml` (rompe el parseo YAML del workflow completo).
+  - [x] Anclar el patrón `'(?i)test.*'` del allowlist de `.gitleaks.toml` a rutas reales de test.
+  - [x] Excluir `devDependencies` de la imagen runtime del `Dockerfile` del BFF.
+  - [x] Agregar `.env`/`.env.*` a `.dockerignore` (raíz).
+  - [x] Loguear la excepción real en `CoreHealthIndicator.check()` antes de `indicator.down()`.
+  - [x] Fijar `Content-Type: application/problem+json` en la respuesta 503 de `GET /health/ready`.
 
 ## Notas técnicas y decisiones
 
@@ -133,7 +140,7 @@ describe('GET /health', () => {
 ## Definición de Hecho
 
 - [x] DoD común cumplida.
-- [x] Cobertura de pruebas del BFF: **80% líneas en código nuevo (T1–T6)** medido con Jest coverage (umbral HU-00.09). Resultado: 100% statements/functions/lines, 80% branches (umbral `coverageThreshold` de `jest.config.js` cumplido).
+- [x] Cobertura de pruebas del BFF: **80% líneas en código nuevo (T1–T6, T9)** medido con Jest coverage (umbral HU-00.09). Resultado: 100% statements/functions/lines, 83.33% branches (umbral `coverageThreshold` de `jest.config.js` cumplido).
 - [x] `GET /health` documentado en `contracts/public`. `GET /health/ready` agregado al mismo contrato (T4a).
 - [x] Desacoplamiento validado: Opción A confirmada en readiness (2026-11-03) — sin CA6 propio; HU-06.06 (tracking <200ms) y HU-04.03 (agregador) validarán el SLA cuando se implementen. Sin acción adicional en esta historia.
 
@@ -177,6 +184,33 @@ Verificación manual del binario compilado (`node dist/main.js`):
 - `GET /api/v1` 200 (ruta de negocio bajo el prefijo); `GET /health` fuera del prefijo (CA5).
 
 También se re-ejecutaron sin regresiones: `pnpm --filter @animetracker/repo-checks test` (33/33) y `pnpm --filter @animetracker/ci test` (18/18), y `spectral lint` sobre ambos contratos (0 errores).
+
+### T9 — Corrección de hallazgos de code review (2026-11-01)
+
+**Archivos modificados:**
+- `.github/workflows/ci.yml` (name del step `bff` entrecomillado)
+- `.gitleaks.toml` (allowlist anclado a rutas reales)
+- `apps/bff/Dockerfile` (etapa `prod-deps` separada; `runtime` ya no copia devDependencies)
+- `.dockerignore` (raíz; excluye `.env`/`.env.*`)
+- `apps/bff/src/health/core-health.indicator.ts` (`Logger` inyectado, loguea la excepción real)
+- `apps/bff/src/health/health.controller.ts` (`readiness()` con `@Res()` manual; fija `Content-Type: application/problem+json` en el 503)
+- `apps/bff/src/__tests__/core-health-indicator.spec.ts` (+1 test: excepción no-`Error`)
+- `apps/bff/src/__tests__/health.e2e.spec.ts` (+1 assert: header `Content-Type` real en el 503)
+
+**Comandos y resultado:**
+```
+node -e "require('js-yaml').load(fs.readFileSync('.github/workflows/ci.yml'))"   # YAML OK (4 jobs parseados)
+gitleaks detect --source . --config .gitleaks.toml --no-git                       # no leaks found
+pnpm --filter @animetracker/bff run lint                                          # OK, 0 problemas
+pnpm --filter @animetracker/bff run build                                         # OK
+pnpm --filter @animetracker/bff run test:coverage                                 # 4 suites, 16 tests — todos ✓
+pnpm --filter @animetracker/repo-checks test                                      # 33/33 ✓ (sin regresión)
+pnpm --filter @animetracker/ci test                                               # 18/18 ✓ (sin regresión)
+```
+
+Cobertura tras T9 (`src/**/*.ts`, excluye `generated/`, `main.ts`, `*.d.ts`): **100% statements, 83.33% branches, 100% functions, 100% lines** (umbral 80% — cumplido; branches sube de 80% a 83.33% por la nueva rama cubierta en `CoreHealthIndicator`).
+
+**Nota:** no se validó el build de la imagen Docker (`docker build -f apps/bff/Dockerfile .`) porque el daemon de Docker Desktop no estaba disponible en el entorno de desarrollo; el cambio del `Dockerfile` sigue el mismo patrón ya usado por la etapa `deps` existente (`pnpm install --filter ... --frozen-lockfile`, agregando `--prod`). Recomendado verificar el build de imagen en CI/HU-00.06.
 
 ## Readiness Review
 - Fecha: 2026-11-01 (iteración 5: re-validación post story-gaps iteración 5)
@@ -223,3 +257,43 @@ También se re-ejecutaron sin regresiones: `pnpm --filter @animetracker/repo-che
 - Dependencias registradas: 0
 - Cambios realizados en la historia: § Dev Notes (texto enmienda ADR-003 §Decisión)
 - Resultado re-validación: require-review (2) — ADR-003 no enmendado en archivo; deferred a PR de T3. T1 y T2 no bloqueados.
+
+## Code Review
+- Fecha: 2026-11-01
+- Resultado: CAMBIOS REQUERIDOS (iteración 1) → **T9 corrigió los 6 hallazgos ≥ MEDIA el 2026-11-01** (ver checkmarks `✓` bajo cada hallazgo). Pendiente re-ejecutar `/story-review` para confirmar cierre formal.
+- Cobertura de líneas (código cambiado): 100 % statements/functions/lines, **83.33 %** branches tras T9 (subió desde 80 % al cubrir la rama no-`Error` de `CoreHealthIndicator`; umbral `coverageThreshold` de `jest.config.js` cumplido con margen)
+
+| Ámbito | Resultado (iteración 1) | Hallazgos |
+|---|---|---|
+| Criterios de aceptación | ✅ | 0 |
+| Seguridad | ❌ | 3 |
+| Diseño / SOLID | ❌ | 1 |
+| Arquitectura | ❌ | 2 |
+| Pruebas (> 80 %) | ✅ | 0 |
+
+### Hallazgos
+- [x] [CRITICA][Arquitectura] El step `name: Build bff (CA3: regenerates the core client from the contract)` es un escalar plano YAML sin comillas que contiene "`: `"; la gramática YAML corta el escalar ahí y rompe el parseo de **todo** `ci.yml`, no solo el job `bff` (confirmado con `js-yaml`: `bad indentation of a mapping entry (235:29)`). — `.github/workflows/ci.yml:235` — Corrección sugerida: entrecomillar el valor (`name: "Build bff (CA3: regenerates the core client from the contract)"`) o reformular sin "`: `" interno.
+  - ✓ Corregido: `name:` entrecomillado en `ci.yml:235`. Verificado parseo completo con `js-yaml` (`YAML OK, jobs keys: [detect, run-job, secrets, ci-ok]`).
+- [x] [ALTA][Seguridad] Patrón sin anclar `'(?i)test.*'` en el allowlist de `.gitleaks.toml` exime del escaneo cualquier ruta que contenga la subcadena "test" en cualquier posición (p. ej. `attestation.ts`, `latest-config.yml`, `contest-results.json`), permitiendo que un secreto real commiteado en esas rutas pase desapercibido. — `.gitleaks.toml:11` — Corrección sugerida: anclar a convenciones reales del repo (`'(?i)(^|/)__tests__/'`, `'\.spec\.ts$'`, `'\.test\.ts$'`).
+  - ✓ Corregido: allowlist anclado a `(?i)(^|/)__tests__/`, `(?i)(^|/)tests/` (proyectos `.NET *.UnitTests/*.IntegrationTests` bajo `services/core/tests/`), `\.spec\.ts$`, `\.test\.ts$`. Verificado con `gitleaks detect --source . --config .gitleaks.toml --no-git`: "no leaks found".
+- [x] [MEDIA][Seguridad] La etapa `deps` del `Dockerfile` instala sin `--prod`, por lo que `devDependencies` (jest, eslint, nock, ts-jest, etc.) terminan en la imagen de runtime pese a `NODE_ENV=production`. — `apps/bff/Dockerfile:8-11,20-21` — Corrección sugerida: etapa `prod-deps` con `pnpm install --prod` (o `pnpm deploy`) y copiar a `runtime` solo ese `node_modules` reducido.
+  - ✓ Corregido: nueva etapa `prod-deps` (`pnpm install --filter @animetracker/bff --frozen-lockfile --prod`); `runtime` copia `node_modules` desde `prod-deps` en vez de `deps`. `deps` (con devDependencies) solo alimenta la etapa `build`.
+- [x] [MEDIA][Seguridad] `.dockerignore` (raíz) no excluye `.env`/`.env.*` como sí hace `.gitignore`; un `.env` local en `apps/bff` quedaría embebido en capas intermedias de la imagen de build. — `.dockerignore:1-9` — Corrección sugerida: agregar `.env`, `.env.*`, `!.env.example`.
+  - ✓ Corregido: agregado `.env`, `.env.*`, `!.env.example` a `.dockerignore`.
+- [x] [MEDIA][Diseño] `CoreHealthIndicator.check()` usa un `catch` genérico que descarta la excepción real (timeout, DNS, bug del cliente) sin loguearla; no hay `Logger` de NestJS en el BFF. Dificulta diagnosticar en producción si "down" es un corte de red real o un defecto. — `apps/bff/src/health/core-health.indicator.ts:22` — Corrección sugerida: inyectar `Logger` de `@nestjs/common` y loguear `error`/`stack` antes de `indicator.down()`.
+  - ✓ Corregido: `Logger` de `@nestjs/common` inyectado; loguea `error.message`/`stack` (o `JSON.stringify` del error del cliente) antes de `indicator.down()`. Rama no-`Error` cubierta con nuevo test unitario.
+- [x] [MEDIA][Arquitectura] La respuesta 503 de `GET /health/ready` no fija `Content-Type: application/problem+json`; NestJS usa `application/json` por defecto. Contradice ADR-003 punto 6 y `contracts/public/bff.v1.yaml` (503 declarado como `application/problem+json`). El test E2E no lo detecta porque `jest-openapi` resuelve el esquema por código de estado sin comparar el header real. — `apps/bff/src/health/health.controller.ts:18-29,39-47` — Corrección sugerida: `@Header('Content-Type', 'application/problem+json')` en el método de readiness.
+  - ✓ Corregido: `@Header()` estático no funciona porque `ExpressAdapter.reply()` **revierte** cualquier `Content-Type` ≠ `application/json` cuando el body es un objeto y el status ≥ 400 (verificado en `node_modules/@nestjs/platform-express/adapters/express-adapter.js:83-94`). Se cambió `readiness()` a `@Res()` sin `passthrough` (control manual total): `res.status(503).setHeader('Content-Type', 'application/problem+json').json(...)`, evitando que Nest reescriba la respuesta. Nuevo assert `res.headers['content-type']` en `health.e2e.spec.ts` confirma el header real (no solo el esquema).
+
+### Sugerencias (bajo el umbral)
+- [BAJA][Aceptación] CA4: el `process.exit(1)` real de `main.ts` solo se verificó manualmente (Dev Agent Record), sin test automatizado que mockee `process.exit`/`console.error`. — `apps/bff/src/main.ts:14-19`
+- [BAJA][Aceptación] El comando del Gherkin de CA3 (`pnpm --filter bff gen:core-client`) no coincide literalmente con el script real (`pnpm --filter @animetracker/bff run gen:core-client`); detalle de redacción sin impacto funcional. — `0-3-bff-nestjs-inicial.md:45`
+- [BAJA][Diseño] `HealthController` mezcla orquestación HTTP con construcción de los DTOs del contrato; decisión justificada en la historia, aceptable con un solo indicador. Revisar si se agregan más (tracking, calendar). — `apps/bff/src/health/health.controller.ts:31-47`
+- [BAJA][Diseño] `toHealthStatus`/`toProblem` reciben `string` en vez del union literal `'up'|'down'` (`HealthIndicatorStatus` de `@nestjs/terminus`), perdiendo verificación del compilador. — `apps/bff/src/health/health.controller.ts:31,39`
+- [BAJA][Seguridad] `Dockerfile` usa el tag mutable `node:24-alpine` en vez de pin por digest. — `apps/bff/Dockerfile:4`
+- [BAJA][Seguridad] `ci.yml` no pasa `--frozen-lockfile` explícito en `pnpm install` (pnpm lo infiere de `CI=true`, riesgo bajo). — `.github/workflows/ci.yml:229`
+- [BAJA][Seguridad] Nota prospectiva: sin `helmet()` ni `ValidationPipe` global; razonable hoy (sin endpoints de negocio ni CORS), pero planificar antes de exponer rutas reales bajo `/api/v1`. — `apps/bff/src/main.ts`
+- [BAJA][Arquitectura] `GET /` (`AppController`, expuesto como `GET /api/v1`) no está documentado en `contracts/public/bff.v1.yaml`, desviándose de ADR-003 punto 1. Es andamiaje de CA5, no bloquea, pero debería documentarse o marcarse como no contractual antes de añadir rutas de negocio reales. — `apps/bff/src/app.controller.ts:8-11`
+- [BAJA][Arquitectura] La dependencia de producción `node-fetch` (adaptador para que `nock` intercepte `openapi-fetch`) está bien justificada en Dev Notes pero no quedó registrada en ningún ADR. — `apps/bff/src/core/node-fetch-adapter.ts:1-27`
+- [BAJA][Pruebas] Rama no cubierta en `node-fetch-adapter.ts` (método ≠ GET/HEAD con cuerpo serializado); documentada en la historia como limitación conocida y no bloqueante (único uso actual es `GET /health`). — `apps/bff/src/core/node-fetch-adapter.ts:12-17`
+- [BAJA][Pruebas] Duplicación menor de setup de entorno (`CORE_BASE_URL`/`PORT`/`NODE_ENV` + `AppModule`/`configureApp`) entre `health.e2e.spec.ts` y `api-prefix.e2e.spec.ts`. — `apps/bff/src/__tests__/health.e2e.spec.ts:14-17`

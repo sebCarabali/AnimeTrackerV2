@@ -232,7 +232,7 @@ jobs:
         if: matrix.job == 'bff'
         run: pnpm --filter @animetracker/bff run lint
 
-      - name: Build bff (CA3: regenerates the core client from the contract)
+      - name: "Build bff (CA3: regenerates the core client from the contract)"
         if: matrix.job == 'bff'
         run: pnpm --filter @animetracker/bff run build
 

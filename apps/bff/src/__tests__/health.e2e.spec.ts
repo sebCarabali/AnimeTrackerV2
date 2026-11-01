@@ -75,6 +75,7 @@ describe('Health endpoints (e2e)', () => {
 
       expect(res.status).toBe(503);
       expect(res.body.title).toBeDefined();
+      expect(res.headers['content-type']).toContain('application/problem+json');
       expect(res).toSatisfyApiSpec();
     });
   });

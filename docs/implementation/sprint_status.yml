@@ -34,8 +34,8 @@ metricas:
   puntos_total: 196
   historias_done: 7   # 0-1 (3), 0-2 (5), 0-7 (5), 0-9 (5), 0-8 (3), 0-12a (1.5), 0-12b (1.5)
   puntos_done: 24
-  historias_review: 3   # 0-8 (PR), 0-12a (PR), 0-12b (PR) — listos para merge
-  puntos_review: 6
+  historias_review: 4   # 0-8 (PR), 0-12a (PR), 0-12b (PR) — listos para merge; 0-3 (review, sprint-2)
+  puntos_review: 9
   historias_ready_for_dev: 6   # 0-3, 0-4, 0-5, 0-6, 0-10, 0-11 (sprint-2)
   avance_pct: 12   # puntos_done / puntos_total (24/196)
 
@@ -124,7 +124,7 @@ epicas:
       0-2-solucion-net-monolito-modular:
         { id: HU-00.02, titulo: Solución .NET 8 como monolito modular, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-2-solucion-net-monolito-modular.md }
       0-3-bff-nestjs-inicial:
-        { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: review, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12b], archivo: stories/0-3-bff-nestjs-inicial.md, nota: "review 2026-11-01. T1-T8 completadas. Enmienda ADR-003 §Decisión aplicada. 15/15 tests, cobertura 100%/80%/100%/100%. NestJS fijado en v11 (v12 es ESM-only, rompe CJS); nock fijado en v14 (v15 es ESM-only)." }
+        { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: review, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12b], archivo: stories/0-3-bff-nestjs-inicial.md, nota: "T9 completada 2026-11-01: 6 hallazgos de code review (1 CRITICA, 1 ALTA, 4 MEDIA) corregidos — ci.yml name: entrecomillado, gitleaks allowlist anclado, Dockerfile sin devDeps en runtime, .dockerignore con .env, Logger en CoreHealthIndicator, Content-Type problem+json en /health/ready (requirió @Res() manual, Nest revierte el header en passthrough con status >=400). 16/16 tests, cobertura 100%/83.33%/100%/100%. Pendiente /story-review." }
       0-4-spa-angular-inicial:
         { id: HU-00.04, titulo: SPA Angular inicial, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.09], archivo: stories/0-4-spa-angular-inicial.md }
       0-5-esqueleto-extension-navegador:
@@ -248,6 +248,31 @@ riesgos:
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
 
 historial:
+  - fecha: 2026-11-01
+    cambio: >-
+      HU-00.03 (0-3-bff-nestjs-inicial) promovida a review tras corrección T9 (iteración 1).
+      6 hallazgos ≥ MEDIA corregidos: name: entrecomillado en ci.yml (CRITICA), allowlist de
+      .gitleaks.toml anclado a __tests__/, tests/, .spec.ts$, .test.ts$ (ALTA), etapa prod-deps
+      separada en el Dockerfile para excluir devDependencies del runtime (MEDIA), .env/.env.*
+      agregado a .dockerignore (MEDIA), Logger inyectado en CoreHealthIndicator.check() (MEDIA),
+      Content-Type: application/problem+json fijado en el 503 de GET /health/ready — requirió
+      cambiar de @Res({passthrough:true}) a @Res() manual porque ExpressAdapter.reply() revierte
+      el Content-Type a application/json cuando el body es un objeto y el status >= 400 (MEDIA).
+      16/16 tests (2 nuevos), cobertura 100%/83.33%/100%/100% (branches sube de 80% a 83.33%).
+      Verificado: js-yaml parsea ci.yml completo, gitleaks detect sin leaks, lint/build limpios,
+      sin regresión en @animetracker/repo-checks (33/33) ni @animetracker/ci (18/18).
+  - fecha: 2026-11-01
+    cambio: >-
+      HU-00.03 (0-3-bff-nestjs-inicial) regresada a in-progress tras code review.
+      1 hallazgo CRITICA (Arquitectura): el `name:` del step "Build bff" en ci.yml
+      contiene ": " sin comillas en un escalar plano YAML, rompiendo el parseo de
+      todo el workflow (confirmado con js-yaml). 1 hallazgo ALTA (Seguridad):
+      allowlist de gitleaks con regex sin anclar ('(?i)test.*') puede ocultar
+      secretos reales. 4 hallazgos MEDIA: Dockerfile copia devDependencies al
+      runtime, .dockerignore sin excluir .env, catch silencioso sin logging en
+      CoreHealthIndicator, /health/ready sin Content-Type application/problem+json.
+      T9 agregada con 6 ítems de corrección. 11 sugerencias BAJA registradas.
+      15/15 tests, cobertura 100%/80%/100%/100% (umbral cumplido).
   - fecha: 2026-11-02
     cambio: >-
       Sprint-1 kick-off + code review completados. 3 PRs listos para merge:

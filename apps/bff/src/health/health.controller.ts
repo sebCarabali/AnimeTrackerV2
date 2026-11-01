@@ -16,16 +16,21 @@ export class HealthController {
 
   /** Readiness: 503 when a downstream dependency is down. */
   @Get('health/ready')
-  async readiness(@Res({ passthrough: true }) res: Response): Promise<HealthStatus | Problem> {
+  async readiness(@Res() res: Response): Promise<void> {
     const result = await this.coreHealthIndicator.check();
-    const body = this.toHealthStatus(result.core.status);
 
     if (result.core.status !== 'up') {
-      res.status(HttpStatus.SERVICE_UNAVAILABLE);
-      return this.toProblem(result.core.status);
+      // Nest's own response handling resets Content-Type to application/json for any
+      // object body paired with a >=400 status (see ExpressAdapter.reply), so the problem+json
+      // header must be set and the response sent manually — passthrough would be overwritten.
+      res
+        .status(HttpStatus.SERVICE_UNAVAILABLE)
+        .setHeader('Content-Type', 'application/problem+json')
+        .json(this.toProblem(result.core.status));
+      return;
     }
 
-    return body;
+    res.status(HttpStatus.OK).json(this.toHealthStatus(result.core.status));
   }
 
   private toHealthStatus(coreStatus: string): HealthStatus {

@@ -47,4 +47,13 @@ describe('CoreHealthIndicator', () => {
 
     expect(result.core.status).toBe('down');
   });
+
+  it('reporta "down" cuando el cliente generado lanza un valor que no es Error', async () => {
+    const coreClient = { GET: jest.fn().mockRejectedValue('timeout') };
+    const indicator = await buildIndicator(coreClient);
+
+    const result = await indicator.check();
+
+    expect(result.core.status).toBe('down');
+  });
 });

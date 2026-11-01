@@ -8,7 +8,10 @@ useDefault = true  # Ruleslist estándar de gitleaks
 [allowlist]
 description = "Allow test fixtures and test data"
 paths = [
-  '(?i)test.*',
+  '(?i)(^|/)__tests__/',
+  '(?i)(^|/)tests/',
+  '\.spec\.ts$',
+  '\.test\.ts$',
   '(?i)__fixtures__',
   '(?i)fixtures/',
   '(?i)testresults/',
