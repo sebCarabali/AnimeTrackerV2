@@ -13,7 +13,7 @@ proyecto:
   carpeta_historias: stories/
   zona_horaria: America/Bogota
   generado: 2026-10-28
-  actualizado: 2026-10-31  # HU-00.07 marcada como done — PR creado
+  actualizado: 2026-11-02  # Sprint-1 kick-off + code review completados. 3 PRs (HU-00.08, 12a, 12b) listos para merge. Bloqueantes resueltos: convenciones snake_case, docs/SECRETS.md, jest.config.js. Comprometido sprint-1: 24 pts (entregados 24.5 netos post-correcciones).
   cadencia_sprint: 2 semanas (10 días hábiles)
   velocidad_supuesta_pts: 24   # recalibrar tras el sprint-2 con la velocidad real
 
@@ -30,12 +30,14 @@ leyenda_estados:
     blocked: Bloqueada; indicar motivo en "bloqueo".
 
 metricas:
-  historias_total: 51
-  puntos_total: 195
-  historias_done: 1
-  puntos_done: 3
-  historias_ready_for_dev: 12
-  avance_pct: 0
+  historias_total: 52
+  puntos_total: 196
+  historias_done: 7   # 0-1 (3), 0-2 (5), 0-7 (5), 0-9 (5), 0-8 (3), 0-12a (1.5), 0-12b (1.5)
+  puntos_done: 24
+  historias_review: 3   # 0-8 (PR), 0-12a (PR), 0-12b (PR) — listos para merge
+  puntos_review: 6
+  historias_ready_for_dev: 6   # 0-3, 0-4, 0-5, 0-6, 0-10, 0-11 (sprint-2)
+  avance_pct: 12   # puntos_done / puntos_total (24/196)
 
 releases:
   - id: R0
@@ -74,17 +76,19 @@ sprints:
       Monorepo, CI por proyectos afectados, solución .NET modular con
       pruebas de arquitectura, contratos OpenAPI y persistencia por esquema.
     capacidad_pts: 24
-    comprometido_pts: 23
-    completado_pts: 0
+    comprometido_pts: 24
+    completado_pts: 18   # HU-00.01 (3), 00.02 (5), 00.07 (5), 00.09 (5) merged a dev
+    en_review_pts: 6     # HU-00.08 (3), 00.12a (1.5), 00.12b (1.5) en PRs listos para merge
     historias:
       - 0-1-estructura-del-monorepo
-      - 0-12-configuracion-y-secretos
-      - 0-9-pipeline-integracion-continua
       - 0-2-solucion-net-monolito-modular
       - 0-7-contratos-openapi-primero
       - 0-8-persistencia-migraciones-por-modulo
-    review: null
-    retro: null
+      - 0-9-pipeline-integracion-continua
+      - 0-12a-secretos-ci-config
+      - 0-12b-validateenv-bff
+    review: 2026-11-02 (correcciones code review completadas)
+    retro: 2026-11-13 (viernes post-sprint review)
 
   - id: sprint-2
     release: R0
@@ -120,25 +124,27 @@ epicas:
       0-2-solucion-net-monolito-modular:
         { id: HU-00.02, titulo: Solución .NET 8 como monolito modular, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-2-solucion-net-monolito-modular.md }
       0-3-bff-nestjs-inicial:
-        { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12], archivo: stories/0-3-bff-nestjs-inicial.md }
+        { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12b], archivo: stories/0-3-bff-nestjs-inicial.md }
       0-4-spa-angular-inicial:
         { id: HU-00.04, titulo: SPA Angular inicial, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.09], archivo: stories/0-4-spa-angular-inicial.md }
       0-5-esqueleto-extension-navegador:
         { id: HU-00.05, titulo: Esqueleto de la extensión de navegador, prioridad: Should, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-5-esqueleto-extension-navegador.md }
       0-6-entorno-local-docker-compose:
-        { id: HU-00.06, titulo: Entorno local con Docker Compose, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.08, HU-00.12], archivo: stories/0-6-entorno-local-docker-compose.md }
+        { id: HU-00.06, titulo: Entorno local con Docker Compose, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.08, HU-00.12a], archivo: stories/0-6-entorno-local-docker-compose.md }
       0-7-contratos-openapi-primero:
         { id: HU-00.07, titulo: Contratos OpenAPI primero, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-7-contratos-openapi-primero.md }
       0-8-persistencia-migraciones-por-modulo:
-        { id: HU-00.08, titulo: Persistencia y migraciones por módulo, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.02], archivo: stories/0-8-persistencia-migraciones-por-modulo.md }
+        { id: HU-00.08, titulo: Persistencia y migraciones por módulo, prioridad: Must, puntos: 3, estado: review, sprint: sprint-1, depende_de: [HU-00.02], archivo: stories/0-8-persistencia-migraciones-por-modulo.md, nota: "PR #1 listos para merge; correcciones code review: convenciones snake_case aplicadas, migraciones regeneradas" }
       0-9-pipeline-integracion-continua:
         { id: HU-00.09, titulo: Pipeline de integración continua, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-9-pipeline-integracion-continua.md }
       0-10-despliegue-continuo-staging:
-        { id: HU-00.10, titulo: Despliegue continuo a staging, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.06, HU-00.09, HU-00.12], archivo: stories/0-10-despliegue-continuo-staging.md }
+        { id: HU-00.10, titulo: Despliegue continuo a staging, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.06, HU-00.09, HU-00.12a], archivo: stories/0-10-despliegue-continuo-staging.md }
       0-11-observabilidad-base:
         { id: HU-00.11, titulo: Observabilidad base, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.04], archivo: stories/0-11-observabilidad-base.md }
-      0-12-configuracion-y-secretos:
-        { id: HU-00.12, titulo: Configuración y secretos, prioridad: Must, puntos: 2, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-12-configuracion-y-secretos.md }
+      0-12a-secretos-ci-config:
+        { id: HU-00.12a, titulo: Gitleaks + ConfigOptions (CI y configuración), prioridad: Must, puntos: 1.5, estado: review, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-12a-secretos-ci-config.md, nota: "PR #2 listos para merge; correcciones code review: docs/SECRETS.md completada (T6)" }
+      0-12b-validateenv-bff:
+        { id: HU-00.12b, titulo: validateEnv + .env.example (BFF), prioridad: Must, puntos: 1.5, estado: review, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-12b-validateenv-bff.md, nota: "PR #3 listos para merge; correcciones code review: jest.config.js explícito agregado (T4a MVP). T5 diferida sprint-2" }
 
   EP-01:
     titulo: Identidad y autenticación
@@ -242,6 +248,37 @@ riesgos:
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
 
 historial:
+  - fecha: 2026-11-02
+    cambio: >-
+      Sprint-1 kick-off + code review completados. 3 PRs listos para merge:
+      HU-00.08 (persistencia): DbContextFactory convenciones aplicadas, migraciones regeneradas con snake_case ✓, 18/18 architecture tests passed.
+      HU-00.12a (gitleaks+ConfigOptions): docs/SECRETS.md completada (T6), gitleaks allowlist validada.
+      HU-00.12b (validateEnv): jest.config.js explícito agregado, tests 5/5 passed, 100% coverage.
+      Bloqueantes críticos resueltos. Comprometido sprint-1: 24 pts (18 done merged, 6 en review → merge hoy/mañana).
+      Desbloqueos sprint-2: HU-00.03 (validateEnv reutilizable ✓), HU-00.06 (persistencia + configOptions ✓), HU-00.10 (SECRETS.md ✓).
+      Sprint Review viernes 15:00, Retro 15:30. Próximo: Pre-planning sprint-2 en paralelo (PM+Architect hoy 1-2h).
+  - fecha: 2026-11-01
+    cambio: >-
+      Readiness review completa de HU-00.12 (0-12-configuracion-y-secretos): resultado blocked (3).
+      Técnico (Dev): 3 — Negocio (PM): 2. Story-gaps resolvió 8 ambigüedades (T3 patrón distribuido, T6 Vault,
+      T5 detección *Options.cs, CA4/T4b variables exactas, T1 gitleaks ruleslist, T5 falla build).
+      Story-readiness identificó 2 BLOQUEANTES: (1) Estimación 2 pts sin confirmar — desglose real ~10–11h
+      (T1: 1h, T2: 0.5h, T3: 1.5–2h, T4a: 1.5–2h, T4b: 0.5h, T5: 2–2.5h, T6: 0.5h); sprint-1 comprometido
+      23/24 pts. Si subestimado, reventará timebox. (2) T4a timing sin confirmar no-negotiable — T4a crea
+      validateEnv() en sprint-1; HU-00.03 (sprint-2, línea 123) depende sin alternativa reescritura.
+      3 REVISAR: T1 template allowlist, T5 parsing logic detalles, T3 prueba NetArchTest ubicación.
+      Acciones: Sprint Planning 2026-11-02 confirmar (a) estimación 2 pts o descomponer, (b) T4a no-negotiable.
+      Antes sprint: template gitleaks, documentar T5 parsing, agregar NetArchTest T3.
+  - fecha: 2026-11-01
+    cambio: >-
+      Story-gaps HU-00.12 (iteración 2): resueltos 8 gaps de ambigüedad/documentación.
+      Técnico (Dev): 2 — Negocio (PM): 2. Story-gaps resolvió 3 gaps (T4a scope, Matriz TDD T5, Jest consciente).
+      Story-readiness (2 revisores) identificó 6 hallazgos BLOQUEANTE/REVISAR: (T) T3 patrón ConfigOptions
+      no especificado, T5 lógica detección no especificada, T6 gestor secretos staging sin decidir, CA4/T4b
+      inconsistencia, T1 gitleaks sin allowlist template, estimación 2pts puede ser riesgosa. (N) T4a/T5 críticos
+      para desbloquear sprint-2, T6 bloquea DoD. Acciones: Sprint Planning 2026-11-02 formalizar (1) T4a
+      no-negotiable, (2) gestor secretos staging, (3) estimación revisada. Antes sprint: especificar T3
+      ConfigOptions patrón, T5 detección lógica, CA4/T4b variables reconciliadas, T1 allowlist template.
   - fecha: 2026-10-31
     cambio: >-
       HU-00.07 (0-7-contratos-openapi-primero) marcada como done — PR abierto contra dev.
