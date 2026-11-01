@@ -31,11 +31,19 @@ jobs:
 
       - name: Detección de Breaking Changes - BFF Público (CA3)
         run: |
-          # Extraemos la versión de main localmente para evitar problemas de red/autenticación
-          git show origin/main:contracts/public/bff.v1.yaml > base-bff.yaml
-          oasdiff breaking base-bff.yaml contracts/public/bff.v1.yaml --fail-on ERR
+          # Verificamos si el archivo existe en la rama main
+          if git rev-parse --verify origin/main:contracts/public/bff.v1.yaml >/dev/null 2>&1; then
+            git show origin/main:contracts/public/bff.v1.yaml > base-bff.yaml
+            oasdiff breaking base-bff.yaml contracts/public/bff.v1.yaml --fail-on ERR
+          else
+            echo "El contrato bff.v1.yaml es nuevo en este PR. Omitiendo comparación de breaking changes."
+          fi
 
       - name: Detección de Breaking Changes - Core Interno (CA3)
         run: |
-          git show origin/main:contracts/internal/core.v1.yaml > base-core.yaml
-          oasdiff breaking base-core.yaml contracts/internal/core.v1.yaml --fail-on ERR
+          if git rev-parse --verify origin/main:contracts/internal/core.v1.yaml >/dev/null 2>&1; then
+            git show origin/main:contracts/internal/core.v1.yaml > base-core.yaml
+            oasdiff breaking base-core.yaml contracts/internal/core.v1.yaml --fail-on ERR
+          else
+            echo "El contrato core.v1.yaml es nuevo en este PR. Omitiendo comparación de breaking changes."
+          fi
