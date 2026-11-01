@@ -107,6 +107,8 @@ describe('GET /health', () => {
   - [x] Anclar los patrones restantes del allowlist de `.gitleaks.toml` (`__fixtures__`, `fixtures/`, `testresults/`) a convenciones reales de ruta (igual que `__tests__/`, `tests/`, `.spec.ts$`, `.test.ts$`).
   - [x] Documentar el cambio estructural `[[allowlist]]` → `[allowlist]` (sin `regexTarget = "path"`) introducido en T9 y validar el allowlist con un secreto de prueba plantado en una ruta exenta y una no exenta.
   - [x] Resolver el acoplamiento de `readiness()` con el pipeline de interceptores de Nest (mover la construcción de la respuesta RFC 9457 a un `ExceptionFilter`, o documentar explícitamente la limitación antes de implementar HU-00.11).
+- [x] T11 Corregir hallazgos de code review — iteración 3 (2026-11-01):
+  - [x] Agregar prueba unitaria de `nodeFetchAdapter` que ejercite la rama `method !== GET/HEAD` (serialización de `body` vía `input.arrayBuffer()`), mockeando `node-fetch` y pasando una `Request` POST con cuerpo.
 
 ## Notas técnicas y decisiones
 
@@ -246,6 +248,22 @@ pnpm --filter @animetracker/ci test                                     # 18/18 
 
 Cobertura tras T10 (`src/**/*.ts`, excluye `generated/`, `main.ts`, `*.d.ts`): **100% statements, 83.33% branches, 100% functions, 100% lines** (umbral 80% — cumplido; sin cambio respecto a T9, los archivos nuevos quedan 100% cubiertos por los mismos tests E2E existentes).
 
+### T11 — Corrección de hallazgos de code review — iteración 3 (2026-11-01)
+
+**Archivos creados:**
+- `apps/bff/src/__tests__/node-fetch-adapter.spec.ts` (2 tests: GET sin body, POST con body serializado — mock de `node-fetch` vía `jest.mock`)
+
+**Comandos y resultado:**
+```
+pnpm --filter @animetracker/bff exec jest --coverage   # 5 suites, 18 tests — todos ✓
+pnpm --filter @animetracker/bff run lint                # OK, 0 problemas
+pnpm --filter @animetracker/bff run build               # OK
+pnpm --filter @animetracker/repo-checks test             # 33/33 ✓ (sin regresión)
+pnpm --filter @animetracker/ci test                      # 18/18 ✓ (sin regresión)
+```
+
+Cobertura tras T11 (`src/**/*.ts`, excluye `generated/`, `main.ts`, `*.d.ts`): **100% statements, 100% branches, 100% functions, 100% lines** (branches sube de 83.33% a 100% al cubrir la rama `method !== GET/HEAD` de `node-fetch-adapter.ts`).
+
 ## Readiness Review
 - Fecha: 2026-11-01 (iteración 5: re-validación post story-gaps iteración 5)
 - Resultado: require-review (2)
@@ -294,16 +312,20 @@ Cobertura tras T10 (`src/**/*.ts`, excluye `generated/`, `main.ts`, `*.d.ts`): *
 
 ## Code Review
 - Fecha: 2026-11-01
-- Resultado: CAMBIOS REQUERIDOS (iteración 2). Iteración 1 (2026-11-01) tuvo 6 hallazgos ≥ MEDIA, corregidos por T9 y verificados de forma independiente en esta iteración (ver checkmarks `✓`). Iteración 2 (re-ejecución de `/story-review` tras T9) encontró 3 hallazgos nuevos ≥ MEDIA (T10 pendiente).
-- Cobertura de líneas (código cambiado): 100 % statements/functions/lines, **83.33 %** branches (umbral `coverageThreshold` de `jest.config.js` 80 % cumplido con margen). 16/16 tests passed, 4 suites.
+- Resultado: CAMBIOS REQUERIDOS (iteración 3), corregidos por T11 el mismo día. Iteraciones 1, 2 y 3 (2026-11-01) tuvieron 6, 3 y 1 hallazgos ≥ MEDIA respectivamente, todos corregidos (T9, T10, T11) y verificados sin regresión (ver checkmarks `✓`). Pendiente re-ejecución de `/story-review` para confirmar iteración 4 sin hallazgos y promover a `pull-request`.
+- Cobertura de líneas (código cambiado): **100 %** statements/branches/functions/lines tras T11 (sube de 83.33 % a 100 % en branches). 18/18 tests passed, 5 suites.
 
-| Ámbito | Resultado (iteración 2) | Hallazgos |
+| Ámbito | Resultado (iteración 3) | Hallazgos |
 |---|---|---|
-| Criterios de aceptación | ❌ | 1 |
-| Seguridad | ❌ | 2 |
-| Diseño / SOLID | ❌ | 1 |
+| Criterios de aceptación | ✅ | 0 |
+| Seguridad | ✅ | 0 |
+| Diseño / SOLID | ✅ | 0 |
 | Arquitectura | ✅ | 0 |
-| Pruebas (> 80 %) | ✅ | 0 |
+| Pruebas (> 80 %) | ❌ | 1 |
+
+### Hallazgos — iteración 3 (2026-11-01), corregidos por T11
+- [x] [MEDIA][Pruebas] `node-fetch-adapter.ts` no tiene ninguna prueba que ejercite la rama `method !== GET/HEAD` (serialización de `body` vía `input.arrayBuffer()`). Hoy el único uso real es `GET /health`, por lo que el riesgo inmediato es bajo, pero es código de producción (no de test) que quedará sin verificar en cuanto el BFF agregue un endpoint que reenvíe POST/PUT al core — esta misma historia declara en su cabecera que bloquea `HU-06.06` (ruta rápida de tracking, que usará POST). Este hallazgo ya se había registrado como sugerencia BAJA en iteraciones previas bajo el supuesto de "único uso hoy es GET"; se reclasifica a MEDIA porque la propia historia confirma que ese supuesto deja de sostenerse apenas se implemente la historia que bloquea. — `apps/bff/src/core/node-fetch-adapter.ts:12-17` — Corrección sugerida: añadir un test unitario de `nodeFetchAdapter` con una `Request` POST con body, verificando que `node-fetch` recibe el body serializado correctamente (mock de `node-fetch`).
+  - ✓ Corregido: nuevo `apps/bff/src/__tests__/node-fetch-adapter.spec.ts` con 2 casos (GET sin body, POST con body serializado), mockeando el módulo `node-fetch` con `jest.mock`. `node-fetch-adapter.ts` pasa de 50 % a 100 % branches. Cobertura global del proyecto: **100 % statements/branches/functions/lines** (18/18 tests, 5 suites). Sin regresión en `@animetracker/repo-checks` (33/33) ni `@animetracker/ci` (18/18). Lint y build limpios.
 
 ### Hallazgos — iteración 2 (2026-11-01), corregidos por T10
 - [x] [MEDIA][Seguridad] El allowlist de `.gitleaks.toml` corrigió el patrón `(?i)test.*` (T9) pero deja 3 entradas con el mismo defecto de anclaje por subcadena en cualquier posición de la ruta: `(?i)__fixtures__`, `(?i)fixtures/`, `(?i)testresults/`. Una ruta como `legacy-fixtures/prod-secrets.yaml` o `nottestresults/credentials.json` quedaría exenta del escaneo de secretos igual que ocurría con el patrón original, con superficie más acotada pero el mismo mecanismo de bypass. — `.gitleaks.toml:15-17` — Corrección sugerida: anclar igual que las entradas ya corregidas: `'(?i)(^|/)__fixtures__($|/)'`, `'(?i)(^|/)fixtures/'`, `'(?i)(^|/)testresults/'`.
@@ -337,7 +359,7 @@ Cobertura tras T10 (`src/**/*.ts`, excluye `generated/`, `main.ts`, `*.d.ts`): *
 - [BAJA][Seguridad] Nota prospectiva: sin `helmet()` ni `ValidationPipe` global; razonable hoy (sin endpoints de negocio ni CORS), pero planificar antes de exponer rutas reales bajo `/api/v1`. — `apps/bff/src/main.ts`
 - [BAJA][Arquitectura] `GET /` (`AppController`, expuesto como `GET /api/v1`) no está documentado en `contracts/public/bff.v1.yaml`, desviándose de ADR-003 punto 1. Es andamiaje de CA5, no bloquea, pero debería documentarse o marcarse como no contractual antes de añadir rutas de negocio reales. — `apps/bff/src/app.controller.ts:8-11`
 - [BAJA][Arquitectura] La dependencia de producción `node-fetch` (adaptador para que `nock` intercepte `openapi-fetch`) está bien justificada en Dev Notes pero no quedó registrada en ningún ADR. — `apps/bff/src/core/node-fetch-adapter.ts:1-27`
-- [BAJA][Pruebas] Rama no cubierta en `node-fetch-adapter.ts` (método ≠ GET/HEAD con cuerpo serializado); documentada en la historia como limitación conocida y no bloqueante (único uso actual es `GET /health`). — `apps/bff/src/core/node-fetch-adapter.ts:12-17`
 - [BAJA][Pruebas] Duplicación menor de setup de entorno (`CORE_BASE_URL`/`PORT`/`NODE_ENV` + `AppModule`/`configureApp`) entre `health.e2e.spec.ts` y `api-prefix.e2e.spec.ts`. — `apps/bff/src/__tests__/health.e2e.spec.ts:14-17`
 - [BAJA][Diseño] Literal `'/health/ready'` duplicado: una vez como ruta (`@Get('health/ready')`) y otra vez como `instance` en `toProblem()`. Si la ruta cambia, es fácil olvidar el segundo. — `apps/bff/src/health/health.controller.ts:18,50` — Corrección sugerida: extraer una constante o derivar `instance` de `req.url`.
 - [BAJA][Aceptación] La tarea T2 describe el esquema de validación como `NODE_ENV, PORT, CORE_BASE_URL, CORS_ORIGINS`, pero la implementación (`validateBffConfig` en `app.module.ts:9-11`) omite `CORS_ORIGINS`. La omisión está justificada y documentada en "Decisiones de implementación" (diferida a HU-00.04), por lo que se registra como desalineación de redacción, no como bloqueo. — `0-3-bff-nestjs-inicial.md:91` — Corrección sugerida: actualizar el texto de T2 para reflejar el alcance real implementado.
+- [BAJA][Diseño] No existe un `ExceptionFilter` global que normalice excepciones no controladas al formato `application/problem+json`; hoy solo `CoreUnavailableException` pasa por `ProblemJsonExceptionFilter` (aplicado método a método). Mientras el contrato público solo cubra `/health` y `/health/ready` no bloquea, pero en cuanto se agreguen rutas de negocio bajo `/api/v1` cualquier error no capturado volverá al formato JSON por defecto de Nest, rompiendo la consistencia RFC 9457 ya adoptada. — `apps/bff/src/main.ts`, `apps/bff/src/health/problem-json.filter.ts` — Corrección sugerida: planificar un `APP_FILTER` global (o `app.useGlobalFilters(...)`) que mapee cualquier excepción no reconocida a `Problem`, antes de exponer endpoints de negocio reales.
