@@ -108,3 +108,27 @@ describe('GET /health', () => {
 - [ ] DoD común cumplida.
 - [ ] Cobertura de pruebas del BFF en el umbral de HU-00.09.
 - [ ] `GET /health` documentado en `contracts/public`.
+
+## Readiness Review
+- Fecha: 2026-10-31
+- Resultado: blocked (3)
+- Técnico (Dev): 3 — Negocio (PM): 2 — Ágil (Scrum Master): 3
+
+### Hallazgos técnicos
+- [BLOQUEANTE] Contrato interno ausente: CA3 y T3 requieren `contracts/internal/core.v1.yaml` para generar el cliente HTTP con `pnpm --filter bff gen:core-client`. El contrato no existe aún en el repositorio (entregable de HU-00.07). — `0-3-bff-nestjs-inicial.md#criterios-de-aceptación:43-47` y `contracts/README.md`
+- [BLOQUEANTE] Dependencias técnicas de Sprint 1 pendientes: HU-00.03 depende de HU-00.07 (Contratos OpenAPI primero) y HU-00.12 (Configuración y secretos), ambas en estado `ready-for-dev` programadas en Sprint 1. — `sprint_status.yml:123`, `0-7-contratos-openapi-primero.md:13` y `0-12-configuracion-y-secretos.md:13`
+- [REVISAR] Runner de pruebas JS/TS: la historia especifica Jest para el BFF mientras las herramientas del monorepo utilizan Vitest; conviene ratificar Jest como estándar para NestJS o evaluar Vitest. — `0-3-bff-nestjs-inicial.md:65` vs `tools/ci/vitest.config.ts`
+- [INFO] Dependencia HU-00.01 (Estructura del monorepo) en estado `done`; `apps/bff` existe en workspace de pnpm. — `sprint_status.yml:119`
+
+### Hallazgos de negocio (Product Manager)
+- [REVISAR] Cumplimiento de DoR regla 3: los contratos OpenAPI de backend/BFF deben estar definidos antes de codificar (`AGENTS.md:32`). — `AGENTS.md#definition-of-ready-dor`
+- [INFO] Redacción de valor en la historia: la cláusula "para..." se enfoca en habilitación técnica; se sugiere enriquecerla para destacar el desacoplamiento de clientes y la ruta rápida (<200 ms) para la extensión. — `PRD.md#6-requisitos-no-funcionales:43` y `ARD.md#5-backend-for-frontend-bff:80`
+- [INFO] Criterios de aceptación (Gherkin) y matriz TDD completos y testeables; fuera de alcance debidamente acotado (sin auth ni telemetría en este paso). — `0-3-bff-nestjs-inicial.md:26-86`
+
+### Hallazgos ágiles (Scrum Master)
+- [BLOQUEANTE] Planificación de Sprint y límites de WIP: HU-00.03 está formalmente asignada al Sprint 2 (2026-11-16 a 2026-11-27). Sprint 1 (comprometido en 23/24 pts) tiene como meta entregar Monorepo, CI, .NET modular, Contratos (HU-00.07) y Secretos (HU-00.12). Iniciar HU-00.03 ahora rompería el foco del sprint e incrementaría el WIP innecesariamente. — `sprint_status.yml:68-107`
+
+### Acciones para quedar Ready
+- [ ] Completar y marcar `done` HU-00.07 en Sprint 1 para disponer de `contracts/internal/core.v1.yaml`.
+- [ ] Completar y marcar `done` HU-00.12 en Sprint 1 para disponer del estándar de validación de secretos y variables de entorno.
+- [ ] Validar formalmente el pase a `ready-for-dev` en la Sprint Planning del Sprint 2.

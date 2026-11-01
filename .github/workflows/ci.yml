@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, stagin, dev]
   push:
-    branches: [main]
+    branches: [main, stagin, dev]
 
 # H6: minimum required permissions (principle of least privilege)
 permissions:

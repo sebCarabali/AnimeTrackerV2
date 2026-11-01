@@ -3,4 +3,5 @@ packages:
   - "tools/*"
 
 allowBuilds:
+  '@scarf/scarf': false
   esbuild: true
