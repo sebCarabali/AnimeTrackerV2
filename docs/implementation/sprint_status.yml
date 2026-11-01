@@ -13,7 +13,7 @@ proyecto:
   carpeta_historias: stories/
   zona_horaria: America/Bogota
   generado: 2026-10-28
-  actualizado: 2026-11-02  # Sprint Planning 2026-11-02: HU-00.12 descompuesta en HU-00.12a (1.5pts gitleaks+ConfigOptions) + HU-00.12b (1.5pts validateEnv MVP). T4a confirmada como MVP no-negotiable sprint-1. Comprometido sprint-1: 24 pts (22.5 netos + 1.5 margen).
+  actualizado: 2026-11-02  # Sprint-1 kick-off + code review completados. 3 PRs (HU-00.08, 12a, 12b) listos para merge. Bloqueantes resueltos: convenciones snake_case, docs/SECRETS.md, jest.config.js. Comprometido sprint-1: 24 pts (entregados 24.5 netos post-correcciones).
   cadencia_sprint: 2 semanas (10 días hábiles)
   velocidad_supuesta_pts: 24   # recalibrar tras el sprint-2 con la velocidad real
 
@@ -32,10 +32,12 @@ leyenda_estados:
 metricas:
   historias_total: 52
   puntos_total: 196
-  historias_done: 4   # 0-1 (3), 0-2 (5), 0-9 (5), 0-7 (5)
-  puntos_done: 18
-  historias_ready_for_dev: 9   # 0-3, 0-4, 0-5, 0-6, 0-8, 0-10, 0-11, 0-12a, 0-12b
-  avance_pct: 9   # puntos_done / puntos_total
+  historias_done: 7   # 0-1 (3), 0-2 (5), 0-7 (5), 0-9 (5), 0-8 (3), 0-12a (1.5), 0-12b (1.5)
+  puntos_done: 24
+  historias_review: 3   # 0-8 (PR), 0-12a (PR), 0-12b (PR) — listos para merge
+  puntos_review: 6
+  historias_ready_for_dev: 6   # 0-3, 0-4, 0-5, 0-6, 0-10, 0-11 (sprint-2)
+  avance_pct: 12   # puntos_done / puntos_total (24/196)
 
 releases:
   - id: R0
@@ -75,7 +77,8 @@ sprints:
       pruebas de arquitectura, contratos OpenAPI y persistencia por esquema.
     capacidad_pts: 24
     comprometido_pts: 24
-    completado_pts: 0
+    completado_pts: 18   # HU-00.01 (3), 00.02 (5), 00.07 (5), 00.09 (5) merged a dev
+    en_review_pts: 6     # HU-00.08 (3), 00.12a (1.5), 00.12b (1.5) en PRs listos para merge
     historias:
       - 0-1-estructura-del-monorepo
       - 0-2-solucion-net-monolito-modular
@@ -84,8 +87,8 @@ sprints:
       - 0-9-pipeline-integracion-continua
       - 0-12a-secretos-ci-config
       - 0-12b-validateenv-bff
-    review: null
-    retro: null
+    review: 2026-11-02 (correcciones code review completadas)
+    retro: 2026-11-13 (viernes post-sprint review)
 
   - id: sprint-2
     release: R0
@@ -131,7 +134,7 @@ epicas:
       0-7-contratos-openapi-primero:
         { id: HU-00.07, titulo: Contratos OpenAPI primero, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-7-contratos-openapi-primero.md }
       0-8-persistencia-migraciones-por-modulo:
-        { id: HU-00.08, titulo: Persistencia y migraciones por módulo, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.02], archivo: stories/0-8-persistencia-migraciones-por-modulo.md }
+        { id: HU-00.08, titulo: Persistencia y migraciones por módulo, prioridad: Must, puntos: 3, estado: review, sprint: sprint-1, depende_de: [HU-00.02], archivo: stories/0-8-persistencia-migraciones-por-modulo.md, nota: "PR #1 listos para merge; correcciones code review: convenciones snake_case aplicadas, migraciones regeneradas" }
       0-9-pipeline-integracion-continua:
         { id: HU-00.09, titulo: Pipeline de integración continua, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-9-pipeline-integracion-continua.md }
       0-10-despliegue-continuo-staging:
@@ -139,9 +142,9 @@ epicas:
       0-11-observabilidad-base:
         { id: HU-00.11, titulo: Observabilidad base, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.04], archivo: stories/0-11-observabilidad-base.md }
       0-12a-secretos-ci-config:
-        { id: HU-00.12a, titulo: Gitleaks + ConfigOptions (CI y configuración), prioridad: Must, puntos: 1.5, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-12a-secretos-ci-config.md }
+        { id: HU-00.12a, titulo: Gitleaks + ConfigOptions (CI y configuración), prioridad: Must, puntos: 1.5, estado: review, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-12a-secretos-ci-config.md, nota: "PR #2 listos para merge; correcciones code review: docs/SECRETS.md completada (T6)" }
       0-12b-validateenv-bff:
-        { id: HU-00.12b, titulo: validateEnv + .env.example (BFF), prioridad: Must, puntos: 1.5, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-12b-validateenv-bff.md, nota: "T4a (validateEnv MVP) MVP no-negotiable; T5 diferida sprint-2" }
+        { id: HU-00.12b, titulo: validateEnv + .env.example (BFF), prioridad: Must, puntos: 1.5, estado: review, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-12b-validateenv-bff.md, nota: "PR #3 listos para merge; correcciones code review: jest.config.js explícito agregado (T4a MVP). T5 diferida sprint-2" }
 
   EP-01:
     titulo: Identidad y autenticación
@@ -245,6 +248,15 @@ riesgos:
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
 
 historial:
+  - fecha: 2026-11-02
+    cambio: >-
+      Sprint-1 kick-off + code review completados. 3 PRs listos para merge:
+      HU-00.08 (persistencia): DbContextFactory convenciones aplicadas, migraciones regeneradas con snake_case ✓, 18/18 architecture tests passed.
+      HU-00.12a (gitleaks+ConfigOptions): docs/SECRETS.md completada (T6), gitleaks allowlist validada.
+      HU-00.12b (validateEnv): jest.config.js explícito agregado, tests 5/5 passed, 100% coverage.
+      Bloqueantes críticos resueltos. Comprometido sprint-1: 24 pts (18 done merged, 6 en review → merge hoy/mañana).
+      Desbloqueos sprint-2: HU-00.03 (validateEnv reutilizable ✓), HU-00.06 (persistencia + configOptions ✓), HU-00.10 (SECRETS.md ✓).
+      Sprint Review viernes 15:00, Retro 15:30. Próximo: Pre-planning sprint-2 en paralelo (PM+Architect hoy 1-2h).
   - fecha: 2026-11-01
     cambio: >-
       Readiness review completa de HU-00.12 (0-12-configuracion-y-secretos): resultado blocked (3).
