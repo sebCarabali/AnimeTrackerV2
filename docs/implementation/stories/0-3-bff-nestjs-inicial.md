@@ -312,16 +312,16 @@ Cobertura tras T11 (`src/**/*.ts`, excluye `generated/`, `main.ts`, `*.d.ts`): *
 
 ## Code Review
 - Fecha: 2026-11-01
-- Resultado: CAMBIOS REQUERIDOS (iteración 3), corregidos por T11 el mismo día. Iteraciones 1, 2 y 3 (2026-11-01) tuvieron 6, 3 y 1 hallazgos ≥ MEDIA respectivamente, todos corregidos (T9, T10, T11) y verificados sin regresión (ver checkmarks `✓`). Pendiente re-ejecución de `/story-review` para confirmar iteración 4 sin hallazgos y promover a `pull-request`.
-- Cobertura de líneas (código cambiado): **100 %** statements/branches/functions/lines tras T11 (sube de 83.33 % a 100 % en branches). 18/18 tests passed, 5 suites.
+- Resultado: **APROBADA** (iteración 4). Iteraciones 1, 2 y 3 (2026-11-01) tuvieron 6, 3 y 1 hallazgos ≥ MEDIA respectivamente, todos corregidos (T9, T10, T11) y verificados sin regresión. Iteración 4 (re-ejecución de `/story-review` tras T11): 0 hallazgos ≥ MEDIA en los 5 ámbitos. 1 sugerencia BAJA nueva registrada (ver Sugerencias).
+- Cobertura de líneas (código cambiado): **100 %** statements/branches/functions/lines. 18/18 tests passed, 5 suites.
 
-| Ámbito | Resultado (iteración 3) | Hallazgos |
+| Ámbito | Resultado (iteración 4) | Hallazgos |
 |---|---|---|
 | Criterios de aceptación | ✅ | 0 |
 | Seguridad | ✅ | 0 |
 | Diseño / SOLID | ✅ | 0 |
 | Arquitectura | ✅ | 0 |
-| Pruebas (> 80 %) | ❌ | 1 |
+| Pruebas (> 80 %) | ✅ | 0 |
 
 ### Hallazgos — iteración 3 (2026-11-01), corregidos por T11
 - [x] [MEDIA][Pruebas] `node-fetch-adapter.ts` no tiene ninguna prueba que ejercite la rama `method !== GET/HEAD` (serialización de `body` vía `input.arrayBuffer()`). Hoy el único uso real es `GET /health`, por lo que el riesgo inmediato es bajo, pero es código de producción (no de test) que quedará sin verificar en cuanto el BFF agregue un endpoint que reenvíe POST/PUT al core — esta misma historia declara en su cabecera que bloquea `HU-06.06` (ruta rápida de tracking, que usará POST). Este hallazgo ya se había registrado como sugerencia BAJA en iteraciones previas bajo el supuesto de "único uso hoy es GET"; se reclasifica a MEDIA porque la propia historia confirma que ese supuesto deja de sostenerse apenas se implemente la historia que bloquea. — `apps/bff/src/core/node-fetch-adapter.ts:12-17` — Corrección sugerida: añadir un test unitario de `nodeFetchAdapter` con una `Request` POST con body, verificando que `node-fetch` recibe el body serializado correctamente (mock de `node-fetch`).
@@ -363,3 +363,4 @@ Cobertura tras T11 (`src/**/*.ts`, excluye `generated/`, `main.ts`, `*.d.ts`): *
 - [BAJA][Diseño] Literal `'/health/ready'` duplicado: una vez como ruta (`@Get('health/ready')`) y otra vez como `instance` en `toProblem()`. Si la ruta cambia, es fácil olvidar el segundo. — `apps/bff/src/health/health.controller.ts:18,50` — Corrección sugerida: extraer una constante o derivar `instance` de `req.url`.
 - [BAJA][Aceptación] La tarea T2 describe el esquema de validación como `NODE_ENV, PORT, CORE_BASE_URL, CORS_ORIGINS`, pero la implementación (`validateBffConfig` en `app.module.ts:9-11`) omite `CORS_ORIGINS`. La omisión está justificada y documentada en "Decisiones de implementación" (diferida a HU-00.04), por lo que se registra como desalineación de redacción, no como bloqueo. — `0-3-bff-nestjs-inicial.md:91` — Corrección sugerida: actualizar el texto de T2 para reflejar el alcance real implementado.
 - [BAJA][Diseño] No existe un `ExceptionFilter` global que normalice excepciones no controladas al formato `application/problem+json`; hoy solo `CoreUnavailableException` pasa por `ProblemJsonExceptionFilter` (aplicado método a método). Mientras el contrato público solo cubra `/health` y `/health/ready` no bloquea, pero en cuanto se agreguen rutas de negocio bajo `/api/v1` cualquier error no capturado volverá al formato JSON por defecto de Nest, rompiendo la consistencia RFC 9457 ya adoptada. — `apps/bff/src/main.ts`, `apps/bff/src/health/problem-json.filter.ts` — Corrección sugerida: planificar un `APP_FILTER` global (o `app.useGlobalFilters(...)`) que mapee cualquier excepción no reconocida a `Problem`, antes de exponer endpoints de negocio reales.
+- [BAJA][Pruebas] `node-fetch-adapter.spec.ts` (T11) verifica los argumentos con que se invoca `node-fetch` pero no hace ninguna aserción sobre el `Response` reconstruido que devuelve `nodeFetchAdapter` (status, statusText, headers); un regreso en esas líneas no lo detectaría el test aunque la cobertura sea 100 %. — `apps/bff/src/__tests__/node-fetch-adapter.spec.ts:22-48` — Corrección sugerida: añadir `expect(response.status)`/`expect(response.statusText)` (y opcionalmente un header propagado) en al menos uno de los casos.

@@ -124,7 +124,7 @@ epicas:
       0-2-solucion-net-monolito-modular:
         { id: HU-00.02, titulo: Solución .NET 8 como monolito modular, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-2-solucion-net-monolito-modular.md }
       0-3-bff-nestjs-inicial:
-        { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: review, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12b], archivo: stories/0-3-bff-nestjs-inicial.md, nota: "T11 completada (2026-11-01): agregado node-fetch-adapter.spec.ts cubriendo la rama method!=GET/HEAD (serialización de body); cierra el hallazgo MEDIA de la iteración 3 de code review. 18/18 tests, cobertura 100%/100%/100%/100%. Pendiente re-ejecución de /story-review." }
+        { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: pull-request, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12b], archivo: stories/0-3-bff-nestjs-inicial.md, nota: "Code review iteración 4 (2026-11-01): APROBADA. 0 hallazgos ≥ MEDIA en los 5 ámbitos (aceptación, seguridad, diseño, arquitectura, pruebas). 18/18 tests, cobertura 100%/100%/100%/100%. Lista para PR." }
       0-4-spa-angular-inicial:
         { id: HU-00.04, titulo: SPA Angular inicial, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.09], archivo: stories/0-4-spa-angular-inicial.md }
       0-5-esqueleto-extension-navegador:
@@ -248,6 +248,15 @@ riesgos:
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
 
 historial:
+  - fecha: 2026-11-01
+    cambio: >-
+      HU-00.03 (0-3-bff-nestjs-inicial) promovida a pull-request tras code review iteración 4.
+      APROBADA: 0 hallazgos ≥ MEDIA en los 5 ámbitos (aceptación, seguridad, diseño, arquitectura,
+      pruebas). El único cambio desde la iteración 3 fue T11 (nuevo test unitario de
+      node-fetch-adapter.ts, sin tocar código de producción). 1 sugerencia BAJA nueva registrada
+      (node-fetch-adapter.spec.ts no afirma sobre el Response reconstruido, solo sobre los
+      argumentos de node-fetch). 18/18 tests, cobertura 100%/100%/100%/100%. Siguiente paso:
+      /story-pr 0-3.
   - fecha: 2026-11-01
     cambio: >-
       HU-00.03 (0-3-bff-nestjs-inicial) regresada a in-progress tras code review iteración 3.
