@@ -31,11 +31,13 @@ Sin una convención explícita y herramientas automatizadas de verificación, lo
 
 5. **Pruebas de contrato automatizadas**:
    - `.NET`: helper `ContractAssert` en `tests/AnimeTracker.Testing` valida cada respuesta del Host contra `core.v1.yaml`.
-   - BFF: se configura `jest-openapi` al crearse el proyecto NestJS (HU-00.03).
+   - BFF: `jest-openapi` se configura en `apps/bff` (HU-00.03) con `setupFilesAfterEnv` (`jest.setup.ts`) apuntando a `contracts/public/bff.v1.yaml`, para que cada test E2E de módulo valide automáticamente las respuestas contra el contrato.
 
 6. **Errores en formato `application/problem+json`** (RFC 9457) en ambos contratos.
 
 7. **Documentación navegable** generada con Redocly CLI (`pnpm contracts:docs`) en `dist/docs/`.
+
+8. **Generación de cliente tipado del BFF (HU-00.03)**: el BFF usa **openapi-fetch** como generador de cliente tipado a partir de `contracts/internal/core.v1.yaml`. El script `pnpm --filter @animetracker/bff run gen:core-client` genera los tipos en `apps/bff/src/generated/core/schema.d.ts`; el código generado no se edita a mano y queda excluido del lint y de git (regenerado en `prebuild`, tanto local como en CI, para que los tipos desactualizados fallen el build). Alternativas descartadas: `openapi-generator-cli` (excesivamente verboso para un BFF TypeScript estricto) y `swagger-typescript-api` (menos ergonómico con generics y sin soporte nativo de fetch).
 
 ## Alternativas consideradas
 
@@ -54,4 +56,5 @@ Sin una convención explícita y herramientas automatizadas de verificación, lo
 - PRD §5.1 — Arquitectura y contratos
 - ARD §6 — Decisiones de interfaz
 - HU-00.07 — Contratos OpenAPI primero
+- HU-00.03 — Proyecto BFF NestJS inicial
 - HU-07.02 — Fechas en UTC en todos los contratos

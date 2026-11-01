@@ -3,10 +3,14 @@ export default {
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: ['**/__tests__/**/*.spec.ts'],
+  setupFiles: ['<rootDir>/jest.env.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
     '!src/**/__tests__/**',
+    '!src/generated/**',
+    '!src/main.ts',
   ],
   coverageThreshold: {
     global: {

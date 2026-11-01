@@ -223,15 +223,22 @@ jobs:
             echo "core.v1.yaml es nuevo en este PR. Omitiendo comparación de breaking changes."
           fi
 
-      # ── bff (stub — extended in HU-00.03) ───────────────────────────────────
+      # ── bff (HU-00.03) ───────────────────────────────────────────────────
       - name: pnpm install (bff)
         if: matrix.job == 'bff'
-        run: pnpm --filter @animetracker/bff install 
+        run: pnpm --filter @animetracker/bff install
 
-      - name: bff build + test (stub)
+      - name: Lint bff
         if: matrix.job == 'bff'
-        run: |
-          echo "bff job: no project yet — will be added in HU-00.03"
+        run: pnpm --filter @animetracker/bff run lint
+
+      - name: Build bff (CA3: regenerates the core client from the contract)
+        if: matrix.job == 'bff'
+        run: pnpm --filter @animetracker/bff run build
+
+      - name: Test bff (with coverage)
+        if: matrix.job == 'bff'
+        run: pnpm --filter @animetracker/bff run test:coverage
 
       # ── spa (stub — extended in HU-00.04) ───────────────────────────────────
       - name: pnpm install (spa)
