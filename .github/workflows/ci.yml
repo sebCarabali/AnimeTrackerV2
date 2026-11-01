@@ -253,10 +253,26 @@ jobs:
         run: |
           echo "extension job: no project yet — will be added in HU-00.05"
 
+  # ── T1/CA1-CA2: Scan for secrets in PRs ─────────────────────────────────────
+  secrets:
+    name: Scan for secrets
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: gitleaks/gitleaks-action@v2
+        with:
+          config-path: .gitleaks.toml
+          fail: true
+          notify: false
+
   # ── T7: CA4 — single aggregator check (branch protection targets this) ──────
   ci-ok:
     name: ci-ok
-    needs: [detect, run-job]
+    needs: [detect, run-job, secrets]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -269,6 +285,11 @@ jobs:
           fi
           if [ "${{ needs.run-job.result }}" != "success" ] && [ "${{ needs.run-job.result }}" != "skipped" ]; then
             echo "One or more CI jobs failed: ${{ needs.run-job.result }}"
+            exit 1
+          fi
+          # T1/CA1: secrets job is only required to pass/skip (not fail) in PRs
+          if [ "${{ needs.secrets.result }}" != "success" ] && [ "${{ needs.secrets.result }}" != "skipped" ]; then
+            echo "Secrets scan failed: ${{ needs.secrets.result }}"
             exit 1
           fi
           echo "All CI jobs passed."

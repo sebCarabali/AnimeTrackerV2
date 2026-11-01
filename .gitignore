@@ -57,3 +57,7 @@ logs/
 # ─── Builds de la extensión ──────────────────────────────────────
 apps/extension/dist/
 apps/extension/build/
+node_modules
+
+# Test results
+TestResults*
