@@ -2,9 +2,9 @@ name: OpenAPI Contracts CI
 
 on:
   pull_request:
-    branches: [main, stagin, dev]
+    branches: [main, staging, dev]
   push:
-    branches: [main, stagin, dev]
+    branches: [main, staging, dev]
 
 
 jobs:

@@ -81,6 +81,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharedKernel", "SharedKerne
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimeTracker.SharedKernel.UnitTests", "tests\SharedKernel\AnimeTracker.SharedKernel.UnitTests\AnimeTracker.SharedKernel.UnitTests.csproj", "{6D278148-57F9-41EE-9186-8ACA74052EBD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimeTracker.Testing", "tests\AnimeTracker.Testing\AnimeTracker.Testing.csproj", "{01F3836C-47C6-4482-8826-EFDE8D1C4EAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -403,6 +405,18 @@ Global
 		{6D278148-57F9-41EE-9186-8ACA74052EBD}.Release|x64.Build.0 = Release|Any CPU
 		{6D278148-57F9-41EE-9186-8ACA74052EBD}.Release|x86.ActiveCfg = Release|Any CPU
 		{6D278148-57F9-41EE-9186-8ACA74052EBD}.Release|x86.Build.0 = Release|Any CPU
+		{01F3836C-47C6-4482-8826-EFDE8D1C4EAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01F3836C-47C6-4482-8826-EFDE8D1C4EAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01F3836C-47C6-4482-8826-EFDE8D1C4EAA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{01F3836C-47C6-4482-8826-EFDE8D1C4EAA}.Debug|x64.Build.0 = Debug|Any CPU
+		{01F3836C-47C6-4482-8826-EFDE8D1C4EAA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{01F3836C-47C6-4482-8826-EFDE8D1C4EAA}.Debug|x86.Build.0 = Debug|Any CPU
+		{01F3836C-47C6-4482-8826-EFDE8D1C4EAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01F3836C-47C6-4482-8826-EFDE8D1C4EAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01F3836C-47C6-4482-8826-EFDE8D1C4EAA}.Release|x64.ActiveCfg = Release|Any CPU
+		{01F3836C-47C6-4482-8826-EFDE8D1C4EAA}.Release|x64.Build.0 = Release|Any CPU
+		{01F3836C-47C6-4482-8826-EFDE8D1C4EAA}.Release|x86.ActiveCfg = Release|Any CPU
+		{01F3836C-47C6-4482-8826-EFDE8D1C4EAA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -445,5 +459,6 @@ Global
 		{C0830A97-D138-4AD0-8B56-B296DD4C13A7} = {2D90B387-9E96-A33A-A182-52F1887BC10C}
 		{1649EFD9-AA01-455D-A743-B6F8E478380F} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{6D278148-57F9-41EE-9186-8ACA74052EBD} = {1649EFD9-AA01-455D-A743-B6F8E478380F}
+		{01F3836C-47C6-4482-8826-EFDE8D1C4EAA} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal
