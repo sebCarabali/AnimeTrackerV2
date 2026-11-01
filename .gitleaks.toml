@@ -5,13 +5,12 @@ description = "Detecta credenciales, tokens y claves privadas en commits"
 useDefault = true  # Ruleslist estándar de gitleaks
 
 # Allowlist para test data y fixtures
-[[allowlist]]
+[allowlist]
 description = "Allow test fixtures and test data"
-regexTarget = "path"
 paths = [
-  "(?i)test.*",
-  "(?i)__fixtures__",
-  "(?i)fixtures/",
-  "(?i)testresults/",
-  "(?i)\.gitleaks\.toml"
+  '(?i)test.*',
+  '(?i)__fixtures__',
+  '(?i)fixtures/',
+  '(?i)testresults/',
+  '(?i)\.gitleaks\.toml'
 ]
