@@ -13,7 +13,7 @@ proyecto:
   carpeta_historias: stories/
   zona_horaria: America/Bogota
   generado: 2026-10-28
-  actualizado: 2026-10-31  # HU-00.07 promovida a review tras corrección T9 (iteración 3)
+  actualizado: 2026-10-31  # HU-00.07 promovida a review tras corrección T10 (iteración 4)
   cadencia_sprint: 2 semanas (10 días hábiles)
   velocidad_supuesta_pts: 24   # recalibrar tras el sprint-2 con la velocidad real
 
@@ -242,6 +242,20 @@ riesgos:
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
 
 historial:
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a review tras corrección T10 (iteración 4).
+      H1: ResolveSpecPath promovido a public en ContractAssert.cs; eliminado InternalsVisibleTo.
+      H2: openapi-contracts.yml implementa bypass BASE_MAJOR/PR_MAJOR para oasdiff.
+      58 pruebas .NET + 33 Vitest, 0 fallos. Cobertura AnimeTracker.Testing: 93.75 % ✓.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) regresada a in-progress tras code review iteración 3.
+      2 hallazgos MEDIA: H1: ContractAssertUnitTests en AnimeTracker.Host.IntegrationTests
+      en lugar de proyecto propio (InternalsVisibleTo acoplado). H2: openapi-contracts.yml ejecuta
+      oasdiff sin bypass de versión mayor (fallará en PRs v1→v2 con breaking changes intencionados).
+      16 sugerencias BAJA. T10 agregada con 2 ítems de corrección.
+      Cobertura AnimeTracker.Testing: 93.75 % ✓. 58 pruebas .NET + 33 Vitest, 0 fallos.
   - fecha: 2026-10-31
     cambio: >-
       HU-00.07 (0-7-contratos-openapi-primero) promovida a review tras corrección T9 (iteración 3).
