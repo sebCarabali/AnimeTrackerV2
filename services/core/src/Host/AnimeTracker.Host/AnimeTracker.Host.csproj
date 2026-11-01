@@ -12,8 +12,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Modules\Catalog\AnimeTracker.Catalog.Api\AnimeTracker.Catalog.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Catalog\AnimeTracker.Catalog.Infrastructure\AnimeTracker.Catalog.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Tracking\AnimeTracker.Tracking.Api\AnimeTracker.Tracking.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Tracking\AnimeTracker.Tracking.Infrastructure\AnimeTracker.Tracking.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\Calendar\AnimeTracker.Calendar.Api\AnimeTracker.Calendar.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Calendar\AnimeTracker.Calendar.Infrastructure\AnimeTracker.Calendar.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
