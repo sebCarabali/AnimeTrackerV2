@@ -1,6 +1,9 @@
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+
+[assembly: InternalsVisibleTo("AnimeTracker.Host.IntegrationTests")]
 
 namespace AnimeTracker.Testing;
 
@@ -55,10 +58,17 @@ public static class ContractAssert
 
         var responseSpec = CastDict(responseObj, $"response {statusCode}");
         var content = GetDict(responseSpec, "content");
-        if (content is null)
-            return;
-
+        // H3: read body first so we can detect when body exists but contract declares no content
         var body = await response.Content.ReadAsStringAsync();
+
+        if (content is null)
+        {
+            if (!string.IsNullOrWhiteSpace(body))
+                throw new ContractViolationException(
+                    $"Response has a body but contract declares no 'content' for {statusCode} {method} {path} in '{spec}'.");
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(body))
             return;
 
@@ -104,7 +114,8 @@ public static class ContractAssert
                 "object"  => element.ValueKind == JsonValueKind.Object,
                 "array"   => element.ValueKind == JsonValueKind.Array,
                 "string"  => element.ValueKind == JsonValueKind.String,
-                "integer" => element.ValueKind == JsonValueKind.Number,
+                // H2: integer must be a whole number, not any JSON number (e.g. 1.5 must fail)
+                "integer" => element.ValueKind == JsonValueKind.Number && element.TryGetInt64(out _),
                 "number"  => element.ValueKind == JsonValueKind.Number,
                 "boolean" => element.ValueKind is JsonValueKind.True or JsonValueKind.False,
                 _         => true
@@ -171,17 +182,22 @@ public static class ContractAssert
         => obj as IDictionary<object, object>
            ?? throw new ContractViolationException($"Expected a mapping for {context} but got '{obj?.GetType().Name ?? "null"}'.");
 
-    private static string ResolveSpecPath(string spec)
+    // H4: exposed as internal for testing; supports REPO_ROOT env var and .reporoot marker anchor
+    internal static string ResolveSpecPath(string spec, string? startDir = null)
     {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        var root = Environment.GetEnvironmentVariable("REPO_ROOT");
+        if (!string.IsNullOrWhiteSpace(root))
+            return Path.Combine(root, spec.Replace('/', Path.DirectorySeparatorChar));
+
+        var dir = new DirectoryInfo(startDir ?? AppContext.BaseDirectory);
         while (dir is not null)
         {
-            if (File.Exists(Path.Combine(dir.FullName, "pnpm-workspace.yaml")))
+            if (File.Exists(Path.Combine(dir.FullName, ".reporoot")))
                 return Path.Combine(dir.FullName, spec.Replace('/', Path.DirectorySeparatorChar));
             dir = dir.Parent;
         }
 
         throw new InvalidOperationException(
-            "Cannot locate repository root (no pnpm-workspace.yaml found in ancestor directories).");
+            "Cannot locate repository root (no .reporoot marker found in ancestor directories). Set REPO_ROOT to override.");
     }
 }

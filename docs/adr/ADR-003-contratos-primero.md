@@ -41,11 +41,13 @@ Sin una convención explícita y herramientas automatizadas de verificación, lo
 
 - **Generación de contrato desde el código** (code-first con Swashbuckle / NSwag): descartado porque se desea que el contrato preceda a la implementación y sea agnóstico del framework del servidor.
 - **Sin versionado semántico**: descartado por falta de trazabilidad ante breaking changes.
+- **`Microsoft.OpenApi.Readers` para parsear el contrato en .NET**: descartado por conflicto de versión en runtime entre `Microsoft.OpenApi.Readers` 1.6.22 y `Microsoft.OpenApi` 2.12.2 que requiere `Microsoft.AspNetCore.OpenApi` 10.0.x. Se optó por `YamlDotNet` 16.3.0 para parsear el YAML directamente en `ContractAssert`.
+- **`pnpm-workspace.yaml` como ancla de raíz del repositorio en `ContractAssert`**: descartado porque acopla el código de pruebas .NET a un artefacto del ecosistema JavaScript. Se adoptó un archivo `.reporoot` dedicado en la raíz del monorepo, con `REPO_ROOT` como variable de entorno primaria (útil en CI y tests de aislamiento).
 
 ## Consecuencias
 
 - **Positivas**: ciclo de feedback rápido ante cambios incompatibles; documentación siempre actualizada; clientes y servidores coherentes por construcción.
-- **Negativas**: disciplina adicional requerida al añadir endpoints (el contrato va primero, siempre); el helper `ContractAssert` agrega una dependencia de prueba en `Microsoft.OpenApi.Readers`.
+- **Negativas**: disciplina adicional requerida al añadir endpoints (el contrato va primero, siempre); el helper `ContractAssert` usa `YamlDotNet` 16.3.0 como dependencia de prueba, con un validador de esquema propio en lugar de la librería oficial de OpenAPI.
 
 ## Referencias
 

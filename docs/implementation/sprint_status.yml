@@ -13,7 +13,7 @@ proyecto:
   carpeta_historias: stories/
   zona_horaria: America/Bogota
   generado: 2026-10-28
-  actualizado: 2026-10-31
+  actualizado: 2026-10-31  # HU-00.07 promovida a review tras corrección T8 (7 hallazgos ALTA/MEDIA)
   cadencia_sprint: 2 semanas (10 días hábiles)
   velocidad_supuesta_pts: 24   # recalibrar tras el sprint-2 con la velocidad real
 
@@ -242,6 +242,22 @@ riesgos:
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
 
 historial:
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a review tras corrección T8.
+      H1: job contracts en ci.yml reemplazado con Spectral + oasdiff reales.
+      H2: integer validation con TryGetInt64. H3: throw cuando body existe sin content.
+      H4: .reporoot como ancla de monorepo (+ REPO_ROOT env var). H5: ADR-003 actualizado.
+      H6: regla Spectral error-response-problem-json-media-type. H7: 8 unit tests de ContractAssert.
+      Cobertura AnimeTracker.Testing: 91.2 % ✓. 56 pruebas .NET + 33 Vitest, 0 fallos.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) regresada a in-progress tras code review iteración 1.
+      1 hallazgo ALTA (Arquitectura): job contracts en ci.yml sigue siendo stub; Spectral y oasdiff
+      no alimentan ci-ok. 6 hallazgos MEDIA: integer/number en ContractAssert, silent-pass sin content,
+      ResolveSpecPath acoplado a pnpm-workspace.yaml, ADR-003 inconsistente con YamlDotNet, regla
+      Spectral no valida application/problem+json, 7 ramas de error sin prueba en ContractAssert.
+      T8 agregada con 7 ítems de corrección. 10 sugerencias BAJA. Cobertura AnimeTracker.Testing: 84.16 % ✓.
   - fecha: 2026-10-31
     cambio: >-
       HU-00.07 (0-7-contratos-openapi-primero) promovida a review. T1–T4, T6–T7 completadas.
