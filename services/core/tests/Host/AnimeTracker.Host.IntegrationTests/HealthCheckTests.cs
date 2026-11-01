@@ -26,13 +26,12 @@ public class HealthCheckTests(WebApplicationFactory<Program> factory)
         var root = doc.RootElement;
 
         root.GetProperty("status").GetString().ShouldBe("Healthy");
+        root.GetProperty("timestamp").GetString().ShouldNotBeNullOrEmpty();
 
-        var modules = root.GetProperty("modules").EnumerateArray()
-            .Select(m => m.GetProperty("name").GetString())
-            .ToList();
-        modules.ShouldContain("catalog");
-        modules.ShouldContain("tracking");
-        modules.ShouldContain("calendar");
+        var entries = root.GetProperty("entries");
+        entries.TryGetProperty("catalog", out _).ShouldBeTrue();
+        entries.TryGetProperty("tracking", out _).ShouldBeTrue();
+        entries.TryGetProperty("calendar", out _).ShouldBeTrue();
     }
 
     [Fact]

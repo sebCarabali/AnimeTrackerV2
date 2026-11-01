@@ -13,14 +13,14 @@ proyecto:
   carpeta_historias: stories/
   zona_horaria: America/Bogota
   generado: 2026-10-28
-  actualizado: 2026-10-31
+  actualizado: 2026-10-31  # HU-00.07 marcada como done — PR creado
   cadencia_sprint: 2 semanas (10 días hábiles)
   velocidad_supuesta_pts: 24   # recalibrar tras el sprint-2 con la velocidad real
 
 leyenda_estados:
   release: [planned, in-progress, done]
   sprint: [planned, active, closed]
-  epica: [backlog, planned, in-progress, review, push-request, done]
+  epica: [backlog, planned, in-progress, review, pull-request, done]
   historia:
     backlog: En el backlog, sin archivo de historia detallado.
     ready-for-dev: Archivo de historia con criterios y plan TDD listo; puede entrar a un sprint.
@@ -128,7 +128,7 @@ epicas:
       0-6-entorno-local-docker-compose:
         { id: HU-00.06, titulo: Entorno local con Docker Compose, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.08, HU-00.12], archivo: stories/0-6-entorno-local-docker-compose.md }
       0-7-contratos-openapi-primero:
-        { id: HU-00.07, titulo: Contratos OpenAPI primero, prioridad: Must, puntos: 5, estado: in-progress, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-7-contratos-openapi-primero.md }
+        { id: HU-00.07, titulo: Contratos OpenAPI primero, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-7-contratos-openapi-primero.md }
       0-8-persistencia-migraciones-por-modulo:
         { id: HU-00.08, titulo: Persistencia y migraciones por módulo, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.02], archivo: stories/0-8-persistencia-migraciones-por-modulo.md }
       0-9-pipeline-integracion-continua:
@@ -242,6 +242,68 @@ riesgos:
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
 
 historial:
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) marcada como done — PR abierto contra dev.
+      Build y 74 pruebas (.NET 16 + ArchTests 18 + otros + 33 Vitest) en verde tras rebase.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a pull-request tras code review iteración 4.
+      APROBADA: 0 hallazgos ≥ MEDIA en los 5 ámbitos (aceptación, seguridad, diseño, arquitectura,
+      pruebas). 17 sugerencias BAJA registradas, ninguna bloquea. Cobertura 93.75 % ✓.
+      58 pruebas .NET + 33 Vitest, 0 fallos.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a review tras corrección T10 (iteración 4).
+      H1: ResolveSpecPath promovido a public en ContractAssert.cs; eliminado InternalsVisibleTo.
+      H2: openapi-contracts.yml implementa bypass BASE_MAJOR/PR_MAJOR para oasdiff.
+      58 pruebas .NET + 33 Vitest, 0 fallos. Cobertura AnimeTracker.Testing: 93.75 % ✓.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) regresada a in-progress tras code review iteración 3.
+      2 hallazgos MEDIA: H1: ContractAssertUnitTests en AnimeTracker.Host.IntegrationTests
+      en lugar de proyecto propio (InternalsVisibleTo acoplado). H2: openapi-contracts.yml ejecuta
+      oasdiff sin bypass de versión mayor (fallará en PRs v1→v2 con breaking changes intencionados).
+      16 sugerencias BAJA. T10 agregada con 2 ítems de corrección.
+      Cobertura AnimeTracker.Testing: 93.75 % ✓. 58 pruebas .NET + 33 Vitest, 0 fallos.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a review tras corrección T9 (iteración 3).
+      H1: typo stagin→staging en ci.yml branches (líneas 5 y 7). H2: bypass versión mayor en pasos
+      oasdiff (grep+sed extrae segmento mayor; si PR_MAJOR > BASE_MAJOR se omite oasdiff con mensaje).
+      H3: test SatisfiesAsync_float_value_for_integer_type_throws (1.5 con type:integer).
+      H4: test SatisfiesAsync_no_paths_section_throws (spec sin paths:). 58 pruebas .NET + 33 Vitest,
+      0 fallos. Cobertura AnimeTracker.Testing: 93.8 % ✓.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) regresada a in-progress tras code review iteración 2.
+      2 hallazgos ALTA: typo `stagin` en ci.yml triggers (rama staging sin CI) y bypass versión mayor
+      de CA3 no implementado. 2 hallazgos MEDIA: arm "integer" de ValidateSchema sin cobertura (H2),
+      rama "no paths" sin cobertura. 16 sugerencias BAJA. T9 agregada con 4 ítems de corrección.
+      Cobertura AnimeTracker.Testing: 93.0 % ✓. 57 pruebas .NET + 33 Vitest, 0 fallos.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a review tras corrección T8.
+      H1: job contracts en ci.yml reemplazado con Spectral + oasdiff reales.
+      H2: integer validation con TryGetInt64. H3: throw cuando body existe sin content.
+      H4: .reporoot como ancla de monorepo (+ REPO_ROOT env var). H5: ADR-003 actualizado.
+      H6: regla Spectral error-response-problem-json-media-type. H7: 8 unit tests de ContractAssert.
+      Cobertura AnimeTracker.Testing: 91.2 % ✓. 56 pruebas .NET + 33 Vitest, 0 fallos.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) regresada a in-progress tras code review iteración 1.
+      1 hallazgo ALTA (Arquitectura): job contracts en ci.yml sigue siendo stub; Spectral y oasdiff
+      no alimentan ci-ok. 6 hallazgos MEDIA: integer/number en ContractAssert, silent-pass sin content,
+      ResolveSpecPath acoplado a pnpm-workspace.yaml, ADR-003 inconsistente con YamlDotNet, regla
+      Spectral no valida application/problem+json, 7 ramas de error sin prueba en ContractAssert.
+      T8 agregada con 7 ítems de corrección. 10 sugerencias BAJA. Cobertura AnimeTracker.Testing: 84.16 % ✓.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a review. T1–T4, T6–T7 completadas.
+      ContractAssert con YamlDotNet 16.3.0; 3 pruebas de contrato en Host.IntegrationTests
+      (81% cobertura). /health alineado con core.v1.yaml (entries + timestamp). T5 diferida
+      a HU-00.03 (apps/bff skeleton). ADR-003-contratos-primero.md registrado.
+      49 pruebas .NET + 33 Vitest, 0 fallos.
   - fecha: 2026-10-31
     cambio: >-
       HU-00.07 (0-7-contratos-openapi-primero) promovida a in-progress tras aprobación

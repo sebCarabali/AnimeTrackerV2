@@ -38,3 +38,16 @@ rules:
     then:
       field: content
       function: defined
+
+  error-response-problem-json-media-type:
+    description: "Error responses must use application/problem+json as content type (RFC 9457)"
+    given: "$.paths.*[get,post,put,delete,patch].responses[?(@property >= 400 && @property < 600)].content"
+    severity: error
+    recommended: true
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          required:
+            - "application/problem+json"

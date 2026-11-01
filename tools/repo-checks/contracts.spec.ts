@@ -84,6 +84,29 @@ describe('HU-00.07 · CA2 — Lint de estilo con Spectral', () => {
 });
 
 
+describe('HU-00.07 · CA3 — Detección de cambios incompatibles con oasdiff', () => {
+  const base = join(root, 'contracts/__fixtures__/v1-base.yaml');
+  const breaking = join(root, 'contracts/__fixtures__/v1-breaking.yaml');
+  const oasdiffBin = 'oasdiff';
+
+  it('oasdiff reporta breaking changes entre v1-base y v1-breaking', () => {
+    expect(existsSync(base), 'v1-base.yaml debe existir').toBe(true);
+    expect(existsSync(breaking), 'v1-breaking.yaml debe existir').toBe(true);
+
+    const result = spawnSync(oasdiffBin, ['breaking', base, breaking, '--fail-on', 'ERR'], {
+      cwd: root,
+      encoding: 'utf-8',
+      shell: true,
+    });
+
+    expect(
+      result.status,
+      `oasdiff debe detectar breaking changes (exit code != 0).\nstdout: ${result.stdout}\nstderr: ${result.stderr}`,
+    ).not.toBe(0);
+  });
+
+});
+
 describe('HU-00.07 · CA6 — Documentación navegable', () => {
   it('pnpm contracts:docs genera documentación HTML para ambos contratos', () => {
     const bffDoc = join(root, 'dist/docs/bff.html');
