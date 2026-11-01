@@ -40,6 +40,9 @@ describe('validateEnv', () => {
       process.env.PORT = '3000';
       process.env.NODE_ENV = 'development';
 
+      // Note: validateEnv treats empty string ("") as present (falsy but defined).
+      // Edge case: process.env.VAR = "" is still a defined variable in JS.
+      // For strict validation, app logic should use additional checks (e.g., `!VAR || VAR.trim() === ""`).
       expect(() => {
         validateEnv(['CORE_BASE_URL', 'PORT', 'NODE_ENV']);
       }).not.toThrow();
