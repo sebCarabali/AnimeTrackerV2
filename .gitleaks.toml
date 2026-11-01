@@ -1,0 +1,17 @@
+title = "AnimeTracker Secrets Scanner"
+description = "Detecta credenciales, tokens y claves privadas en commits"
+
+[extend]
+useDefault = true  # Ruleslist estándar de gitleaks
+
+# Allowlist para test data y fixtures
+[[allowlist]]
+description = "Allow test fixtures and test data"
+regexTarget = "path"
+paths = [
+  "(?i)test.*",
+  "(?i)__fixtures__",
+  "(?i)fixtures/",
+  "(?i)testresults/",
+  "(?i)\.gitleaks\.toml"
+]
