@@ -13,7 +13,7 @@ proyecto:
   carpeta_historias: stories/
   zona_horaria: America/Bogota
   generado: 2026-10-28
-  actualizado: 2026-10-29
+  actualizado: 2026-10-31
   cadencia_sprint: 2 semanas (10 días hábiles)
   velocidad_supuesta_pts: 24   # recalibrar tras el sprint-2 con la velocidad real
 
@@ -128,7 +128,7 @@ epicas:
       0-6-entorno-local-docker-compose:
         { id: HU-00.06, titulo: Entorno local con Docker Compose, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.08, HU-00.12], archivo: stories/0-6-entorno-local-docker-compose.md }
       0-7-contratos-openapi-primero:
-        { id: HU-00.07, titulo: Contratos OpenAPI primero, prioridad: Must, puntos: 5, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-7-contratos-openapi-primero.md }
+        { id: HU-00.07, titulo: Contratos OpenAPI primero, prioridad: Must, puntos: 5, estado: in-progress, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-7-contratos-openapi-primero.md }
       0-8-persistencia-migraciones-por-modulo:
         { id: HU-00.08, titulo: Persistencia y migraciones por módulo, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.02], archivo: stories/0-8-persistencia-migraciones-por-modulo.md }
       0-9-pipeline-integracion-continua:
@@ -242,6 +242,17 @@ riesgos:
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
 
 historial:
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a in-progress tras aprobación
+      de readiness review por PM, Scrum Master y Architect. Rama feature/story-0-7-contratos-openapi-primero
+      creada. Inicio de ciclo TDD (T1-T7).
+  - fecha: 2026-10-31
+    cambio: >-
+      Readiness review de HU-00.07 (0-7-contratos-openapi-primero): resultado 1
+      (ready-for-dev). Técnico (Dev & Architect): 1, Negocio (PM): 1, Ágil (Scrum Master): 1.
+      Historia lista para iniciar desarrollo en Sprint 1. Dependencias HU-00.01 y HU-00.09 completadas en dev.
+      Desbloquea desarrollo de HU-00.03, HU-00.04 y contratos de endpoints subsecuentes.
   - fecha: 2026-10-31
     cambio: >-
       HU-00.09 (0-9-pipeline-integracion-continua) regresada a in-progress tras code review

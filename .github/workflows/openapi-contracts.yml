@@ -1,0 +1,49 @@
+name: OpenAPI Contracts CI
+
+on:
+  pull_request:
+    branches: [main, stagin, dev]
+  push:
+    branches: [main, stagin, dev]
+
+
+jobs:
+  verify-contracts:
+    name: Lint & Breaking Changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+        with:
+          # fetch-depth: 0 es obligatorio para descargar el historial y poder comparar contra main
+          fetch-depth: 0
+
+      - name: Instalar Spectral CLI
+        run: npm install -g @stoplight/spectral-cli
+
+      - name: Ejecutar Lint de estilo (CA2)
+        run: spectral lint contracts/public/bff.v1.yaml contracts/internal/core.v1.yaml
+
+      - name: Instalar oasdiff
+        run: |
+          go install github.com/oasdiff/oasdiff@latest
+          sudo mv $(go env GOPATH)/bin/oasdiff /usr/local/bin/
+
+      - name: Detección de Breaking Changes - BFF Público (CA3)
+        run: |
+          # Verificamos si el archivo existe en la rama main
+          if git rev-parse --verify origin/main:contracts/public/bff.v1.yaml >/dev/null 2>&1; then
+            git show origin/main:contracts/public/bff.v1.yaml > base-bff.yaml
+            oasdiff breaking base-bff.yaml contracts/public/bff.v1.yaml --fail-on ERR
+          else
+            echo "El contrato bff.v1.yaml es nuevo en este PR. Omitiendo comparación de breaking changes."
+          fi
+
+      - name: Detección de Breaking Changes - Core Interno (CA3)
+        run: |
+          if git rev-parse --verify origin/main:contracts/internal/core.v1.yaml >/dev/null 2>&1; then
+            git show origin/main:contracts/internal/core.v1.yaml > base-core.yaml
+            oasdiff breaking base-core.yaml contracts/internal/core.v1.yaml --fail-on ERR
+          else
+            echo "El contrato core.v1.yaml es nuevo en este PR. Omitiendo comparación de breaking changes."
+          fi
