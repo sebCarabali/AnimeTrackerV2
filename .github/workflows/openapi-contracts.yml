@@ -26,8 +26,10 @@ jobs:
 
       - name: Instalar oasdiff
         run: |
-          curl -sL https://raw.githubusercontent.com/Tufin/oasdiff/main/scripts/install.sh | sh
+          curl -sL https://github.com/Tufin/oasdiff/releases/latest/download/oasdiff_linux_amd64.tar.gz -o oasdiff.tar.gz
+          tar -xzf oasdiff.tar.gz oasdiff
           sudo mv oasdiff /usr/local/bin/
+          rm oasdiff.tar.gz
 
       - name: Detección de Breaking Changes - BFF Público (CA3)
         run: |
