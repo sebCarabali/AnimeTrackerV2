@@ -26,10 +26,8 @@ jobs:
 
       - name: Instalar oasdiff
         run: |
-          curl -sL https://github.com/Tufin/oasdiff/releases/latest/download/oasdiff_linux_amd64.tar.gz -o oasdiff.tar.gz
-          tar -xzf oasdiff.tar.gz oasdiff
-          sudo mv oasdiff /usr/local/bin/
-          rm oasdiff.tar.gz
+          go install github.com/tufin/oasdiff@latest
+          sudo mv $(go env GOPATH)/bin/oasdiff /usr/local/bin/
 
       - name: Detección de Breaking Changes - BFF Público (CA3)
         run: |
