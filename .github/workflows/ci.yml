@@ -181,7 +181,7 @@ jobs:
       # ── bff (stub — extended in HU-00.03) ───────────────────────────────────
       - name: pnpm install (bff)
         if: matrix.job == 'bff'
-        run: pnpm --filter @animetracker/bff install --if-present
+        run: pnpm --filter @animetracker/bff install 
 
       - name: bff build + test (stub)
         if: matrix.job == 'bff'
@@ -191,7 +191,7 @@ jobs:
       # ── spa (stub — extended in HU-00.04) ───────────────────────────────────
       - name: pnpm install (spa)
         if: matrix.job == 'spa'
-        run: pnpm --filter @animetracker/spa install --if-present
+        run: pnpm --filter @animetracker/spa install
 
       - name: spa build + test (stub)
         if: matrix.job == 'spa'
@@ -201,7 +201,7 @@ jobs:
       # ── extension (stub — extended in HU-00.05) ──────────────────────────────
       - name: pnpm install (extension)
         if: matrix.job == 'extension'
-        run: pnpm --filter @animetracker/extension install --if-present
+        run: pnpm --filter @animetracker/extension install
 
       - name: extension build + test (stub)
         if: matrix.job == 'extension'
