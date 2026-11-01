@@ -137,9 +137,9 @@ it.each([
 
 ## Pull Request
 
-- URL: https://github.com/sebCarabali/AnimeTrackerV2/pull/7
+- URL: https://github.com/sebCarabali/AnimeTrackerV2/pull/8
 - Fecha: 2026-10-31
-- Rama: `feature/story-0-9-pipeline-integracion-continua` → `main`
+- Rama: `feature/story-0-9-pipeline-integracion-continua` → `dev`
 
 ## Readiness Review
 
