@@ -124,7 +124,7 @@ epicas:
       0-2-solucion-net-monolito-modular:
         { id: HU-00.02, titulo: Solución .NET 8 como monolito modular, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-2-solucion-net-monolito-modular.md }
       0-3-bff-nestjs-inicial:
-        { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: review, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12b], archivo: stories/0-3-bff-nestjs-inicial.md, nota: "T9 completada 2026-11-01: 6 hallazgos de code review (1 CRITICA, 1 ALTA, 4 MEDIA) corregidos — ci.yml name: entrecomillado, gitleaks allowlist anclado, Dockerfile sin devDeps en runtime, .dockerignore con .env, Logger en CoreHealthIndicator, Content-Type problem+json en /health/ready (requirió @Res() manual, Nest revierte el header en passthrough con status >=400). 16/16 tests, cobertura 100%/83.33%/100%/100%. Pendiente /story-review." }
+        { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: review, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12b], archivo: stories/0-3-bff-nestjs-inicial.md, nota: "T10 completada (2026-11-01): allowlist de .gitleaks.toml anclado (3 patrones) y cambio estructural [[allowlist]]->[allowlist] documentado y validado con secreto private-key plantado; readiness() ya no usa @Res(), lanza CoreUnavailableException capturada por ProblemJsonExceptionFilter. 16/16 tests, cobertura 100%/83.33%/100%/100%. Pendiente re-ejecución de /story-review." }
       0-4-spa-angular-inicial:
         { id: HU-00.04, titulo: SPA Angular inicial, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.09], archivo: stories/0-4-spa-angular-inicial.md }
       0-5-esqueleto-extension-navegador:
@@ -248,6 +248,33 @@ riesgos:
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
 
 historial:
+  - fecha: 2026-11-01
+    cambio: >-
+      HU-00.03 (0-3-bff-nestjs-inicial) promovida a review tras corrección T10 (iteración 2).
+      3 hallazgos MEDIA corregidos: (1) allowlist de .gitleaks.toml anclado en los 3 patrones
+      restantes (__fixtures__, fixtures/, testresults/) igual que las entradas ya corregidas en
+      T9; (2) cambio estructural [[allowlist]] -> [allowlist] (T9) documentado en .gitleaks.toml
+      y validado plantando un secreto private-key real en rutas exentas (__tests__/,
+      __fixtures__/, fixtures/, TestResults/ -> 0 leaks) y en rutas señuelo no exentas
+      (attestation.ts, legacy-fixtures/, nottestresults/ -> 3 leaks detectados); (3)
+      readiness() ya no usa @Res() manual: lanza CoreUnavailableException, capturada por el
+      nuevo ProblemJsonExceptionFilter (@Catch + @UseFilters), devolviendo la ruta de éxito al
+      pipeline estándar de interceptores de Nest y dejando la construcción RFC 9457 en el punto
+      de extensión sancionado por el framework. 16/16 tests sin cambios funcionales, cobertura
+      100%/83.33%/100%/100% (sin cambio respecto a T9). Sin regresión en @animetracker/repo-checks
+      (33/33) ni @animetracker/ci (18/18). Pendiente re-ejecución de /story-review.
+  - fecha: 2026-11-01
+    cambio: >-
+      HU-00.03 (0-3-bff-nestjs-inicial) regresada a in-progress tras code review iteración 2.
+      3 hallazgos MEDIA: (1) Seguridad — allowlist de .gitleaks.toml deja 3 patrones
+      (__fixtures__, fixtures/, testresults/) con el mismo defecto de anclaje por subcadena
+      que el patrón test.* ya corregido en T9; (2) Seguridad — cambio estructural
+      [[allowlist]] a [allowlist] (T9) sin documentar ni verificar empíricamente con un
+      secreto de prueba plantado; (3) Diseño — @Res() manual en readiness() (fix válido de
+      T9 para Content-Type) saca esa ruta del pipeline de interceptores de Nest, riesgo para
+      interceptores futuros de HU-00.11. Arquitectura y Pruebas (16/16, cobertura 83.33%
+      branches) aprobadas sin hallazgos nuevos; los 6 hallazgos de iteración 1 confirmados
+      corregidos de forma independiente. T10 agregada con 3 ítems de corrección.
   - fecha: 2026-11-01
     cambio: >-
       HU-00.03 (0-3-bff-nestjs-inicial) promovida a review tras corrección T9 (iteración 1).
