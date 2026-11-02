@@ -34,8 +34,10 @@ metricas:
   puntos_total: 196
   historias_done: 8   # 0-1 (3), 0-2 (5), 0-3 (3), 0-7 (5), 0-8 (3), 0-9 (5), 0-12a (1.5), 0-12b (1.5)
   puntos_done: 27
-  historias_review: 1   # 0-4
-  puntos_review: 3
+  historias_review: 0
+  puntos_review: 0
+  historias_pull_request: 1   # 0-4
+  puntos_pull_request: 3
   historias_ready_for_dev: 4   # 0-5, 0-6, 0-10, 0-11 (sprint-2)
   avance_pct: 13   # puntos_done / puntos_total (27/196)
 
@@ -139,7 +141,7 @@ epicas:
       0-3-bff-nestjs-inicial:
         { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: done, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12b], archivo: stories/0-3-bff-nestjs-inicial.md, nota: "Code review iteración 4 (2026-11-01): APROBADA. 0 hallazgos ≥ MEDIA en los 5 ámbitos (aceptación, seguridad, diseño, arquitectura, pruebas). 18/18 tests, cobertura 100%/100%/100%/100%. PR #21 mergeado a dev (commit f393996, HEAD de dev)." }
       0-4-spa-angular-inicial:
-        { id: HU-00.04, titulo: SPA Angular inicial, prioridad: Must, puntos: 3, estado: review, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.09], archivo: stories/0-4-spa-angular-inicial.md, nota: "Desarrollo completado (2026-11-01): apps/spa (Angular 22, standalone, vitest) con Shell + 4 páginas lazy + NotFound, cliente tipado (ng-openapi-gen) desde contracts/public/bff.v1.yaml, job spa real en ci.yml. 10/10 tests, cobertura 100%/98.57%/100%/100% (umbral 80% como gate en angular.json). Lighthouse accesibilidad 100/100. Pendiente: /story-review 0-4." }
+        { id: HU-00.04, titulo: SPA Angular inicial, prioridad: Must, puntos: 3, estado: pull-request, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.09], archivo: stories/0-4-spa-angular-inicial.md, nota: "Code review (2026-11-02): APROBADA. 0 hallazgos ≥ MEDIA en los 5 ámbitos (aceptación, seguridad, diseño, arquitectura, pruebas); 7 sugerencias BAJA registradas (no bloqueantes). 10/10 tests, cobertura 100%/98.57%/100%/100% (umbral 80%). Pendiente: /story-pr 0-4." }
       0-5-esqueleto-extension-navegador:
         { id: HU-00.05, titulo: Esqueleto de la extensión de navegador, prioridad: Should, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-5-esqueleto-extension-navegador.md }
       0-6-entorno-local-docker-compose:
@@ -262,6 +264,19 @@ riesgos:
   - { id: R-03, descripcion: "Defectos de infraestructura/configuración (YAML de GitHub Actions, reglas de gitleaks, umbral de cobertura) se detectan en code review manual en ciclos tardíos (2ª-4ª iteración) en vez de en un gate automatizado — patrón observado en HU-00.02 (9 hallazgos ≥MEDIA en 1ª iteración, cobertura <80%), HU-00.07 (4 iteraciones, typo \"stagin\" en ci.yml que rompía CI real en staging), HU-00.09 (H5 sin cerrar 3 ciclos consecutivos por evidencia CA4/CA5 no enlazada) y HU-00.03 (1 hallazgo CRÍTICO de YAML roto + 1 ALTA de regex de allowlist de gitleaks sin anclar). Riesgo de que se repita en HU-00.10/00.11 (sprint-2), que también tocan workflows de CI/CD e infraestructura.", probabilidad: alta, impacto: medio, mitigacion: "Retro sprint-1 (2026-11-01): agregar job de lint de YAML/Actions (actionlint o equivalente) en detect/run-job de ci.yml antes de cualquier otro job; mover el gate de cobertura ≥80% a bloqueante de CI en vez de hallazgo de code review; exigir matriz CA→evidencia (test/artefacto) explícita en la plantilla de PR y que story-review la valide, para que hallazgos como H5 no se reabran por ciclos sin cerrar. Dueño: Architect (gate de CI) + SM (plantilla PR / criterio de escalamiento tras 2 ciclos sin cerrar). Aplica antes de iniciar HU-00.10/00.11." }
 
 historial:
+  - fecha: 2026-11-02
+    cambio: >-
+      HU-00.04 (0-4-spa-angular-inicial) promovida a pull-request tras code review.
+      APROBADA: 0 hallazgos ≥ MEDIA en los 5 ámbitos (aceptación, seguridad, diseño,
+      arquitectura, pruebas) revisados en paralelo. 7 sugerencias BAJA registradas, no
+      bloqueantes: (1) CA5 sin test automatizado que confirme que el job "spa" se
+      dispara para apps/spa/ en tools/ci/affected.ts; (2) paths de ruta duplicados
+      entre app.routes.ts y shell.ts (DRY); (3) Shell.navLinks hardcodeado (OCP, sin
+      impacto al tamaño actual); (4) páginas sin ChangeDetectionStrategy.OnPush; (5)
+      sin E2E real con "ng serve" (RouterTestingHarness es TestBed, no E2E); (6) rama
+      no cubierta en app.ts:10 es instrumentación v8 del decorador, no lógica real.
+      10/10 tests, cobertura 100%/98.57%/100%/100% (umbral 80% superado). Siguiente
+      paso: /story-pr 0-4.
   - fecha: 2026-11-01
     cambio: >-
       HU-00.04 (0-4-spa-angular-inicial) desarrollada y promovida a review. Rama
