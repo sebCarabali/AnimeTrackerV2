@@ -8,7 +8,7 @@
 | Prioridad | Must |
 | Estimación | 3 pts |
 | Sprint | sprint-2 |
-| Estado | pull-request |
+| Estado | done |
 | Depende de | HU-00.01, HU-00.07, HU-00.09 |
 | Bloquea | EP-01 (UI), EP-02 (UI), EP-03 (UI), EP-04, EP-05 (UI) |
 
