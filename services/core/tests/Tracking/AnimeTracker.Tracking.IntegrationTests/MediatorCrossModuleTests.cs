@@ -1,6 +1,7 @@
 using AnimeTracker.Catalog.Application;
 using AnimeTracker.Catalog.Contracts.Queries;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
@@ -15,8 +16,15 @@ public class MediatorCrossModuleTests
 
     public MediatorCrossModuleTests()
     {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Catalog:ConnectionString"] = "test"
+            })
+            .Build();
+
         var services = new ServiceCollection();
-        services.AddCatalogApplication();
+        services.AddCatalogApplication(configuration);
         // Tracking would register its own handlers here; omitted since it has none yet.
         var provider = services.BuildServiceProvider();
         _mediator = provider.GetRequiredService<IMediator>();

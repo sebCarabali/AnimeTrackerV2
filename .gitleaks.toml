@@ -1,0 +1,30 @@
+title = "AnimeTracker Secrets Scanner"
+description = "Detecta credenciales, tokens y claves privadas en commits"
+
+[extend]
+useDefault = true  # Ruleslist estándar de gitleaks
+
+# Allowlist para test data y fixtures
+#
+# Nota (T10, 2026-11-01): esta tabla única `[allowlist]` reemplaza la forma `[[allowlist]]`
+# (con `regexTarget = "path"` por entrada) usada antes de T9. gitleaks v8 define el allowlist
+# global del nivel superior como una tabla única (`[allowlist]`), no un arreglo de tablas; el
+# campo `paths` siempre compara contra la ruta del archivo independientemente de `regexTarget`
+# (ese campo solo afecta a `regexes`), por lo que `regexTarget = "path"` es innecesario aquí.
+# Validado empíricamente plantando un secreto `private-key` real (bloque PEM) en rutas que
+# deben quedar exentas (`__tests__/`, `__fixtures__/`, `fixtures/`, `TestResults/`) — 0 leaks — y
+# en rutas señuelo que NO deben quedar exentas (`attestation.ts`, `legacy-fixtures/`,
+# `nottestresults/`) — 3 leaks detectados (`private-key`), confirmando que el allowlist está
+# activo y anclado correctamente, sin falsos negativos por subcadena.
+[allowlist]
+description = "Allow test fixtures and test data"
+paths = [
+  '(?i)(^|/)__tests__/',
+  '(?i)(^|/)tests/',
+  '\.spec\.ts$',
+  '\.test\.ts$',
+  '(?i)(^|/)__fixtures__($|/)',
+  '(?i)(^|/)fixtures/',
+  '(?i)(^|/)testresults/',
+  '(?i)\.gitleaks\.toml'
+]

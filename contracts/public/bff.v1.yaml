@@ -32,6 +32,26 @@ paths:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
+  /health/ready:
+    get:
+      summary: Readiness check endpoint
+      description: Returns 200 only when the BFF and its downstream dependencies (core) are ready to serve traffic.
+      operationId: getHealthReady
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service and downstream dependencies are ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: A downstream dependency is not ready
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
 components:
   schemas:
     HealthStatus:

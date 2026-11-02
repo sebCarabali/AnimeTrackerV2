@@ -223,15 +223,22 @@ jobs:
             echo "core.v1.yaml es nuevo en este PR. Omitiendo comparación de breaking changes."
           fi
 
-      # ── bff (stub — extended in HU-00.03) ───────────────────────────────────
+      # ── bff (HU-00.03) ───────────────────────────────────────────────────
       - name: pnpm install (bff)
         if: matrix.job == 'bff'
-        run: pnpm --filter @animetracker/bff install 
+        run: pnpm --filter @animetracker/bff install
 
-      - name: bff build + test (stub)
+      - name: Lint bff
         if: matrix.job == 'bff'
-        run: |
-          echo "bff job: no project yet — will be added in HU-00.03"
+        run: pnpm --filter @animetracker/bff run lint
+
+      - name: "Build bff (CA3: regenerates the core client from the contract)"
+        if: matrix.job == 'bff'
+        run: pnpm --filter @animetracker/bff run build
+
+      - name: Test bff (with coverage)
+        if: matrix.job == 'bff'
+        run: pnpm --filter @animetracker/bff run test:coverage
 
       # ── spa (stub — extended in HU-00.04) ───────────────────────────────────
       - name: pnpm install (spa)
@@ -253,10 +260,26 @@ jobs:
         run: |
           echo "extension job: no project yet — will be added in HU-00.05"
 
+  # ── T1/CA1-CA2: Scan for secrets in PRs ─────────────────────────────────────
+  secrets:
+    name: Scan for secrets
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: gitleaks/gitleaks-action@v2
+        with:
+          config-path: .gitleaks.toml
+          fail: true
+          notify: false
+
   # ── T7: CA4 — single aggregator check (branch protection targets this) ──────
   ci-ok:
     name: ci-ok
-    needs: [detect, run-job]
+    needs: [detect, run-job, secrets]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -269,6 +292,11 @@ jobs:
           fi
           if [ "${{ needs.run-job.result }}" != "success" ] && [ "${{ needs.run-job.result }}" != "skipped" ]; then
             echo "One or more CI jobs failed: ${{ needs.run-job.result }}"
+            exit 1
+          fi
+          # T1/CA1: secrets job is only required to pass/skip (not fail) in PRs
+          if [ "${{ needs.secrets.result }}" != "success" ] && [ "${{ needs.secrets.result }}" != "skipped" ]; then
+            echo "Secrets scan failed: ${{ needs.secrets.result }}"
             exit 1
           fi
           echo "All CI jobs passed."

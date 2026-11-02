@@ -1,0 +1,13 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# T2/CA2: Escanea secretos antes de commitear
+echo "Running gitleaks check..."
+gitleaks detect --source . --config .gitleaks.toml --exit-code 1
+
+if [ $? -ne 0 ]; then
+  echo "ERROR: Secrets detected. Commit aborted."
+  exit 1
+fi
+
+echo "No secrets found. Commit allowed."

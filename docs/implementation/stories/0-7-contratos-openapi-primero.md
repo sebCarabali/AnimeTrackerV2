@@ -8,7 +8,7 @@
 | Prioridad | Must |
 | Estimación | 5 pts |
 | Sprint | sprint-1 |
-| Estado | in-progress |
+| Estado | done |
 | Depende de | HU-00.01, HU-00.09 |
 | Bloquea | HU-00.03, HU-00.04, HU-07.02 y cualquier endpoint nuevo |
 

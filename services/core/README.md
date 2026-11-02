@@ -62,3 +62,18 @@ dotnet test AnimeTracker.sln
 docker compose up -d db redis
 dotnet run --project services/core/src/Host/AnimeTracker.Host
 ```
+
+## Deuda Técnica — Sprint-2
+
+### T5 (Testcontainers)
+
+**Descripción:** Las pruebas de integración (`AnimeTracker.Host.IntegrationTests`, módulos `*.IntegrationTests`) requieren una instancia PostgreSQL activa en `localhost:5432`. En ambientes de CI/CD, esto obliga a usar Docker Compose dentro del pipeline.
+
+**Objetivo sprint-2:** Implementar una fixture basada en **Testcontainers** que lance un contenedor PostgreSQL ephemeral por prueba, permitiendo ejecución autónoma de la suite sin dependencias externas.
+
+**Impacto:** 
+- ✅ CI/CD independiente de infraestructura externa
+- ✅ Tests más rápidos (contenedor por test en paralelo)
+- ✅ Validación de migraciones garantizada en cada ejecución
+
+**Referencia:** [Testcontainers.DotNet](https://dotnet.testcontainers.com/)
