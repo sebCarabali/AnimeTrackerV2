@@ -5,6 +5,9 @@ packages:
 allowBuilds:
   '@scarf/scarf': false
   esbuild: true
+  '@parcel/watcher': true
+  lmdb: true
+  msgpackr-extract: true
 
 minimumReleaseAgeExclude:
   - globals@17.14.0
