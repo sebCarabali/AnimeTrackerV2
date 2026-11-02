@@ -169,3 +169,8 @@ _Ninguno ≥ MEDIA._
 - [BAJA][Diseño] Páginas sin `ChangeDetectionStrategy.OnPush` — `apps/spa/src/app/pages/*/*.ts` — Sugerencia: fijar `OnPush` como convención desde esta historia base para que las páginas reales la hereden.
 - [BAJA][Pruebas] Sin prueba E2E real (Playwright/Cypress) que levante la app servida, como describe el Gherkin de CA1 ("Dado la SPA en ejecución con `ng serve`"); hoy se cubre con `RouterTestingHarness` (integración TestBed) — `apps/spa/src/app/app.routes.spec.ts` — Sugerencia: aceptable para este alcance (skeleton); considerar un E2E mínimo en una historia futura de EP-01 con contenido real.
 - [BAJA][Pruebas] Rama sin cubrir en `app.ts:10` (branch 90 %) es instrumentación v8 sobre el decorador `@Component`, no lógica de negocio — `apps/spa/src/app/app.ts:4-10` — Sin acción requerida.
+
+## Pull Request
+- URL: https://github.com/sebCarabali/AnimeTrackerV2/pull/25
+- Fecha: 2026-11-01
+- Nota: el código de `apps/spa` ya está en `dev` desde el PR #24 (mergeado antes de registrar el code review); este PR transporta el cierre documental (code review APROBADA + estado `done`).
