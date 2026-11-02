@@ -93,14 +93,16 @@ sprints:
 
   - id: sprint-2
     release: R0
-    inicio: 2026-11-16
-    fin: 2026-11-27
-    estado: planned
+    inicio: 2026-11-02   # Adelantado desde el 2026-11-16 planeado: sprint-1 cerró 100% el 2026-11-01, ~2 semanas antes de su fin planeado; el SM decidió en Sprint Planning (2026-11-01) reutilizar ese hueco de calendario para no perder cadencia (cadencia_sprint: 2 semanas/10 días hábiles se preserva).
+    fin: 2026-11-13
+    estado: active   # Iniciado en Sprint Planning 2026-11-01; arranque de desarrollo 2026-11-02.
     objetivo: >-
-      BFF, SPA y extensión inicializados; entorno local con un comando;
-      despliegue continuo a staging y observabilidad de punta a punta.
+      BFF, SPA y extensión inicializados; entorno local con un comando
+      (ahora también base de staging); despliegue continuo a staging y
+      observabilidad de punta a punta, sobre la decisión de Q5 (servidor
+      único self-hosted).
     capacidad_pts: 24
-    comprometido_pts: 24
+    comprometido_pts: 22   # 24 - 2 (HU-07.02 retirada del compromiso: no cumple DoR, ver nota en la historia)
     completado_pts: 0
     historias:
       - 0-3-bff-nestjs-inicial
@@ -109,18 +111,19 @@ sprints:
       - 0-6-entorno-local-docker-compose
       - 0-10-despliegue-continuo-staging
       - 0-11-observabilidad-base
-      - 7-2-fechas-utc-en-contratos
     review: null
     retro: null
+    planning: 2026-11-01 (ejecutado; ver historial para objetivo, alcance confirmado y decisiones)
     acciones_retro_sprint1:   # Acciones concretas acordadas en la retro de sprint-1 (2026-11-01), a ejecutar durante sprint-2
-      - { id: ACC-01, accion: "Agregar job de lint de YAML/Actions (actionlint o equivalente) en ci.yml, antes de cualquier otro job, para atrapar YAML roto y typos de rama automáticamente", dueño: Architect, ambito: "ci.yml — afecta HU-00.10, HU-00.11", estado: pendiente }
-      - { id: ACC-02, accion: "Convertir el umbral de cobertura ≥80% en gate bloqueante de CI (falla el PR) en vez de hallazgo de code review", dueño: "Architect + Dev", ambito: "Pipeline CI", estado: pendiente }
-      - { id: ACC-03, accion: "Exigir matriz CA→evidencia (test/artefacto) explícita en la plantilla de PR y que story-review la valide; escalar a ADR o excepción documentada si un hallazgo sobrevive 2 ciclos sin cerrar", dueño: "Scrum Master", ambito: "Proceso story-review", estado: pendiente }
-      - { id: ACC-04, accion: "Añadir checklist de autochequeo pre-PR (lint local + cobertura local) vía hook de Husky adicional", dueño: Dev, ambito: "Todas las historias de sprint-2", estado: pendiente }
-      - { id: ACC-05, accion: "Documentar guardrails de negocio no negociables (costo, SLA, compliance) como precondición del ADR, antes de evaluar opciones de arquitectura", dueño: PM, ambito: "HU-00.06, HU-00.10, HU-00.11 (decisiones de infraestructura)", estado: pendiente }
-      - { id: ACC-06, accion: "Exigir desglose en tareas con horas estimadas antes del readiness review para toda historia ≥3 pts o con dependencias externas", dueño: PM, ambito: "Refinamiento previo a sprint-2", estado: pendiente }
-      - { id: ACC-07, accion: "Redactar ADR de la decisión self-hosted (Q5) con la cadena de descartes (ACA → AKS → self-hosted) como contexto reusable, antes de iniciar HU-00.06", dueño: Architect, ambito: "HU-00.06", estado: pendiente }
-      - { id: ACC-08, accion: "Comunicar en el planning de sprint-2 que la capacidad extra usada para adelantar HU-00.03 no es la baseline esperada, para no inflar el compromiso", dueño: PM, ambito: "Sprint-2 planning", estado: pendiente }
+      - { id: ACC-01, accion: "Agregar job de lint de YAML/Actions (actionlint o equivalente) en ci.yml, antes de cualquier otro job, para atrapar YAML roto y typos de rama automáticamente", dueño: Architect, ambito: "ci.yml — afecta HU-00.10, HU-00.11", estado: pendiente, bloqueante: false, nota_sm: "Paralelo al día 1; debe estar listo antes de que HU-00.10/HU-00.11 abran sus primeros PRs con workflows de CI/CD nuevos." }
+      - { id: ACC-02, accion: "Convertir el umbral de cobertura ≥80% en gate bloqueante de CI (falla el PR) en vez de hallazgo de code review", dueño: "Architect + Dev", ambito: "Pipeline CI", estado: pendiente, bloqueante: false, nota_sm: "Paralelo; idealmente antes del primer PR mergeado del sprint para que el gate aplique desde el inicio." }
+      - { id: ACC-03, accion: "Exigir matriz CA→evidencia (test/artefacto) explícita en la plantilla de PR y que story-review la valide; escalar a ADR o excepción documentada si un hallazgo sobrevive 2 ciclos sin cerrar", dueño: "Scrum Master", ambito: "Proceso story-review", estado: pendiente, bloqueante: false, nota_sm: "Paralelo; el SM la deja lista antes de que la primera historia de sprint-2 llegue a estado review." }
+      - { id: ACC-04, accion: "Añadir checklist de autochequeo pre-PR (lint local + cobertura local) vía hook de Husky adicional", dueño: Dev, ambito: "Todas las historias de sprint-2", estado: pendiente, bloqueante: false, nota_sm: "Paralelo; no bloquea el inicio de ninguna historia." }
+      - { id: ACC-05, accion: "Documentar guardrails de negocio no negociables (costo, SLA, compliance) como precondición del ADR, antes de evaluar opciones de arquitectura", dueño: PM, ambito: "HU-00.06, HU-00.10, HU-00.11 (decisiones de infraestructura)", estado: satisfecha, bloqueante: false, nota_sm: "Satisfecha de facto: el guardrail 'cero suscripciones adicionales' ya quedó documentado como precondición explícita dentro de la decisión de Q5 (preguntas_abiertas) antes de cerrarla. No bloquea." }
+      - { id: ACC-06, accion: "Exigir desglose en tareas con horas estimadas antes del readiness review para toda historia ≥3 pts o con dependencias externas", dueño: PM, ambito: "Refinamiento previo a sprint-2", estado: pendiente, bloqueante: false, nota_sm: "No aplica retroactivamente a 0-4/0-5/0-6/0-10/0-11 (ya con readiness aprobado); se exige desde ya en el refinamiento de HU-07.02 y de cara a sprint-3." }
+      - { id: ACC-06b, accion: "(Derivada de ACC-06, decidida en este planning) Completar el archivo de historia detallado de HU-07.02 (fechas UTC en contratos) y pasar por story-readiness antes de comprometerla en un sprint", dueño: PM, ambito: "HU-07.02", estado: pendiente, bloqueante: false, nota_sm: "HU-07.02 queda fuera del compromiso de sprint-2 (no cumple DoR). Candidata a sprint-3 una vez resuelto esto." }
+      - { id: ACC-07, accion: "Redactar ADR de la decisión self-hosted (Q5) con la cadena de descartes (ACA → AKS → self-hosted) como contexto reusable, antes de iniciar HU-00.06", dueño: Architect, ambito: "HU-00.06", estado: pendiente, bloqueante: true, nota_sm: "BLOQUEANTE DURA para HU-00.06: Dev no debe tomar la historia hasta que el ADR exista (Q5 ya tiene toda la decisión redactada en preguntas_abiertas, por lo que el ADR es en gran parte transcripción — se espera < 1 día). No bloquea HU-00.04 ni HU-00.05, que pueden iniciar de inmediato." }
+      - { id: ACC-08, accion: "Comunicar en el planning de sprint-2 que la capacidad extra usada para adelantar HU-00.03 no es la baseline esperada, para no inflar el compromiso", dueño: PM, ambito: "Sprint-2 planning", estado: ejecutada, bloqueante: false, nota_sm: "Ejecutada en este Sprint Planning (2026-11-01): velocidad_supuesta_pts se mantiene en 24 (no 27); comprometido_pts de sprint-2 (22) se fija sobre la capacidad base, sin inflar por el adelanto de HU-00.03." }
 
 epicas:
   EP-00:
@@ -240,7 +243,7 @@ epicas:
     puntos: 17
     historias:
       7-1-prueba-de-carga-tracking: { id: HU-07.01, titulo: Prueba de carga del endpoint de tracking, prioridad: Should, puntos: 5, estado: backlog, sprint: null, release: R3 }
-      7-2-fechas-utc-en-contratos: { id: HU-07.02, titulo: Fechas en UTC en todos los contratos, prioridad: Must, puntos: 2, estado: backlog, sprint: sprint-2, release: R0, depende_de: [HU-00.07, HU-00.08], nota: Falta archivo de historia detallado antes del sprint-2 }
+      7-2-fechas-utc-en-contratos: { id: HU-07.02, titulo: Fechas en UTC en todos los contratos, prioridad: Must, puntos: 2, estado: backlog, sprint: null, release: R0, depende_de: [HU-00.07, HU-00.08], nota: "Retirada del compromiso de sprint-2 en Sprint Planning (2026-11-01): no cumple DoR (falta archivo de historia detallado con CA Gherkin y plan TDD). Queda en backlog; candidata a sprint-3 una vez tenga su archivo de historia y pase story-readiness (ver ACC-06b)." }
       7-3-seguridad-perimetro: { id: HU-07.03, titulo: Seguridad básica del perímetro, prioridad: Must, puntos: 5, estado: backlog, sprint: null, release: R1 }
       7-4-pruebas-e2e-flujos-clave: { id: HU-07.04, titulo: Pruebas extremo a extremo de flujos clave, prioridad: Should, puntos: 5, estado: backlog, sprint: null, release: R3 }
 
@@ -259,6 +262,36 @@ riesgos:
   - { id: R-03, descripcion: "Defectos de infraestructura/configuración (YAML de GitHub Actions, reglas de gitleaks, umbral de cobertura) se detectan en code review manual en ciclos tardíos (2ª-4ª iteración) en vez de en un gate automatizado — patrón observado en HU-00.02 (9 hallazgos ≥MEDIA en 1ª iteración, cobertura <80%), HU-00.07 (4 iteraciones, typo \"stagin\" en ci.yml que rompía CI real en staging), HU-00.09 (H5 sin cerrar 3 ciclos consecutivos por evidencia CA4/CA5 no enlazada) y HU-00.03 (1 hallazgo CRÍTICO de YAML roto + 1 ALTA de regex de allowlist de gitleaks sin anclar). Riesgo de que se repita en HU-00.10/00.11 (sprint-2), que también tocan workflows de CI/CD e infraestructura.", probabilidad: alta, impacto: medio, mitigacion: "Retro sprint-1 (2026-11-01): agregar job de lint de YAML/Actions (actionlint o equivalente) en detect/run-job de ci.yml antes de cualquier otro job; mover el gate de cobertura ≥80% a bloqueante de CI en vez de hallazgo de code review; exigir matriz CA→evidencia (test/artefacto) explícita en la plantilla de PR y que story-review la valide, para que hallazgos como H5 no se reabran por ciclos sin cerrar. Dueño: Architect (gate de CI) + SM (plantilla PR / criterio de escalamiento tras 2 ciclos sin cerrar). Aplica antes de iniciar HU-00.10/00.11." }
 
 historial:
+  - fecha: 2026-11-01
+    cambio: >-
+      Sprint Planning de sprint-2 (EP-00, R0) facilitado por el SM, a partir de la retro y la
+      sesión de paralelización ya ejecutadas el mismo día. Objetivo del sprint: BFF, SPA y
+      extensión inicializados; entorno local con un comando (ahora también base de staging);
+      despliegue continuo a staging y observabilidad de punta a punta, sobre la decisión de Q5
+      (servidor único self-hosted). Decisiones tomadas: (A) housekeeping — commiteados los
+      cambios de cierre de sprint-1, retro y Q5 en sprint_status.yml y en las notas técnicas de
+      HU-00.06/00.10/00.11 (verificado que las 3 historias ya reflejan Q5 de forma consistente
+      con las notas del YAML) antes de abrir el sprint. (B) DoR — HU-07.02 (fechas UTC en
+      contratos) NO cumple DoR por falta de archivo de historia detallado; se retira del
+      compromiso de sprint-2 (vuelve a sprint: null, backlog) en vez de forzar su inicio;
+      queda como acción derivada ACC-06b (dueño PM) completar su archivo y pasar story-readiness
+      antes de comprometerla en sprint-3. comprometido_pts baja de 24 a 22. (C) Fechas — sprint-1
+      cerró 100% el 2026-11-01, dejando libre su ventana de calendario (2026-11-02 a 2026-11-13);
+      el SM decide adelantar sprint-2 a esa misma ventana en vez de esperar al 2026-11-16
+      planeado, para no perder cadencia de 2 semanas/10 días hábiles con el equipo ya listo y
+      sin bloqueos de DoR en las historias comprometidas. Sprint-2 pasa a estado "active" con
+      inicio real 2026-11-02. (D) Retro — de las 8 acciones (ACC-01..ACC-08), solo ACC-07 (ADR
+      de la decisión self-hosted, dueño Architect) es bloqueante dura: Dev no debe tomar HU-00.06
+      hasta que exista el ADR (se espera <1 día porque Q5 ya documenta la decisión completa).
+      ACC-05 se marca satisfecha de facto (el guardrail "cero suscripciones" ya es precondición
+      documentada dentro de Q5). ACC-08 se marca ejecutada (este mismo planning comunica que la
+      velocidad_supuesta_pts se mantiene en 24, sin inflar por el adelanto de HU-00.03). ACC-01,
+      ACC-02, ACC-03, ACC-04 y ACC-06 quedan en paralelo durante el sprint, sin bloquear el inicio
+      de ninguna historia, con los hitos de "antes de qué" anotados en su nota_sm. Habilitadas
+      para iniciar desarrollo inmediato (candidatas a /story-dev): HU-00.04 (SPA) y HU-00.05
+      (extensión), sin bloqueos. HU-00.06 (Docker Compose) queda lista para iniciar en cuanto
+      Architect cierre ACC-07 (ADR), esperado el mismo día 2026-11-01 o 2026-11-02. HU-00.10 y
+      HU-00.11 avanzan después de cerrar HU-00.06, según la pista de paralelización ya acordada.
   - fecha: 2026-11-01
     cambio: >-
       Sprint Retrospective de sprint-1 (EP-00, R0) facilitada por el SM con aportes de PM,
