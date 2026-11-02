@@ -240,15 +240,26 @@ jobs:
         if: matrix.job == 'bff'
         run: pnpm --filter @animetracker/bff run test:coverage
 
-      # ── spa (stub — extended in HU-00.04) ───────────────────────────────────
+      # ── spa (HU-00.04) ───────────────────────────────────────────────────
       - name: pnpm install (spa)
         if: matrix.job == 'spa'
         run: pnpm --filter @animetracker/spa install
 
-      - name: spa build + test (stub)
+      - name: "Generate API client (CA4: regenerates from the public contract)"
         if: matrix.job == 'spa'
-        run: |
-          echo "spa job: no project yet — will be added in HU-00.04"
+        run: pnpm --filter @animetracker/spa run gen:api
+
+      - name: Lint spa (CA5)
+        if: matrix.job == 'spa'
+        run: pnpm --filter @animetracker/spa run lint
+
+      - name: Build spa
+        if: matrix.job == 'spa'
+        run: pnpm --filter @animetracker/spa run build
+
+      - name: Test spa (with coverage, CA5)
+        if: matrix.job == 'spa'
+        run: pnpm --filter @animetracker/spa run test:coverage
 
       # ── extension (stub — extended in HU-00.05) ──────────────────────────────
       - name: pnpm install (extension)

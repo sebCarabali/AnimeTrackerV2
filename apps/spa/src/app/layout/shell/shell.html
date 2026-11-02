@@ -1,0 +1,18 @@
+<header class="shell__header">
+  <nav class="shell__nav" aria-label="Navegación principal">
+    @for (link of navLinks; track link.path) {
+      <a
+        [routerLink]="link.path"
+        routerLinkActive="shell__nav-link--active"
+        [ariaCurrentWhenActive]="'page'"
+        class="shell__nav-link"
+      >
+        {{ link.label }}
+      </a>
+    }
+  </nav>
+</header>
+
+<main class="shell__content">
+  <router-outlet></router-outlet>
+</main>

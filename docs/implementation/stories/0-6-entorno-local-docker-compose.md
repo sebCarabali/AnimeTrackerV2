@@ -90,15 +90,17 @@ public async Task Seeder_ejecutado_dos_veces_no_duplica_registros()
 - [ ] T5 (CA1) `.env.example` con todas las variables y valores locales no sensibles.
 - [ ] T6 (CA1) Script `infra/scripts/smoke.sh` y job de CI que lo ejecuta.
 - [ ] T7 Documentar en el README raíz: arranque, reinicio limpio y puertos expuestos.
+- [ ] T8 (Q5) `infra/docker-compose.staging.yml` de overrides sobre el compose base: imágenes por tag (`ghcr.io/...:sha-<commit>`) en vez de build local, variables de entorno de staging, `restart: unless-stopped`, volúmenes persistentes para Postgres. Consumido por HU-00.10 en el servidor único de staging.
 
 ## Notas técnicas y decisiones
 
 - La SPA y la extensión se ejecutan fuera de Compose (`ng serve`, build de la extensión) para tener recarga rápida; Compose cubre backend y datos.
 - El seed usa datos ficticios con `ExternalId` reales de prueba solo si no viola términos de la API externa.
+- **Q5 cerrada (2026-11-01):** staging usa un servidor único self-hosted (sin suscripciones adicionales) en vez de una plataforma gestionada. Este `docker-compose.yml` deja de ser "solo local": es la base reutilizada en staging mediante el override de T8. Decisión completa en `sprint_status.yml` (preguntas_abiertas → Q5).
 
 ## Fuera de alcance
 
-- Entorno de staging (HU-00.10).
+- Mecanismo de despliegue a staging (pipeline, SSH, rollback, reverse proxy): ver HU-00.10. Esta historia solo entrega el compose base y su override; no el `cd-staging.yml` ni el servidor.
 - Colector de telemetría (se agrega en HU-00.11).
 
 ## Definición de Hecho

@@ -20,7 +20,7 @@
 
 - La DoD común incluye "desplegado en el entorno de staging".
 - La prueba de carga (HU-07.01) y las e2e (HU-07.04) se ejecutan contra staging.
-- **Plataforma de staging sin definir** en PRD/ARD; los criterios son independientes de la plataforma.
+- **Plataforma de staging (Q5) cerrada el 2026-11-01:** servidor único self-hosted (VM con Docker Engine + Docker Compose), sin suscripciones adicionales. Decisión del PM junto al Architect tras comparar con Azure Container Apps y AKS; detalle completo en `sprint_status.yml` (preguntas_abiertas → Q5).
 
 ## Criterios de aceptación
 
@@ -70,21 +70,24 @@ Característica: Despliegue continuo a staging
 ## Tareas
 
 - [ ] T1 (CA3) Endpoint `GET /version` en BFF y núcleo (commit, fecha de build en UTC) alimentado por build args.
-- [ ] T2 (CA1) Workflow `cd-staging.yml` disparado por push a `main`; build multiplataforma con `docker/build-push-action` y caché.
-- [ ] T3 (CA2) Paso de despliegue según la plataforma elegida; `migrator` como tarea previa.
-- [ ] T4 (CA4) Estrategia de despliegue con health checks (rolling o blue/green) y reversión.
-- [ ] T5 (CA5) `concurrency: group: deploy-staging, cancel-in-progress: false`.
-- [ ] T6 (CA3) Pruebas de humo post-despliegue y notificación al canal del equipo.
-- [ ] T7 Entorno `staging` en GitHub con secretos de despliegue (ver HU-00.12).
+- [ ] T2 (CA1) Workflow `cd-staging.yml` disparado por push a `main`; build multiplataforma con `docker/build-push-action` y publicación en **GitHub Container Registry (ghcr.io)** (gratis, sin suscripción nueva) con tags `sha-<commit>` y `main`.
+- [ ] T3 (CA2) Paso de despliegue vía `appleboy/ssh-action` contra el servidor único: `docker compose -f docker-compose.yml -f docker-compose.staging.yml pull`, luego `migrator` como `run --rm` (bloqueante, antes de levantar `core`/`bff`), y finalmente `up -d`.
+- [ ] T4 (CA4) Rollback scripted: antes del `pull`, guardar el tag vigente (`LAST_GOOD_SHA` en el servidor); si el smoke test post-deploy (T6) falla, reintentar `up -d` con ese tag anterior; si vuelve a fallar, el job queda en rojo y avisa al equipo (sin plataforma gestionada que lo haga nativo).
+- [ ] T5 (CA5) `concurrency: group: deploy-staging, cancel-in-progress: false` en el workflow, más `flock /var/run/deploy.lock` envolviendo el script en el servidor como defensa adicional ante despliegues concurrentes.
+- [ ] T6 (CA3) `smoke-staging.sh` post-despliegue (`/health/ready` y `GET /version`) y notificación al canal del equipo.
+- [ ] T7 Entorno `staging` en GitHub con secretos de despliegue: `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY` y credenciales de `ghcr.io` si el `pull` en el servidor requiere autenticación (ver HU-00.12).
+- [ ] T8 (CA3) Configurar **Caddy o Traefik** en el servidor como reverse proxy: TLS automático, servir el build estático de la SPA y rutear `/api/*` al BFF.
 
 ## Notas técnicas y decisiones
 
-- **Pregunta abierta:** plataforma de staging (p. ej. Azure Container Apps, Kubernetes, VM con Compose). Resolver en el refinamiento del sprint 2; la estimación asume una plataforma gestionada de contenedores.
-- La SPA se publica como sitio estático; incluir su despliegue si la plataforma lo permite sin elevar la estimación, si no, crear historia aparte.
+- **Q5 cerrada (2026-11-01):** servidor único self-hosted, sin suscripciones adicionales (descartadas Azure Container Apps y AKS por costo/alcance frente al requisito explícito del PM). Trade-off aceptado por el equipo: sin alta disponibilidad, sin autoescalado, sin SLA; parcheo de SO/Docker y mantenimiento de los scripts de T4/T5 quedan a cargo del equipo.
+- La SPA se despliega en el mismo servidor (T8, Caddy/Traefik sirviendo el build estático) sin elevar la estimación — ya no se evalúa plataforma separada ni corte de alcance.
+- Base reutilizada de HU-00.06 (T8 de esa historia: `docker-compose.staging.yml`).
 
 ## Fuera de alcance
 
 - Producción y aprobaciones manuales.
+- Alta disponibilidad, autoescalado o SLA de staging (aceptado como riesgo, ver `sprint_status.yml` → riesgo R-01).
 
 ## Definición de Hecho
 
