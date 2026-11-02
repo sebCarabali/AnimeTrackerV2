@@ -9,7 +9,7 @@
 | Estimación | 5 pts |
 | Sprint | sprint-2 |
 | Estado | ready-for-dev |
-| Depende de | HU-00.02, HU-00.03, HU-00.04 |
+| Depende de | HU-00.02, HU-00.03, HU-00.04 (parcial, solo T6), HU-00.06 |
 | Bloquea | HU-07.01 (medición por salto) |
 
 ## Historia
@@ -94,13 +94,15 @@ public async Task Middleware_agrega_CorrelationId_al_scope_de_log()
 - [ ] T2 (CA4) BFF: logger JSON (`nestjs-pino`) con redacción de `authorization`, `cookie`, `set-cookie`.
 - [ ] T3 (CA2, CA4) Núcleo: middleware que lee la cabecera y abre un scope de log; Serilog con salida JSON y enriquecedores.
 - [ ] T4 (CA5) OpenTelemetry en BFF (`@opentelemetry/sdk-node` + instrumentación HTTP) y núcleo (`OpenTelemetry.Extensions.Hosting` + ASP.NET Core, HttpClient, EF Core, Npgsql).
-- [ ] T5 (CA6) Agregar `otel-collector` y un visor (Jaeger o Aspire Dashboard) a Docker Compose.
-- [ ] T6 SPA: interceptor HTTP que agrega `X-Correlation-Id` por petición (opcional, el BFF lo genera si falta).
+- [ ] T5 (CA6) Agregar `otel-collector` y un visor (Jaeger o Aspire Dashboard) a `infra/docker-compose.yml` (entorno local).
+- [ ] T6 SPA: interceptor HTTP que agrega `X-Correlation-Id` por petición (opcional, el BFF lo genera si falta); coordinar con HU-00.04, no bloquea el resto de esta historia.
+- [ ] T7 (Q5) Stack de observabilidad en staging: Prometheus + Grafana + Loki/Promtail autohospedados en el servidor único (vía `docker-compose.staging.yml` de HU-00.06), expuestos a través del reverse proxy de HU-00.10 (Caddy/Traefik) con autenticación. Vigilar consumo de recursos compartido con `bff`/`core` en esa misma VM.
 
 ## Notas técnicas y decisiones
 
 - Se propaga también `traceparent` (W3C Trace Context); `X-Correlation-Id` sigue existiendo porque es legible para soporte y para la extensión.
 - La SPA no exporta trazas en esta historia (se evaluará en EP-07).
+- **Q5 cerrada (2026-11-01):** al ser staging un servidor único self-hosted (no una plataforma gestionada), el stack de observabilidad de staging (T7) es autohospedado (Prometheus/Grafana/Loki) en vez de un servicio como Azure Monitor. Detalle completo en `sprint_status.yml` (preguntas_abiertas → Q5).
 
 ## Fuera de alcance
 

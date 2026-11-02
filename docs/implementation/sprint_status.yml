@@ -13,7 +13,7 @@ proyecto:
   carpeta_historias: stories/
   zona_horaria: America/Bogota
   generado: 2026-10-28
-  actualizado: 2026-11-01  # Readiness review 0-3 iteración 4: require-review (2). RESUELTOS: T7 jest-openapi (Opción A), T4a DoD /health+/health/ready. PENDIENTE: enmendar ADR-003 §Decisión con openapi-fetch antes de iniciar T3. Corrección stale states: HU-00.08, HU-00.12a, HU-00.12b → done (mergeados sprint-1).
+  actualizado: 2026-11-01  # Readiness review 0-3 iteración 4: require-review (2). RESUELTOS: T7 jest-openapi (Opción A), T4a DoD /health+/health/ready. PENDIENTE: enmendar ADR-003 §Decisión con openapi-fetch antes de iniciar T3. Corrección stale states: HU-00.08, HU-00.12a, HU-00.12b → done (mergeados sprint-1). Planning paralelización EP-00 sprint-2 (PM+SM+Architect): pistas definidas, grafo HU-00.11 corregido.
   cadencia_sprint: 2 semanas (10 días hábiles)
   velocidad_supuesta_pts: 24   # recalibrar tras el sprint-2 con la velocidad real
 
@@ -71,14 +71,15 @@ sprints:
     release: R0
     inicio: 2026-11-02
     fin: 2026-11-13
-    estado: planned
+    estado: closed   # Cerrado 2026-11-01, adelantado respecto al fin planeado (2026-11-13): alcance 100% completado
     objetivo: >-
       Monorepo, CI por proyectos afectados, solución .NET modular con
       pruebas de arquitectura, contratos OpenAPI y persistencia por esquema.
     capacidad_pts: 24
     comprometido_pts: 24
-    completado_pts: 18   # HU-00.01 (3), 00.02 (5), 00.07 (5), 00.09 (5) merged a dev
-    en_review_pts: 6     # HU-00.08 (3), 00.12a (1.5), 00.12b (1.5) en PRs listos para merge
+    completado_pts: 24   # 100%: HU-00.01, 00.02, 00.07, 00.08, 00.09, 00.12a, 00.12b, todas done y mergeadas a dev
+    en_review_pts: 0
+    adelantado_de_sprint2_pts: 3   # HU-00.03 (BFF NestJS inicial) adelantada y mergeada (PR #21) — valor entregado total: 27 pts
     historias:
       - 0-1-estructura-del-monorepo
       - 0-2-solucion-net-monolito-modular
@@ -88,7 +89,7 @@ sprints:
       - 0-12a-secretos-ci-config
       - 0-12b-validateenv-bff
     review: 2026-11-02 (correcciones code review completadas)
-    retro: 2026-11-13 (viernes post-sprint review)
+    retro: 2026-11-01 (ejecutada; adelantada respecto al 2026-11-13 planeado porque el equipo terminó el sprint antes)
 
   - id: sprint-2
     release: R0
@@ -111,6 +112,15 @@ sprints:
       - 7-2-fechas-utc-en-contratos
     review: null
     retro: null
+    acciones_retro_sprint1:   # Acciones concretas acordadas en la retro de sprint-1 (2026-11-01), a ejecutar durante sprint-2
+      - { id: ACC-01, accion: "Agregar job de lint de YAML/Actions (actionlint o equivalente) en ci.yml, antes de cualquier otro job, para atrapar YAML roto y typos de rama automáticamente", dueño: Architect, ambito: "ci.yml — afecta HU-00.10, HU-00.11", estado: pendiente }
+      - { id: ACC-02, accion: "Convertir el umbral de cobertura ≥80% en gate bloqueante de CI (falla el PR) en vez de hallazgo de code review", dueño: "Architect + Dev", ambito: "Pipeline CI", estado: pendiente }
+      - { id: ACC-03, accion: "Exigir matriz CA→evidencia (test/artefacto) explícita en la plantilla de PR y que story-review la valide; escalar a ADR o excepción documentada si un hallazgo sobrevive 2 ciclos sin cerrar", dueño: "Scrum Master", ambito: "Proceso story-review", estado: pendiente }
+      - { id: ACC-04, accion: "Añadir checklist de autochequeo pre-PR (lint local + cobertura local) vía hook de Husky adicional", dueño: Dev, ambito: "Todas las historias de sprint-2", estado: pendiente }
+      - { id: ACC-05, accion: "Documentar guardrails de negocio no negociables (costo, SLA, compliance) como precondición del ADR, antes de evaluar opciones de arquitectura", dueño: PM, ambito: "HU-00.06, HU-00.10, HU-00.11 (decisiones de infraestructura)", estado: pendiente }
+      - { id: ACC-06, accion: "Exigir desglose en tareas con horas estimadas antes del readiness review para toda historia ≥3 pts o con dependencias externas", dueño: PM, ambito: "Refinamiento previo a sprint-2", estado: pendiente }
+      - { id: ACC-07, accion: "Redactar ADR de la decisión self-hosted (Q5) con la cadena de descartes (ACA → AKS → self-hosted) como contexto reusable, antes de iniciar HU-00.06", dueño: Architect, ambito: "HU-00.06", estado: pendiente }
+      - { id: ACC-08, accion: "Comunicar en el planning de sprint-2 que la capacidad extra usada para adelantar HU-00.03 no es la baseline esperada, para no inflar el compromiso", dueño: PM, ambito: "Sprint-2 planning", estado: pendiente }
 
 epicas:
   EP-00:
@@ -124,13 +134,13 @@ epicas:
       0-2-solucion-net-monolito-modular:
         { id: HU-00.02, titulo: Solución .NET 8 como monolito modular, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-2-solucion-net-monolito-modular.md }
       0-3-bff-nestjs-inicial:
-        { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: done, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12b], archivo: stories/0-3-bff-nestjs-inicial.md, nota: "Code review iteración 4 (2026-11-01): APROBADA. 0 hallazgos ≥ MEDIA en los 5 ámbitos (aceptación, seguridad, diseño, arquitectura, pruebas). 18/18 tests, cobertura 100%/100%/100%/100%. PR abierto contra dev." }
+        { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: done, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12b], archivo: stories/0-3-bff-nestjs-inicial.md, nota: "Code review iteración 4 (2026-11-01): APROBADA. 0 hallazgos ≥ MEDIA en los 5 ámbitos (aceptación, seguridad, diseño, arquitectura, pruebas). 18/18 tests, cobertura 100%/100%/100%/100%. PR #21 mergeado a dev (commit f393996, HEAD de dev)." }
       0-4-spa-angular-inicial:
         { id: HU-00.04, titulo: SPA Angular inicial, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.09], archivo: stories/0-4-spa-angular-inicial.md }
       0-5-esqueleto-extension-navegador:
         { id: HU-00.05, titulo: Esqueleto de la extensión de navegador, prioridad: Should, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-5-esqueleto-extension-navegador.md }
       0-6-entorno-local-docker-compose:
-        { id: HU-00.06, titulo: Entorno local con Docker Compose, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.08, HU-00.12a], archivo: stories/0-6-entorno-local-docker-compose.md }
+        { id: HU-00.06, titulo: Entorno local con Docker Compose, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.08, HU-00.12a], archivo: stories/0-6-entorno-local-docker-compose.md, nota: "Alcance ampliado tras cierre de Q5 (2026-11-01, servidor único self-hosted): docker-compose.yml deja de ser solo-local; agregar docker-compose.staging.yml de overrides (imágenes por tag, variables de staging, restart policies, volúmenes persistentes) para reutilizarlo como base del despliegue a staging de HU-00.10." }
       0-7-contratos-openapi-primero:
         { id: HU-00.07, titulo: Contratos OpenAPI primero, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-7-contratos-openapi-primero.md }
       0-8-persistencia-migraciones-por-modulo:
@@ -138,9 +148,9 @@ epicas:
       0-9-pipeline-integracion-continua:
         { id: HU-00.09, titulo: Pipeline de integración continua, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-9-pipeline-integracion-continua.md }
       0-10-despliegue-continuo-staging:
-        { id: HU-00.10, titulo: Despliegue continuo a staging, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.06, HU-00.09, HU-00.12a], archivo: stories/0-10-despliegue-continuo-staging.md }
+        { id: HU-00.10, titulo: Despliegue continuo a staging, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.06, HU-00.09, HU-00.12a], archivo: stories/0-10-despliegue-continuo-staging.md, nota: "Q5 cerrada (2026-11-01): servidor único self-hosted (VM Docker + docker-compose.staging.yml de HU-00.06, Caddy/Traefik como reverse proxy, GHCR como registro). Despliegue vía GitHub Actions + SSH-action (pull → migrator run --rm → up -d → curl /health/ready). CA4 (rollback) y CA5 (serialización) son scripts propios (tag anterior guardado + reintento, y concurrency group + flock), no nativos de plataforma — actualizar Tareas/Notas técnicas de la historia antes de iniciarla." }
       0-11-observabilidad-base:
-        { id: HU-00.11, titulo: Observabilidad base, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.04], archivo: stories/0-11-observabilidad-base.md }
+        { id: HU-00.11, titulo: Observabilidad base, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.04, HU-00.06], archivo: stories/0-11-observabilidad-base.md, nota: "Dependencia a HU-00.04 es parcial: solo coordinar T6 (interceptor opcional SPA); el resto de HU-00.11 no está bloqueado por ella. HU-00.06 agregada como dependencia real (comparten infra/docker-compose.yml). Tras cierre de Q5 (servidor único self-hosted): stack de observabilidad en staging es Prometheus + Grafana + Loki/Promtail autohospedados en la misma VM, no Azure Monitor; vigilar consumo de recursos compartido con bff/core." }
       0-12a-secretos-ci-config:
         { id: HU-00.12a, titulo: Gitleaks + ConfigOptions (CI y configuración), prioridad: Must, puntos: 1.5, estado: done, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-12a-secretos-ci-config.md, nota: "Mergeado PR #19, commit bc9062c. docs/SECRETS.md completada." }
       0-12b-validateenv-bff:
@@ -239,15 +249,47 @@ preguntas_abiertas:
   - { id: Q2, pregunta: "¿Cuál es la concurrencia objetivo para la prueba de carga?", afecta: [HU-07.01], estado: abierta }
   - { id: Q3, pregunta: "¿Jikan, AniList o ambas como fuente de catálogo y horarios?", afecta: [HU-02.04, HU-05.05], estado: abierta }
   - { id: Q4, pregunta: "¿Login con proveedores externos (Google, Discord) además de email?", afecta: [EP-01], estado: abierta }
-  - { id: Q5, pregunta: "¿Plataforma de staging (contenedores gestionados, Kubernetes, VM)?", afecta: [HU-00.10], estado: abierta, resolver_antes_de: sprint-2 }
+  - { id: Q5, pregunta: "¿Plataforma de staging (contenedores gestionados, Kubernetes, VM)?", afecta: [HU-00.06, HU-00.10, HU-00.11], estado: cerrada, decision: "Servidor único self-hosted (sin suscripciones adicionales), decisión final del PM tras evaluar ACA y AKS. Arquitectura: 1 VM con Docker Engine + Docker Compose (base: docker-compose.yml de HU-00.06 + docker-compose.staging.yml de overrides), Caddy/Traefik como reverse proxy (TLS automático) sirviendo la SPA y ruteando al BFF, GitHub Container Registry (gratis) como registro de imágenes. Despliegue: GitHub Actions con SSH-action ejecuta pull → migrator como job bloqueante (run --rm) → up -d → verificación GET /health/ready (CA2/CA3). CA4 (rollback): script guarda el tag previo y reintenta con él si el health check post-deploy falla. CA5 (serialización): concurrency group en el workflow + flock en el servidor como defensa adicional. Trade-off aceptado explícitamente por el equipo: sin alta disponibilidad, sin autoescalado, sin SLA; parcheo de SO/Docker y mantenimiento de los scripts de rollback/health-check a cargo del equipo. HU-00.06 amplía su alcance (ya no es solo-local). HU-00.11 usa Prometheus+Grafana+Loki/Promtail autohospedados en la misma VM en vez de Azure Monitor. Descartadas: ACA (no cumple el requisito de cero suscripciones) y AKS (costo de nodos 24/7 y carga operativa no justificados para 1-2 devs).", resuelta: 2026-11-01 }
   - { id: Q6, pregunta: "¿Se confirma 80 % de cobertura en código nuevo como umbral?", afecta: [HU-00.09], estado: cerrada, decision: "80 % de líneas en código nuevo; sin umbral global inicial", resuelta: 2026-10-31 }
   - { id: Q7, pregunta: "¿Licencia de MediatR v13+ o alternativa (Mediator con generador de código)?", afecta: [HU-00.02], estado: cerrada, decision: "MediatR v12 (última versión libre, sin licencia comercial)", resuelta: 2026-10-29 }
 
 riesgos:
-  - { id: R-01, descripcion: "Plataforma de staging no definida puede retrasar HU-00.10", probabilidad: media, impacto: medio, mitigacion: "Decidir Q5 en el refinamiento previo al sprint-2" }
+  - { id: R-01, descripcion: "Plataforma de staging no definida puede retrasar HU-00.10", probabilidad: baja, impacto: medio, mitigacion: "Resuelto: Q5 cerrada 2026-11-01 con servidor único self-hosted (sin HA/SLA, aceptado por el equipo). Pendiente: actualizar Tareas/Notas técnicas de HU-00.10 (mecanismo SSH-action, rollback scripted, flock) y de HU-00.11 (Prometheus+Grafana+Loki en vez de Azure Monitor) antes de iniciarlas; ampliar alcance de HU-00.06 con docker-compose.staging.yml." }
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
+  - { id: R-03, descripcion: "Defectos de infraestructura/configuración (YAML de GitHub Actions, reglas de gitleaks, umbral de cobertura) se detectan en code review manual en ciclos tardíos (2ª-4ª iteración) en vez de en un gate automatizado — patrón observado en HU-00.02 (9 hallazgos ≥MEDIA en 1ª iteración, cobertura <80%), HU-00.07 (4 iteraciones, typo \"stagin\" en ci.yml que rompía CI real en staging), HU-00.09 (H5 sin cerrar 3 ciclos consecutivos por evidencia CA4/CA5 no enlazada) y HU-00.03 (1 hallazgo CRÍTICO de YAML roto + 1 ALTA de regex de allowlist de gitleaks sin anclar). Riesgo de que se repita en HU-00.10/00.11 (sprint-2), que también tocan workflows de CI/CD e infraestructura.", probabilidad: alta, impacto: medio, mitigacion: "Retro sprint-1 (2026-11-01): agregar job de lint de YAML/Actions (actionlint o equivalente) en detect/run-job de ci.yml antes de cualquier otro job; mover el gate de cobertura ≥80% a bloqueante de CI en vez de hallazgo de code review; exigir matriz CA→evidencia (test/artefacto) explícita en la plantilla de PR y que story-review la valide, para que hallazgos como H5 no se reabran por ciclos sin cerrar. Dueño: Architect (gate de CI) + SM (plantilla PR / criterio de escalamiento tras 2 ciclos sin cerrar). Aplica antes de iniciar HU-00.10/00.11." }
 
 historial:
+  - fecha: 2026-11-01
+    cambio: >-
+      Sprint Retrospective de sprint-1 (EP-00, R0) facilitada por el SM con aportes de PM,
+      Architect, Dev y QA. Sprint cerrado 100% del alcance comprometido (24/24 pts) más 3 pts
+      adelantados de sprint-2 (HU-00.03), 27 pts de valor entregado. Qué funcionó: cobertura de
+      pruebas mejoró iteración a iteración dentro del sprint (HU-00.02 bajo umbral -> HU-00.09
+      89.71% -> HU-00.07 93.75% -> HU-00.03 100%); el readiness review detectó a tiempo la
+      subestimación de HU-00.12 (2 pts vs. ~10-11h reales) y permitió dividirla en 00.12a/00.12b;
+      el equipo cerró todo el alcance y adelantó trabajo de sprint-2. Qué no funcionó: code
+      review con iteraciones largas y regresivas (HU-00.02: 2 iteraciones/9 hallazgos ≥MEDIA;
+      HU-00.07: 4 iteraciones incl. typo "stagin" en ci.yml; HU-00.09: 3 iteraciones con H5
+      pendiente por 3 ciclos consecutivos por evidencia CA4/CA5 no enlazada; HU-00.03: 4
+      iteraciones incl. 1 CRÍTICA de YAML roto y 1 ALTA de regex de gitleaks sin anclar) por
+      ausencia de gates automatizados (lint de YAML/Actions, cobertura bloqueante, trazabilidad
+      CA-evidencia) que detectan estos defectos en segundos en vez de ciclos de revisión humana;
+      Q5/Q6/Q7 se cerraron tarde (ya cursando o terminando el sprint) por tratarse como bloqueos
+      ad-hoc en vez de parte del Definition of Ready; Q5 tuvo que reabrirse (ACA -> AKS ->
+      self-hosted) porque la restricción de negocio del PM (cero suscripciones) se validó
+      después de proponer la primera opción de arquitectura, no antes, generando retrabajo y
+      bloqueando temporalmente HU-00.06/00.10/00.11. Acciones para sprint-2: (1) job de lint de
+      YAML/Actions (actionlint) en ci.yml antes de cualquier otro job — dueño Architect; (2)
+      gate de cobertura ≥80% bloqueante en CI, no hallazgo de review — dueño Architect/Dev; (3)
+      matriz CA->evidencia obligatoria en PR/story-review, con escalamiento a ADR si un hallazgo
+      sobrevive 2 ciclos sin cerrar — dueño SM; (4) checklist de autochequeo pre-PR (lint local +
+      cobertura) vía Husky — dueño Dev; (5) guardrails de negocio no negociables (costo, SLA,
+      compliance) documentados por el PM antes de evaluar opciones de arquitectura, como
+      precondición del ADR — dueño PM, aplica a toda decisión de infraestructura de HU-00.06/
+      00.10/00.11; (6) desglose en tareas con horas estimadas obligatorio antes de readiness
+      review para toda historia ≥3 pts o con dependencias externas — dueño PM. Riesgo R-03
+      registrado (gates automatizados pendientes). Ver historias/0-x para detalle de aportes
+      por rol.
   - fecha: 2026-11-01
     cambio: >-
       HU-00.03 (0-3-bff-nestjs-inicial) promovida a pull-request tras code review iteración 4.
@@ -497,3 +539,38 @@ historial:
       Creación del archivo. 12 historias de EP-00 detalladas (ready-for-dev).
       Plan de sprint-1 y sprint-2 para R0. Módulo Identity y proyectos
       Contracts agregados al alcance de HU-00.02.
+  - fecha: 2026-11-01
+    cambio: >-
+      Sesión de planning de paralelización de EP-00 sprint-2 (PM + Scrum Master +
+      Architect). Se definieron pistas paralelas: HU-00.04 (SPA), HU-00.05 (extensión)
+      y HU-00.06 (Docker Compose) pueden iniciar en paralelo desde el día 1; HU-00.10
+      (despliegue a staging) y HU-00.11 (observabilidad) avanzan tras cerrar HU-00.06,
+      coordinando los archivos compartidos de arranque en apps/bff y services/core.
+      Se corrigió el grafo de dependencias de HU-00.11 (ver nota en la historia y
+      depende_de actualizado). Se confirmó que HU-00.03 ya está mergeada a dev (PR #21,
+      commit f393996). Se identificó que HU-07.02 no cumple DoR (sin archivo de
+      historia detallado). Q5 (plataforma de staging) sigue abierta, en resolución
+      paralela por PM + Architect.
+  - fecha: 2026-11-01
+    cambio: >-
+      Q5 (plataforma de staging) cerrada por PM + Architect en paralelo a la sesión
+      anterior: decisión Azure Container Apps (ACA). Ver detalle en preguntas_abiertas
+      y riesgo R-01 actualizado. El PM pidió además al Architect evaluar AKS como
+      alternativa; veredicto: AKS es técnicamente viable pero no se recomienda para
+      este equipo (1-2 devs, sin presupuesto corporativo) por el costo fijo de nodos
+      24/7 (AKS no escala a 0) y la carga operativa adicional (YAML/Helm/RBAC/ingress/
+      cert-manager) frente a CA4/CA5 nativos en ACA.
+  - fecha: 2026-11-01
+    cambio: >-
+      Q5 reabierta a pedido del PM (humano): requisito explícito de "cero costo de
+      suscripciones adicionales, solo un servidor". El Architect diseñó la alternativa
+      self-hosted (VM única con Docker Compose + GHCR + Caddy/Traefik, despliegue vía
+      SSH-action, rollback y serialización como scripts propios) y la presentó junto a
+      ACA y AKS. El PM (humano) confirmó la decisión final: servidor único self-hosted.
+      Q5 cerrada con esa decisión (ver preguntas_abiertas). Impacto en historias:
+      HU-00.06 amplía alcance (deja de ser solo-local, agrega docker-compose.staging.yml);
+      HU-00.10 debe actualizar sus Tareas/Notas técnicas con el mecanismo concreto
+      (SSH-action, rollback scripted, flock); HU-00.11 cambia su stack de observabilidad
+      de staging a Prometheus+Grafana+Loki autohospedado en vez de Azure Monitor.
+      Trade-off (sin HA, sin SLA, mantenimiento manual de SO/Docker) aceptado
+      explícitamente por el equipo.
