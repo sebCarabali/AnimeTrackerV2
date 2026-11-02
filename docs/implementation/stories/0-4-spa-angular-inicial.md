@@ -8,7 +8,7 @@
 | Prioridad | Must |
 | Estimación | 3 pts |
 | Sprint | sprint-2 |
-| Estado | review |
+| Estado | done |
 | Depende de | HU-00.01, HU-00.07, HU-00.09 |
 | Bloquea | EP-01 (UI), EP-02 (UI), EP-03 (UI), EP-04, EP-05 (UI) |
 
@@ -145,3 +145,32 @@ npx lighthouse http://localhost:4321 --only-categories=accessibility (contra el 
 ```
 
 **Cobertura:** 100 % statements, 98.57 % branches, 100 % funciones, 100 % líneas (umbral 80 % configurado como gate en `angular.json` → `coverageThresholds`).
+
+## Code Review
+- Fecha: 2026-11-02
+- Resultado: APROBADA
+- Cobertura de líneas (código cambiado): 100 % (statements 100 %, branches 98.57 %, funciones 100 %, líneas 100 %; umbral 80 % superado)
+
+| Ámbito | Resultado | Hallazgos |
+|---|---|---|
+| Criterios de aceptación | ✅ | 0 |
+| Seguridad | ✅ | 0 |
+| Diseño / SOLID | ✅ | 0 |
+| Arquitectura | ✅ | 0 |
+| Pruebas (> 80 %) | ✅ | 0 |
+
+### Hallazgos
+_Ninguno ≥ MEDIA._
+
+### Sugerencias (bajo el umbral)
+- [BAJA][Aceptación] CA5 (calidad en CI) no tiene una prueba automatizada que confirme que el job `spa` se dispara para cambios bajo `apps/spa/` (solo verificado manualmente, vía Dev Agent Record) — `tools/ci/affected.ts:18`, `.github/workflows/ci.yml:243-262` — Sugerencia: agregar un caso en `affected.spec.ts` que cubra el prefijo `apps/spa/` → job `spa`.
+- [BAJA][Diseño] Paths de ruta duplicados como literales entre `app.routes.ts` y `shell.ts` (DRY) — `apps/spa/src/app/app.routes.ts`, `apps/spa/src/app/layout/shell/shell.ts:16-21` — Sugerencia: extraer un `ROUTE_PATHS` compartido o derivar `navLinks` de `routes`.
+- [BAJA][Diseño] `Shell.navLinks` hardcodeado en el componente (OCP) — `apps/spa/src/app/layout/shell/shell.ts:16-21` — Sugerencia: si crece la complejidad (roles, i18n, flags), mover a un token/servicio de navegación.
+- [BAJA][Diseño] Páginas sin `ChangeDetectionStrategy.OnPush` — `apps/spa/src/app/pages/*/*.ts` — Sugerencia: fijar `OnPush` como convención desde esta historia base para que las páginas reales la hereden.
+- [BAJA][Pruebas] Sin prueba E2E real (Playwright/Cypress) que levante la app servida, como describe el Gherkin de CA1 ("Dado la SPA en ejecución con `ng serve`"); hoy se cubre con `RouterTestingHarness` (integración TestBed) — `apps/spa/src/app/app.routes.spec.ts` — Sugerencia: aceptable para este alcance (skeleton); considerar un E2E mínimo en una historia futura de EP-01 con contenido real.
+- [BAJA][Pruebas] Rama sin cubrir en `app.ts:10` (branch 90 %) es instrumentación v8 sobre el decorador `@Component`, no lógica de negocio — `apps/spa/src/app/app.ts:4-10` — Sin acción requerida.
+
+## Pull Request
+- URL: https://github.com/sebCarabali/AnimeTrackerV2/pull/25
+- Fecha: 2026-11-01
+- Nota: el código de `apps/spa` ya está en `dev` desde el PR #24 (mergeado antes de registrar el code review); este PR transporta el cierre documental (code review APROBADA + estado `done`).
