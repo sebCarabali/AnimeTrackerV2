@@ -1,0 +1,3 @@
+# Monorepo root marker used by AnimeTracker.Testing.ContractAssert
+# to locate the repository root from any test runner working directory.
+# Do not move or delete this file.

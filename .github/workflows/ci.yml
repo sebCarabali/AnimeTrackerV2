@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, staging, dev]
   push:
-    branches: [main]
+    branches: [main, staging, dev]
 
 # H6: minimum required permissions (principle of least privilege)
 permissions:
@@ -173,25 +173,77 @@ jobs:
           done
 
       # ── contracts ────────────────────────────────────────────────────────────
-      - name: Validate contracts (stub — extended in HU-00.07)
+      - name: Fetch origin/main for oasdiff comparison (contracts)
+        if: matrix.job == 'contracts'
+        run: git fetch --no-tags origin main
+
+      - name: Install Spectral CLI (CA2)
+        if: matrix.job == 'contracts'
+        run: npm install -g @stoplight/spectral-cli
+
+      - name: Lint contracts with Spectral (CA2)
+        if: matrix.job == 'contracts'
+        run: spectral lint contracts/public/bff.v1.yaml contracts/internal/core.v1.yaml
+
+      - name: Install oasdiff (CA3)
         if: matrix.job == 'contracts'
         run: |
-          echo "contracts job: no validators yet — will be added in HU-00.07"
+          go install github.com/oasdiff/oasdiff@latest
+          sudo mv $(go env GOPATH)/bin/oasdiff /usr/local/bin/
 
-      # ── bff (stub — extended in HU-00.03) ───────────────────────────────────
+      - name: Breaking changes — BFF público (CA3)
+        if: matrix.job == 'contracts'
+        run: |
+          if git rev-parse --verify origin/main:contracts/public/bff.v1.yaml >/dev/null 2>&1; then
+            git show origin/main:contracts/public/bff.v1.yaml > /tmp/base-bff.yaml
+            BASE_MAJOR=$(grep -m1 '^\s*version:' /tmp/base-bff.yaml | tr -d '"' | tr -d "'" | sed 's/.*version:[[:space:]]*//' | cut -d. -f1 || echo "0")
+            PR_MAJOR=$(grep -m1 '^\s*version:' contracts/public/bff.v1.yaml | tr -d '"' | tr -d "'" | sed 's/.*version:[[:space:]]*//' | cut -d. -f1 || echo "0")
+            if [ "${PR_MAJOR:-0}" -gt "${BASE_MAJOR:-0}" ]; then
+              echo "Major version bumped (${BASE_MAJOR}.x → ${PR_MAJOR}.x): skipping breaking-change check for bff.v1.yaml."
+            else
+              oasdiff breaking /tmp/base-bff.yaml contracts/public/bff.v1.yaml --fail-on ERR
+            fi
+          else
+            echo "bff.v1.yaml es nuevo en este PR. Omitiendo comparación de breaking changes."
+          fi
+
+      - name: Breaking changes — Core interno (CA3)
+        if: matrix.job == 'contracts'
+        run: |
+          if git rev-parse --verify origin/main:contracts/internal/core.v1.yaml >/dev/null 2>&1; then
+            git show origin/main:contracts/internal/core.v1.yaml > /tmp/base-core.yaml
+            BASE_MAJOR=$(grep -m1 '^\s*version:' /tmp/base-core.yaml | tr -d '"' | tr -d "'" | sed 's/.*version:[[:space:]]*//' | cut -d. -f1 || echo "0")
+            PR_MAJOR=$(grep -m1 '^\s*version:' contracts/internal/core.v1.yaml | tr -d '"' | tr -d "'" | sed 's/.*version:[[:space:]]*//' | cut -d. -f1 || echo "0")
+            if [ "${PR_MAJOR:-0}" -gt "${BASE_MAJOR:-0}" ]; then
+              echo "Major version bumped (${BASE_MAJOR}.x → ${PR_MAJOR}.x): skipping breaking-change check for core.v1.yaml."
+            else
+              oasdiff breaking /tmp/base-core.yaml contracts/internal/core.v1.yaml --fail-on ERR
+            fi
+          else
+            echo "core.v1.yaml es nuevo en este PR. Omitiendo comparación de breaking changes."
+          fi
+
+      # ── bff (HU-00.03) ───────────────────────────────────────────────────
       - name: pnpm install (bff)
         if: matrix.job == 'bff'
-        run: pnpm --filter @animetracker/bff install --if-present
+        run: pnpm --filter @animetracker/bff install
 
-      - name: bff build + test (stub)
+      - name: Lint bff
         if: matrix.job == 'bff'
-        run: |
-          echo "bff job: no project yet — will be added in HU-00.03"
+        run: pnpm --filter @animetracker/bff run lint
+
+      - name: "Build bff (CA3: regenerates the core client from the contract)"
+        if: matrix.job == 'bff'
+        run: pnpm --filter @animetracker/bff run build
+
+      - name: Test bff (with coverage)
+        if: matrix.job == 'bff'
+        run: pnpm --filter @animetracker/bff run test:coverage
 
       # ── spa (stub — extended in HU-00.04) ───────────────────────────────────
       - name: pnpm install (spa)
         if: matrix.job == 'spa'
-        run: pnpm --filter @animetracker/spa install --if-present
+        run: pnpm --filter @animetracker/spa install
 
       - name: spa build + test (stub)
         if: matrix.job == 'spa'
@@ -201,17 +253,33 @@ jobs:
       # ── extension (stub — extended in HU-00.05) ──────────────────────────────
       - name: pnpm install (extension)
         if: matrix.job == 'extension'
-        run: pnpm --filter @animetracker/extension install --if-present
+        run: pnpm --filter @animetracker/extension install
 
       - name: extension build + test (stub)
         if: matrix.job == 'extension'
         run: |
           echo "extension job: no project yet — will be added in HU-00.05"
 
+  # ── T1/CA1-CA2: Scan for secrets in PRs ─────────────────────────────────────
+  secrets:
+    name: Scan for secrets
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: gitleaks/gitleaks-action@v2
+        with:
+          config-path: .gitleaks.toml
+          fail: true
+          notify: false
+
   # ── T7: CA4 — single aggregator check (branch protection targets this) ──────
   ci-ok:
     name: ci-ok
-    needs: [detect, run-job]
+    needs: [detect, run-job, secrets]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -224,6 +292,11 @@ jobs:
           fi
           if [ "${{ needs.run-job.result }}" != "success" ] && [ "${{ needs.run-job.result }}" != "skipped" ]; then
             echo "One or more CI jobs failed: ${{ needs.run-job.result }}"
+            exit 1
+          fi
+          # T1/CA1: secrets job is only required to pass/skip (not fail) in PRs
+          if [ "${{ needs.secrets.result }}" != "success" ] && [ "${{ needs.secrets.result }}" != "skipped" ]; then
+            echo "Secrets scan failed: ${{ needs.secrets.result }}"
             exit 1
           fi
           echo "All CI jobs passed."

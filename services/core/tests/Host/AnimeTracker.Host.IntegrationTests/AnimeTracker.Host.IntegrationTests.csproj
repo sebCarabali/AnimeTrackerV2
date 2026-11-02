@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Host\AnimeTracker.Host\AnimeTracker.Host.csproj" />
+    <ProjectReference Include="..\..\AnimeTracker.Testing\AnimeTracker.Testing.csproj" />
   </ItemGroup>
 
 </Project>

@@ -20,6 +20,7 @@ dist/
 .cache/
 .turbo/
 .nx/cache/
+*.tsbuildinfo
 
 # ─── Cobertura de código ──────────────────────────────────────────
 coverage/
@@ -57,3 +58,10 @@ logs/
 # ─── Builds de la extensión ──────────────────────────────────────
 apps/extension/dist/
 apps/extension/build/
+node_modules
+
+# ─── Cliente generado del BFF (HU-00.03, no se edita a mano) ─────
+apps/bff/src/generated/
+
+# Test results
+TestResults*

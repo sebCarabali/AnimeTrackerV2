@@ -13,14 +13,14 @@ proyecto:
   carpeta_historias: stories/
   zona_horaria: America/Bogota
   generado: 2026-10-28
-  actualizado: 2026-10-29
+  actualizado: 2026-11-01  # Readiness review 0-3 iteración 4: require-review (2). RESUELTOS: T7 jest-openapi (Opción A), T4a DoD /health+/health/ready. PENDIENTE: enmendar ADR-003 §Decisión con openapi-fetch antes de iniciar T3. Corrección stale states: HU-00.08, HU-00.12a, HU-00.12b → done (mergeados sprint-1).
   cadencia_sprint: 2 semanas (10 días hábiles)
   velocidad_supuesta_pts: 24   # recalibrar tras el sprint-2 con la velocidad real
 
 leyenda_estados:
   release: [planned, in-progress, done]
   sprint: [planned, active, closed]
-  epica: [backlog, planned, in-progress, review, push-request, done]
+  epica: [backlog, planned, in-progress, review, pull-request, done]
   historia:
     backlog: En el backlog, sin archivo de historia detallado.
     ready-for-dev: Archivo de historia con criterios y plan TDD listo; puede entrar a un sprint.
@@ -30,12 +30,14 @@ leyenda_estados:
     blocked: Bloqueada; indicar motivo en "bloqueo".
 
 metricas:
-  historias_total: 51
-  puntos_total: 195
-  historias_done: 1
-  puntos_done: 3
-  historias_ready_for_dev: 12
-  avance_pct: 0
+  historias_total: 52
+  puntos_total: 196
+  historias_done: 7   # 0-1 (3), 0-2 (5), 0-7 (5), 0-9 (5), 0-8 (3), 0-12a (1.5), 0-12b (1.5)
+  puntos_done: 24
+  historias_review: 4   # 0-8 (PR), 0-12a (PR), 0-12b (PR) — listos para merge; 0-3 (review, sprint-2)
+  puntos_review: 9
+  historias_ready_for_dev: 6   # 0-3, 0-4, 0-5, 0-6, 0-10, 0-11 (sprint-2)
+  avance_pct: 12   # puntos_done / puntos_total (24/196)
 
 releases:
   - id: R0
@@ -74,17 +76,19 @@ sprints:
       Monorepo, CI por proyectos afectados, solución .NET modular con
       pruebas de arquitectura, contratos OpenAPI y persistencia por esquema.
     capacidad_pts: 24
-    comprometido_pts: 23
-    completado_pts: 0
+    comprometido_pts: 24
+    completado_pts: 18   # HU-00.01 (3), 00.02 (5), 00.07 (5), 00.09 (5) merged a dev
+    en_review_pts: 6     # HU-00.08 (3), 00.12a (1.5), 00.12b (1.5) en PRs listos para merge
     historias:
       - 0-1-estructura-del-monorepo
-      - 0-12-configuracion-y-secretos
-      - 0-9-pipeline-integracion-continua
       - 0-2-solucion-net-monolito-modular
       - 0-7-contratos-openapi-primero
       - 0-8-persistencia-migraciones-por-modulo
-    review: null
-    retro: null
+      - 0-9-pipeline-integracion-continua
+      - 0-12a-secretos-ci-config
+      - 0-12b-validateenv-bff
+    review: 2026-11-02 (correcciones code review completadas)
+    retro: 2026-11-13 (viernes post-sprint review)
 
   - id: sprint-2
     release: R0
@@ -120,25 +124,27 @@ epicas:
       0-2-solucion-net-monolito-modular:
         { id: HU-00.02, titulo: Solución .NET 8 como monolito modular, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-2-solucion-net-monolito-modular.md }
       0-3-bff-nestjs-inicial:
-        { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12], archivo: stories/0-3-bff-nestjs-inicial.md }
+        { id: HU-00.03, titulo: Proyecto BFF NestJS inicial, prioridad: Must, puntos: 3, estado: done, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.12b], archivo: stories/0-3-bff-nestjs-inicial.md, nota: "Code review iteración 4 (2026-11-01): APROBADA. 0 hallazgos ≥ MEDIA en los 5 ámbitos (aceptación, seguridad, diseño, arquitectura, pruebas). 18/18 tests, cobertura 100%/100%/100%/100%. PR abierto contra dev." }
       0-4-spa-angular-inicial:
         { id: HU-00.04, titulo: SPA Angular inicial, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.07, HU-00.09], archivo: stories/0-4-spa-angular-inicial.md }
       0-5-esqueleto-extension-navegador:
         { id: HU-00.05, titulo: Esqueleto de la extensión de navegador, prioridad: Should, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-5-esqueleto-extension-navegador.md }
       0-6-entorno-local-docker-compose:
-        { id: HU-00.06, titulo: Entorno local con Docker Compose, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.08, HU-00.12], archivo: stories/0-6-entorno-local-docker-compose.md }
+        { id: HU-00.06, titulo: Entorno local con Docker Compose, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.08, HU-00.12a], archivo: stories/0-6-entorno-local-docker-compose.md }
       0-7-contratos-openapi-primero:
-        { id: HU-00.07, titulo: Contratos OpenAPI primero, prioridad: Must, puntos: 5, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-7-contratos-openapi-primero.md }
+        { id: HU-00.07, titulo: Contratos OpenAPI primero, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-7-contratos-openapi-primero.md }
       0-8-persistencia-migraciones-por-modulo:
-        { id: HU-00.08, titulo: Persistencia y migraciones por módulo, prioridad: Must, puntos: 3, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.02], archivo: stories/0-8-persistencia-migraciones-por-modulo.md }
+        { id: HU-00.08, titulo: Persistencia y migraciones por módulo, prioridad: Must, puntos: 3, estado: done, sprint: sprint-1, depende_de: [HU-00.02], archivo: stories/0-8-persistencia-migraciones-por-modulo.md, nota: "Mergeado commit 1aafacb. PR correcciones: snake_case aplicado, migraciones regeneradas." }
       0-9-pipeline-integracion-continua:
         { id: HU-00.09, titulo: Pipeline de integración continua, prioridad: Must, puntos: 5, estado: done, sprint: sprint-1, depende_de: [HU-00.01], archivo: stories/0-9-pipeline-integracion-continua.md }
       0-10-despliegue-continuo-staging:
-        { id: HU-00.10, titulo: Despliegue continuo a staging, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.06, HU-00.09, HU-00.12], archivo: stories/0-10-despliegue-continuo-staging.md }
+        { id: HU-00.10, titulo: Despliegue continuo a staging, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.06, HU-00.09, HU-00.12a], archivo: stories/0-10-despliegue-continuo-staging.md }
       0-11-observabilidad-base:
         { id: HU-00.11, titulo: Observabilidad base, prioridad: Should, puntos: 5, estado: ready-for-dev, sprint: sprint-2, depende_de: [HU-00.02, HU-00.03, HU-00.04], archivo: stories/0-11-observabilidad-base.md }
-      0-12-configuracion-y-secretos:
-        { id: HU-00.12, titulo: Configuración y secretos, prioridad: Must, puntos: 2, estado: ready-for-dev, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-12-configuracion-y-secretos.md }
+      0-12a-secretos-ci-config:
+        { id: HU-00.12a, titulo: Gitleaks + ConfigOptions (CI y configuración), prioridad: Must, puntos: 1.5, estado: done, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-12a-secretos-ci-config.md, nota: "Mergeado PR #19, commit bc9062c. docs/SECRETS.md completada." }
+      0-12b-validateenv-bff:
+        { id: HU-00.12b, titulo: validateEnv + .env.example (BFF), prioridad: Must, puntos: 1.5, estado: done, sprint: sprint-1, depende_de: [HU-00.01, HU-00.09], archivo: stories/0-12b-validateenv-bff.md, nota: "Mergeado PR #17, commit 12ddcf4. jest.config.js explícito agregado. T5 diferida sprint-2." }
 
   EP-01:
     titulo: Identidad y autenticación
@@ -242,6 +248,185 @@ riesgos:
   - { id: R-02, descripcion: "HU-06.02 y HU-06.03 (8 pts) son grandes e inciertas", probabilidad: alta, impacto: alto, mitigacion: "Spike y división por plataforma antes de R3" }
 
 historial:
+  - fecha: 2026-11-01
+    cambio: >-
+      HU-00.03 (0-3-bff-nestjs-inicial) promovida a pull-request tras code review iteración 4.
+      APROBADA: 0 hallazgos ≥ MEDIA en los 5 ámbitos (aceptación, seguridad, diseño, arquitectura,
+      pruebas). El único cambio desde la iteración 3 fue T11 (nuevo test unitario de
+      node-fetch-adapter.ts, sin tocar código de producción). 1 sugerencia BAJA nueva registrada
+      (node-fetch-adapter.spec.ts no afirma sobre el Response reconstruido, solo sobre los
+      argumentos de node-fetch). 18/18 tests, cobertura 100%/100%/100%/100%. Siguiente paso:
+      /story-pr 0-3.
+  - fecha: 2026-11-01
+    cambio: >-
+      HU-00.03 (0-3-bff-nestjs-inicial) regresada a in-progress tras code review iteración 3.
+      1 hallazgo MEDIA (Pruebas): node-fetch-adapter.ts no tiene prueba que ejercite la rama
+      method !== GET/HEAD (serialización de body vía input.arrayBuffer()); reclasificado de
+      BAJA (sugerencia registrada en iteraciones 1 y 2 bajo el supuesto "único uso hoy es GET")
+      a MEDIA porque la cabecera de la propia historia confirma que bloquea HU-06.06 (ruta
+      rápida de tracking, que usará POST), por lo que esa rama dejará de ser teórica en cuanto
+      se implemente la historia que esta misma desbloquea. Aceptación, Seguridad, Diseño/SOLID
+      y Arquitectura aprobados sin hallazgos ≥ MEDIA (solo sugerencias BAJA, la mayoría ya
+      registradas en iteraciones previas; una nueva sobre falta de ExceptionFilter global para
+      futuras rutas de negocio). T11 agregada con 1 ítem de corrección. 16/16 tests, cobertura
+      100%/83.33%/100%/100% (sin cambio). Hallazgos de iteraciones 1 y 2 (T9, T10) confirmados
+      corregidos sin regresión.
+  - fecha: 2026-11-01
+    cambio: >-
+      HU-00.03 (0-3-bff-nestjs-inicial) promovida a review tras corrección T10 (iteración 2).
+      3 hallazgos MEDIA corregidos: (1) allowlist de .gitleaks.toml anclado en los 3 patrones
+      restantes (__fixtures__, fixtures/, testresults/) igual que las entradas ya corregidas en
+      T9; (2) cambio estructural [[allowlist]] -> [allowlist] (T9) documentado en .gitleaks.toml
+      y validado plantando un secreto private-key real en rutas exentas (__tests__/,
+      __fixtures__/, fixtures/, TestResults/ -> 0 leaks) y en rutas señuelo no exentas
+      (attestation.ts, legacy-fixtures/, nottestresults/ -> 3 leaks detectados); (3)
+      readiness() ya no usa @Res() manual: lanza CoreUnavailableException, capturada por el
+      nuevo ProblemJsonExceptionFilter (@Catch + @UseFilters), devolviendo la ruta de éxito al
+      pipeline estándar de interceptores de Nest y dejando la construcción RFC 9457 en el punto
+      de extensión sancionado por el framework. 16/16 tests sin cambios funcionales, cobertura
+      100%/83.33%/100%/100% (sin cambio respecto a T9). Sin regresión en @animetracker/repo-checks
+      (33/33) ni @animetracker/ci (18/18). Pendiente re-ejecución de /story-review.
+  - fecha: 2026-11-01
+    cambio: >-
+      HU-00.03 (0-3-bff-nestjs-inicial) regresada a in-progress tras code review iteración 2.
+      3 hallazgos MEDIA: (1) Seguridad — allowlist de .gitleaks.toml deja 3 patrones
+      (__fixtures__, fixtures/, testresults/) con el mismo defecto de anclaje por subcadena
+      que el patrón test.* ya corregido en T9; (2) Seguridad — cambio estructural
+      [[allowlist]] a [allowlist] (T9) sin documentar ni verificar empíricamente con un
+      secreto de prueba plantado; (3) Diseño — @Res() manual en readiness() (fix válido de
+      T9 para Content-Type) saca esa ruta del pipeline de interceptores de Nest, riesgo para
+      interceptores futuros de HU-00.11. Arquitectura y Pruebas (16/16, cobertura 83.33%
+      branches) aprobadas sin hallazgos nuevos; los 6 hallazgos de iteración 1 confirmados
+      corregidos de forma independiente. T10 agregada con 3 ítems de corrección.
+  - fecha: 2026-11-01
+    cambio: >-
+      HU-00.03 (0-3-bff-nestjs-inicial) promovida a review tras corrección T9 (iteración 1).
+      6 hallazgos ≥ MEDIA corregidos: name: entrecomillado en ci.yml (CRITICA), allowlist de
+      .gitleaks.toml anclado a __tests__/, tests/, .spec.ts$, .test.ts$ (ALTA), etapa prod-deps
+      separada en el Dockerfile para excluir devDependencies del runtime (MEDIA), .env/.env.*
+      agregado a .dockerignore (MEDIA), Logger inyectado en CoreHealthIndicator.check() (MEDIA),
+      Content-Type: application/problem+json fijado en el 503 de GET /health/ready — requirió
+      cambiar de @Res({passthrough:true}) a @Res() manual porque ExpressAdapter.reply() revierte
+      el Content-Type a application/json cuando el body es un objeto y el status >= 400 (MEDIA).
+      16/16 tests (2 nuevos), cobertura 100%/83.33%/100%/100% (branches sube de 80% a 83.33%).
+      Verificado: js-yaml parsea ci.yml completo, gitleaks detect sin leaks, lint/build limpios,
+      sin regresión en @animetracker/repo-checks (33/33) ni @animetracker/ci (18/18).
+  - fecha: 2026-11-01
+    cambio: >-
+      HU-00.03 (0-3-bff-nestjs-inicial) regresada a in-progress tras code review.
+      1 hallazgo CRITICA (Arquitectura): el `name:` del step "Build bff" en ci.yml
+      contiene ": " sin comillas en un escalar plano YAML, rompiendo el parseo de
+      todo el workflow (confirmado con js-yaml). 1 hallazgo ALTA (Seguridad):
+      allowlist de gitleaks con regex sin anclar ('(?i)test.*') puede ocultar
+      secretos reales. 4 hallazgos MEDIA: Dockerfile copia devDependencies al
+      runtime, .dockerignore sin excluir .env, catch silencioso sin logging en
+      CoreHealthIndicator, /health/ready sin Content-Type application/problem+json.
+      T9 agregada con 6 ítems de corrección. 11 sugerencias BAJA registradas.
+      15/15 tests, cobertura 100%/80%/100%/100% (umbral cumplido).
+  - fecha: 2026-11-02
+    cambio: >-
+      Sprint-1 kick-off + code review completados. 3 PRs listos para merge:
+      HU-00.08 (persistencia): DbContextFactory convenciones aplicadas, migraciones regeneradas con snake_case ✓, 18/18 architecture tests passed.
+      HU-00.12a (gitleaks+ConfigOptions): docs/SECRETS.md completada (T6), gitleaks allowlist validada.
+      HU-00.12b (validateEnv): jest.config.js explícito agregado, tests 5/5 passed, 100% coverage.
+      Bloqueantes críticos resueltos. Comprometido sprint-1: 24 pts (18 done merged, 6 en review → merge hoy/mañana).
+      Desbloqueos sprint-2: HU-00.03 (validateEnv reutilizable ✓), HU-00.06 (persistencia + configOptions ✓), HU-00.10 (SECRETS.md ✓).
+      Sprint Review viernes 15:00, Retro 15:30. Próximo: Pre-planning sprint-2 en paralelo (PM+Architect hoy 1-2h).
+  - fecha: 2026-11-01
+    cambio: >-
+      Readiness review completa de HU-00.12 (0-12-configuracion-y-secretos): resultado blocked (3).
+      Técnico (Dev): 3 — Negocio (PM): 2. Story-gaps resolvió 8 ambigüedades (T3 patrón distribuido, T6 Vault,
+      T5 detección *Options.cs, CA4/T4b variables exactas, T1 gitleaks ruleslist, T5 falla build).
+      Story-readiness identificó 2 BLOQUEANTES: (1) Estimación 2 pts sin confirmar — desglose real ~10–11h
+      (T1: 1h, T2: 0.5h, T3: 1.5–2h, T4a: 1.5–2h, T4b: 0.5h, T5: 2–2.5h, T6: 0.5h); sprint-1 comprometido
+      23/24 pts. Si subestimado, reventará timebox. (2) T4a timing sin confirmar no-negotiable — T4a crea
+      validateEnv() en sprint-1; HU-00.03 (sprint-2, línea 123) depende sin alternativa reescritura.
+      3 REVISAR: T1 template allowlist, T5 parsing logic detalles, T3 prueba NetArchTest ubicación.
+      Acciones: Sprint Planning 2026-11-02 confirmar (a) estimación 2 pts o descomponer, (b) T4a no-negotiable.
+      Antes sprint: template gitleaks, documentar T5 parsing, agregar NetArchTest T3.
+  - fecha: 2026-11-01
+    cambio: >-
+      Story-gaps HU-00.12 (iteración 2): resueltos 8 gaps de ambigüedad/documentación.
+      Técnico (Dev): 2 — Negocio (PM): 2. Story-gaps resolvió 3 gaps (T4a scope, Matriz TDD T5, Jest consciente).
+      Story-readiness (2 revisores) identificó 6 hallazgos BLOQUEANTE/REVISAR: (T) T3 patrón ConfigOptions
+      no especificado, T5 lógica detección no especificada, T6 gestor secretos staging sin decidir, CA4/T4b
+      inconsistencia, T1 gitleaks sin allowlist template, estimación 2pts puede ser riesgosa. (N) T4a/T5 críticos
+      para desbloquear sprint-2, T6 bloquea DoD. Acciones: Sprint Planning 2026-11-02 formalizar (1) T4a
+      no-negotiable, (2) gestor secretos staging, (3) estimación revisada. Antes sprint: especificar T3
+      ConfigOptions patrón, T5 detección lógica, CA4/T4b variables reconciliadas, T1 allowlist template.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) marcada como done — PR abierto contra dev.
+      Build y 74 pruebas (.NET 16 + ArchTests 18 + otros + 33 Vitest) en verde tras rebase.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a pull-request tras code review iteración 4.
+      APROBADA: 0 hallazgos ≥ MEDIA en los 5 ámbitos (aceptación, seguridad, diseño, arquitectura,
+      pruebas). 17 sugerencias BAJA registradas, ninguna bloquea. Cobertura 93.75 % ✓.
+      58 pruebas .NET + 33 Vitest, 0 fallos.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a review tras corrección T10 (iteración 4).
+      H1: ResolveSpecPath promovido a public en ContractAssert.cs; eliminado InternalsVisibleTo.
+      H2: openapi-contracts.yml implementa bypass BASE_MAJOR/PR_MAJOR para oasdiff.
+      58 pruebas .NET + 33 Vitest, 0 fallos. Cobertura AnimeTracker.Testing: 93.75 % ✓.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) regresada a in-progress tras code review iteración 3.
+      2 hallazgos MEDIA: H1: ContractAssertUnitTests en AnimeTracker.Host.IntegrationTests
+      en lugar de proyecto propio (InternalsVisibleTo acoplado). H2: openapi-contracts.yml ejecuta
+      oasdiff sin bypass de versión mayor (fallará en PRs v1→v2 con breaking changes intencionados).
+      16 sugerencias BAJA. T10 agregada con 2 ítems de corrección.
+      Cobertura AnimeTracker.Testing: 93.75 % ✓. 58 pruebas .NET + 33 Vitest, 0 fallos.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a review tras corrección T9 (iteración 3).
+      H1: typo stagin→staging en ci.yml branches (líneas 5 y 7). H2: bypass versión mayor en pasos
+      oasdiff (grep+sed extrae segmento mayor; si PR_MAJOR > BASE_MAJOR se omite oasdiff con mensaje).
+      H3: test SatisfiesAsync_float_value_for_integer_type_throws (1.5 con type:integer).
+      H4: test SatisfiesAsync_no_paths_section_throws (spec sin paths:). 58 pruebas .NET + 33 Vitest,
+      0 fallos. Cobertura AnimeTracker.Testing: 93.8 % ✓.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) regresada a in-progress tras code review iteración 2.
+      2 hallazgos ALTA: typo `stagin` en ci.yml triggers (rama staging sin CI) y bypass versión mayor
+      de CA3 no implementado. 2 hallazgos MEDIA: arm "integer" de ValidateSchema sin cobertura (H2),
+      rama "no paths" sin cobertura. 16 sugerencias BAJA. T9 agregada con 4 ítems de corrección.
+      Cobertura AnimeTracker.Testing: 93.0 % ✓. 57 pruebas .NET + 33 Vitest, 0 fallos.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a review tras corrección T8.
+      H1: job contracts en ci.yml reemplazado con Spectral + oasdiff reales.
+      H2: integer validation con TryGetInt64. H3: throw cuando body existe sin content.
+      H4: .reporoot como ancla de monorepo (+ REPO_ROOT env var). H5: ADR-003 actualizado.
+      H6: regla Spectral error-response-problem-json-media-type. H7: 8 unit tests de ContractAssert.
+      Cobertura AnimeTracker.Testing: 91.2 % ✓. 56 pruebas .NET + 33 Vitest, 0 fallos.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) regresada a in-progress tras code review iteración 1.
+      1 hallazgo ALTA (Arquitectura): job contracts en ci.yml sigue siendo stub; Spectral y oasdiff
+      no alimentan ci-ok. 6 hallazgos MEDIA: integer/number en ContractAssert, silent-pass sin content,
+      ResolveSpecPath acoplado a pnpm-workspace.yaml, ADR-003 inconsistente con YamlDotNet, regla
+      Spectral no valida application/problem+json, 7 ramas de error sin prueba en ContractAssert.
+      T8 agregada con 7 ítems de corrección. 10 sugerencias BAJA. Cobertura AnimeTracker.Testing: 84.16 % ✓.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a review. T1–T4, T6–T7 completadas.
+      ContractAssert con YamlDotNet 16.3.0; 3 pruebas de contrato en Host.IntegrationTests
+      (81% cobertura). /health alineado con core.v1.yaml (entries + timestamp). T5 diferida
+      a HU-00.03 (apps/bff skeleton). ADR-003-contratos-primero.md registrado.
+      49 pruebas .NET + 33 Vitest, 0 fallos.
+  - fecha: 2026-10-31
+    cambio: >-
+      HU-00.07 (0-7-contratos-openapi-primero) promovida a in-progress tras aprobación
+      de readiness review por PM, Scrum Master y Architect. Rama feature/story-0-7-contratos-openapi-primero
+      creada. Inicio de ciclo TDD (T1-T7).
+  - fecha: 2026-10-31
+    cambio: >-
+      Readiness review de HU-00.07 (0-7-contratos-openapi-primero): resultado 1
+      (ready-for-dev). Técnico (Dev & Architect): 1, Negocio (PM): 1, Ágil (Scrum Master): 1.
+      Historia lista para iniciar desarrollo en Sprint 1. Dependencias HU-00.01 y HU-00.09 completadas en dev.
+      Desbloquea desarrollo de HU-00.03, HU-00.04 y contratos de endpoints subsecuentes.
   - fecha: 2026-10-31
     cambio: >-
       HU-00.09 (0-9-pipeline-integracion-continua) regresada a in-progress tras code review

@@ -1,0 +1,56 @@
+{
+  "name": "@animetracker/bff",
+  "version": "0.0.0",
+  "private": true,
+  "description": "BFF - Backend for Frontend, NestJS + TypeScript",
+  "scripts": {
+    "prebuild": "pnpm run gen:core-client",
+    "build": "nest build",
+    "start": "node dist/main.js",
+    "dev": "nest start --watch",
+    "lint": "eslint \"src/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "gen:core-client": "openapi-typescript ../../contracts/internal/core.v1.yaml -o src/generated/core/schema.d.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.2.8",
+    "@nestjs/config": "^4.0.4",
+    "@nestjs/core": "^11.2.8",
+    "@nestjs/platform-express": "^11.2.8",
+    "@nestjs/terminus": "^11.1.1",
+    "node-fetch": "^2.7.0",
+    "openapi-fetch": "^0.17.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@nestjs/cli": "^11.0.24",
+    "@nestjs/testing": "^11.2.8",
+    "@types/express": "^5.0.6",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.6",
+    "@types/node-fetch": "^2.6.13",
+    "@types/supertest": "^7.2.1",
+    "eslint": "^10.14.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.14.0",
+    "jest": "^29.7.0",
+    "jest-openapi": "^0.14.2",
+    "nock": "^14.0.17",
+    "openapi-typescript": "^7.13.0",
+    "prettier": "^3.9.10",
+    "supertest": "^7.3.1",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.72.1"
+  },
+  "keywords": [
+    "animetracker",
+    "bff",
+    "nestjs"
+  ]
+}

@@ -1,18 +1,29 @@
 using AnimeTracker.Calendar.Api;
+using AnimeTracker.Calendar.Infrastructure;
 using AnimeTracker.Catalog.Api;
+using AnimeTracker.Catalog.Infrastructure;
 using AnimeTracker.Tracking.Api;
+using AnimeTracker.Tracking.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Net;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Register module APIs (Application layer)
 builder.Services
-    .AddCatalogModule()
-    .AddTrackingModule()
-    .AddCalendarModule();
+    .AddCatalogModule(builder.Configuration)
+    .AddTrackingModule(builder.Configuration)
+    .AddCalendarModule(builder.Configuration);
+
+// Register Infrastructure layer (Host responsibility, not Api)
+builder.Services
+    .AddCatalogInfrastructure(builder.Configuration)
+    .AddTrackingInfrastructure(builder.Configuration)
+    .AddCalendarInfrastructure(builder.Configuration);
 
 builder.Services.AddOpenApi();
 
@@ -31,6 +42,29 @@ builder.Services.AddOptions<ForwardedHeadersOptions>()
     });
 
 var app = builder.Build();
+
+// Auto-migrate databases on startup
+using (var scope = app.Services.CreateScope())
+{
+    var serviceProvider = scope.ServiceProvider;
+    try
+    {
+        var catalogDb = serviceProvider.GetRequiredService<AnimeTracker.Catalog.Infrastructure.Persistence.CatalogDbContext>();
+        await catalogDb.Database.MigrateAsync();
+
+        var trackingDb = serviceProvider.GetRequiredService<AnimeTracker.Tracking.Infrastructure.Persistence.TrackingDbContext>();
+        await trackingDb.Database.MigrateAsync();
+
+        var calendarDb = serviceProvider.GetRequiredService<AnimeTracker.Calendar.Infrastructure.Persistence.CalendarDbContext>();
+        await calendarDb.Database.MigrateAsync();
+    }
+    catch (Exception ex)
+    {
+        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while migrating databases during startup");
+        throw;
+    }
+}
 
 if (app.Environment.IsDevelopment())
     app.MapOpenApi();
@@ -61,13 +95,11 @@ app.MapHealthChecks("/health", new HealthCheckOptions
         ctx.Response.ContentType = "application/json";
         var result = JsonSerializer.Serialize(new
         {
-            status = report.Status.ToString(),
-            modules = report.Entries.Select(e => new
-            {
-                name   = e.Key,
-                status = e.Value.Status.ToString(),
-                description = e.Value.Description
-            })
+            status    = report.Status.ToString(),
+            timestamp = DateTime.UtcNow.ToString("o"),
+            entries   = report.Entries.ToDictionary(
+                e => e.Key,
+                e => new { status = e.Value.Status.ToString(), description = e.Value.Description })
         });
         await ctx.Response.WriteAsync(result);
     }

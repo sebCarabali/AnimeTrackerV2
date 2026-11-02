@@ -1,0 +1,20 @@
+openapi: 3.1.0
+info:
+  title: Invalid Contract Fixture
+  version: 0.1.0
+paths:
+  /Invalid_Path:
+    get:
+      summary: Invalid endpoint violating casing, missing operationId, and missing Problem response
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request without RFC 9457 Problem schema
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
